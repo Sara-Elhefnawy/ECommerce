@@ -12,7 +12,7 @@ namespace ECommerce.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "ProductBrands",
+                name: "Brands",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -23,11 +23,11 @@ namespace ECommerce.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductBrands", x => x.Id);
+                    table.PrimaryKey("PK_Brands", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductTypes",
+                name: "Types",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -38,7 +38,7 @@ namespace ECommerce.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductTypes", x => x.Id);
+                    table.PrimaryKey("PK_Types", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -60,15 +60,15 @@ namespace ECommerce.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Products_ProductBrands_BrandId",
+                        name: "FK_Products_Brands_BrandId",
                         column: x => x.BrandId,
-                        principalTable: "ProductBrands",
+                        principalTable: "Brands",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Products_ProductTypes_TypeId",
+                        name: "FK_Products_Types_TypeId",
                         column: x => x.TypeId,
-                        principalTable: "ProductTypes",
+                        principalTable: "Types",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -91,10 +91,10 @@ namespace ECommerce.Infrastructure.Migrations
                 name: "Products");
 
             migrationBuilder.DropTable(
-                name: "ProductBrands");
+                name: "Brands");
 
             migrationBuilder.DropTable(
-                name: "ProductTypes");
+                name: "Types");
         }
     }
 }

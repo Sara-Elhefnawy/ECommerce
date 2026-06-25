@@ -92,7 +92,7 @@ namespace ECommerce.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductBrands");
+                    b.ToTable("Brands");
                 });
 
             modelBuilder.Entity("ECommerce.Domain.Entities.ProductType", b =>
@@ -117,7 +117,7 @@ namespace ECommerce.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ProductTypes");
+                    b.ToTable("Types");
                 });
 
             modelBuilder.Entity("ECommerce.Domain.Entities.Product", b =>
