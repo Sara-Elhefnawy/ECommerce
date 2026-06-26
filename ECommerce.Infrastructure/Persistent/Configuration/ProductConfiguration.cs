@@ -1,6 +1,7 @@
 ﻿using ECommerce.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
 
 namespace ECommerce.Infrastructure.Persistent.Configuration;
 
@@ -23,5 +24,15 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(p => p.Price)
             .IsRequired()
             .HasColumnType("decimal(18,2)");
+
+        builder.HasOne(p => p.Brand)
+            .WithMany()
+            .HasForeignKey(p => p.BrandId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(p => p.Type)
+            .WithMany()
+            .HasForeignKey(p => p.TypeId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

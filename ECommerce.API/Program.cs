@@ -1,5 +1,7 @@
 using ECommerce.Infrastructure;
 using ECommerce.APP;
+using ECommerce.Infrastructure.Persistent;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,5 +11,16 @@ builder.Services.AddPresentation()
                 .AddApp();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    await using var scope = app.Services.CreateAsyncScope();
+
+    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ECommerceDbContext>();
+
+    await dbContext.Database.MigrateAsync();
+    await seeder.SeedAllAsync();
+}
 
 app.Run();

@@ -1,5 +1,6 @@
 ﻿using ECommerce.Infrastructure.Interceptors;
 using ECommerce.Infrastructure.Persistent;
+using ECommerce.Infrastructure.Persistent.Seedings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,12 @@ public static class DependencyInjection
                         sqlOptions => sqlOptions.MigrationsAssembly(typeof(ECommerceDbContext).Assembly.FullName));
             options.AddInterceptors(auditInterceptor);
         });
+
+        services.AddScoped<DatabaseSeeder>();
+
+        services.AddScoped<IDataSeeder, ProductBrandSeeder>();
+        services.AddScoped<IDataSeeder, ProductTypeSeeder>();
+        services.AddScoped<IDataSeeder, ProductSeeder>();
 
         return services;
     }
