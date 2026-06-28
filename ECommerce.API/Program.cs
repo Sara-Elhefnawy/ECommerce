@@ -2,6 +2,7 @@ using ECommerce.Infrastructure;
 using ECommerce.APP;
 using ECommerce.Infrastructure.Persistent;
 using Microsoft.EntityFrameworkCore;
+using ECommerce.API;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddPresentation()
                 .AddApp();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,10 +1,12 @@
-﻿namespace ECommerce.Domain.Entities;
+﻿using ECommerce.Domain.Common;
+
+namespace ECommerce.Domain.Entities;
 
 public class Product : BaseEntity
 {
-    private const int MaxNameLength = 150;
-    private const int MaxDescriptionLength = 1000;
-    private const int MaxPictureUrlLength = 500;
+    public const int MaxNameLength = 150;
+    public const int MaxDescriptionLength = 1000;
+    public const int MaxPictureUrlLength = 500;
 
     public string Name { get; private set; } = default!;
     public string Description { get; private set; } = default!;
@@ -27,78 +29,121 @@ public class Product : BaseEntity
         Guid brandId, 
         Guid typeId)
     {
-        SetName(name);
-        SetDescription(description);
-        SetPictureUrl(pictureUrl);
-        SetPrice(price);
-        SetBrandId(brandId);
-        SetTypeId(typeId); 
+        Name = name;
+        Description = description;
+        PictureUrl = pictureUrl;
+        Price = price;
+        BrandId = brandId;
+        TypeId = typeId;
     }
 
-    // Factory Design Methods
-    public static Product Create(
+    // Factory Design Methods with Result Pattern
+    public static Result<Product> Create(
         string name,
         string description,
         string pictureUrl,
         decimal price,
         Guid brandId,
         Guid typeId)
-        => new(name, description, pictureUrl, price, brandId, typeId);
+    {
+        var validationResult = ValidateAll(name, description, pictureUrl, price, brandId, typeId);
 
-    private void SetName(string value)
+        if (validationResult.IsFailure)
+            return Result<Product>.BadRequest(validationResult.Error!);
+
+        return Result<Product>.Created(new Product(
+            name, description, pictureUrl, price, brandId, typeId));
+    }
+
+    private static Result ValidateAll(
+        string name,
+        string description,
+        string pictureUrl,
+        decimal price,
+        Guid brandId,
+        Guid typeId)
+    {
+        var nameResult = ValidateName(name);
+        if (nameResult.IsFailure)
+            return nameResult;
+
+        var descriptionResult = ValidateDescription(description);
+        if (descriptionResult.IsFailure)
+            return descriptionResult;
+
+        var pictureResult = ValidatePictureUrl(pictureUrl);
+        if (pictureResult.IsFailure)
+            return pictureResult;
+
+        var priceResult = ValidatePrice(price);
+        if (priceResult.IsFailure)
+            return priceResult;
+
+        var brandResult = ValidateBrandId(brandId);
+        if (brandResult.IsFailure)
+            return brandResult;
+
+        var typeResult = ValidateTypeId(typeId);
+        if (typeResult.IsFailure)
+            return typeResult;
+
+        return Result.Ok();
+    }
+
+    private static Result ValidateName(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentNullException(nameof(value), "Product name cannot be null or whitespace");
+            return Result.BadRequest(ProductErrors.InvalidName);
 
         if (value.Length > MaxNameLength)
-            throw new InvalidDataException($"Product name cannot exceed {MaxNameLength} characters");
+            return Result.BadRequest(ProductErrors.InvalidName);
 
-        Name = value;
+        return Result.Ok();
     }
 
-    private void SetDescription(string value)
+    private static Result ValidateDescription(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentNullException(nameof(value), "Product description cannot be null or whitespace");
+            return Result.BadRequest(ProductErrors.InvalidDescription);
 
         if (value.Length > MaxDescriptionLength)
-            throw new InvalidDataException($"Product description cannot exceed {MaxDescriptionLength} characters");
+            return Result.BadRequest(ProductErrors.InvalidDescription);
 
-        Description = value;
+        return Result.Ok();
     }
 
-    private void SetPictureUrl(string value)
+    private static Result ValidatePictureUrl(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new ArgumentNullException(nameof(value), "Product picture URL cannot be null or whitespace");
+            return Result.BadRequest(ProductErrors.InvalidPictureUrl);
 
         if (value.Length > MaxPictureUrlLength)
-            throw new InvalidDataException($"Product picture URL cannot exceed {MaxPictureUrlLength} characters");
+            return Result.BadRequest(ProductErrors.InvalidPictureUrl);
 
-        PictureUrl = value;
+        return Result.Ok();
     }
 
-    private void SetPrice(decimal value)
+    private static Result ValidatePrice(decimal value)
     {
         if (value < 0)
-            throw new InvalidDataException("Product price cannot be negative");
+            return Result.BadRequest(ProductErrors.InvalidPrice);
 
-        Price = value;
+        return Result.Ok();
     }
 
-    private void SetBrandId(Guid brandId)
+    private static Result ValidateBrandId(Guid brandId)
     {
         if (brandId == Guid.Empty)
-            throw new ArgumentException("Brand ID cannot be empty", nameof(brandId));
+            return Result.BadRequest(ProductErrors.InvalidBrand);
 
-        BrandId = brandId;
+        return Result.Ok();
     }
 
-    private void SetTypeId(Guid typeId)
+    private static Result ValidateTypeId(Guid typeId)
     {
         if (typeId == Guid.Empty)
-            throw new ArgumentException("Type ID cannot be empty", nameof(typeId));
+            return Result.BadRequest(ProductErrors.InvalidType);
 
-        TypeId = typeId;
+        return Result.Ok();
     }
 }
