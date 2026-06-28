@@ -52,8 +52,6 @@ namespace ECommerce.Infrastructure.Migrations
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProductBrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ProductTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
@@ -68,16 +66,6 @@ namespace ECommerce.Infrastructure.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Products_Brands_ProductBrandId",
-                        column: x => x.ProductBrandId,
-                        principalTable: "Brands",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Products_Types_ProductTypeId",
-                        column: x => x.ProductTypeId,
-                        principalTable: "Types",
-                        principalColumn: "Id");
-                    table.ForeignKey(
                         name: "FK_Products_Types_TypeId",
                         column: x => x.TypeId,
                         principalTable: "Types",
@@ -89,16 +77,6 @@ namespace ECommerce.Infrastructure.Migrations
                 name: "IX_Products_BrandId",
                 table: "Products",
                 column: "BrandId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_ProductBrandId",
-                table: "Products",
-                column: "ProductBrandId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_ProductTypeId",
-                table: "Products",
-                column: "ProductTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_TypeId",

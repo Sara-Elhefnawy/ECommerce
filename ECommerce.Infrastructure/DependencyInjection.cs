@@ -18,9 +18,11 @@ public static class DependencyInjection
         {
             var auditInterceptor = serviceProvider.GetRequiredService<AuditInterceptor>();
 
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")
-                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found."),
-                        sqlOptions => sqlOptions.MigrationsAssembly(typeof(ECommerceDbContext).Assembly.FullName));
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+            options.UseSqlServer(connectionString);
+
             options.AddInterceptors(auditInterceptor);
         });
 

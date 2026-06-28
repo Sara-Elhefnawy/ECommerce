@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ECommerce.Infrastructure.Migrations
 {
     [DbContext(typeof(ECommerceDbContext))]
-    [Migration("20260626193444_InitialCreation")]
+    [Migration("20260628211502_InitialCreation")]
     partial class InitialCreation
     {
         /// <inheritdoc />
@@ -58,12 +58,6 @@ namespace ECommerce.Infrastructure.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid?>("ProductBrandId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ProductTypeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("TypeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -73,10 +67,6 @@ namespace ECommerce.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
-
-                    b.HasIndex("ProductBrandId");
-
-                    b.HasIndex("ProductTypeId");
 
                     b.HasIndex("TypeId");
 
@@ -136,21 +126,13 @@ namespace ECommerce.Infrastructure.Migrations
             modelBuilder.Entity("ECommerce.Domain.Entities.Product", b =>
                 {
                     b.HasOne("ECommerce.Domain.Entities.ProductBrand", "Brand")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ECommerce.Domain.Entities.ProductBrand", null)
-                        .WithMany("Products")
-                        .HasForeignKey("ProductBrandId");
-
-                    b.HasOne("ECommerce.Domain.Entities.ProductType", null)
-                        .WithMany("Products")
-                        .HasForeignKey("ProductTypeId");
-
                     b.HasOne("ECommerce.Domain.Entities.ProductType", "Type")
-                        .WithMany()
+                        .WithMany("Products")
                         .HasForeignKey("TypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();

@@ -48,4 +48,3 @@ public sealed class SuccessResult(ResultTypes type) : Result(true, type)
 public sealed class FailureResult(Error error, ResultTypes type) : Result(false, type, error)
 {
 }
-

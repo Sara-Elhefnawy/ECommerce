@@ -38,7 +38,7 @@ public class Product : BaseEntity
     }
 
     // Factory Design Methods with Result Pattern
-    public static Result<Product> Create(
+    public static ResultOfT<Product> Create(
         string name,
         string description,
         string pictureUrl,
@@ -49,9 +49,9 @@ public class Product : BaseEntity
         var validationResult = ValidateAll(name, description, pictureUrl, price, brandId, typeId);
 
         if (validationResult.IsFailure)
-            return Result<Product>.BadRequest(validationResult.Error!);
+            return ResultOfT<Product>.BadRequest(validationResult.Error!);
 
-        return Result<Product>.Created(new Product(
+        return ResultOfT<Product>.Created(new Product(
             name, description, pictureUrl, price, brandId, typeId));
     }
 
