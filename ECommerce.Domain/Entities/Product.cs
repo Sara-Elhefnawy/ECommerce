@@ -35,6 +35,8 @@ public class Product : BaseEntity
         Price = price;
         BrandId = brandId;
         TypeId = typeId;
+
+        Id = Guid.NewGuid();
     }
 
     // Factory Design Methods with Result Pattern

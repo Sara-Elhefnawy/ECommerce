@@ -11,5 +11,7 @@ public class TypeConfiguratioon : IEntityTypeConfiguration<ProductType>
         builder.Property(p => p.Name)
             .IsRequired()
             .HasMaxLength(150);
+
+        builder.HasQueryFilter(h => !h.IsDeleted);
     }
 }

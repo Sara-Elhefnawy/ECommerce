@@ -1,5 +1,7 @@
-﻿using ECommerce.Infrastructure.Interceptors;
+﻿using ECommerce.Domain.Abstractions.Repositories;
+using ECommerce.Infrastructure.Interceptors;
 using ECommerce.Infrastructure.Persistent;
+using ECommerce.Infrastructure.Persistent.Repositories;
 using ECommerce.Infrastructure.Persistent.Seedings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -31,6 +33,10 @@ public static class DependencyInjection
         services.AddScoped<IDataSeeder, ProductBrandSeeder>();
         services.AddScoped<IDataSeeder, ProductTypeSeeder>();
         services.AddScoped<IDataSeeder, ProductSeeder>();
+
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        // Register Generic Repository (optional - UnitOfWork handles this)
+        //services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         return services;
     }

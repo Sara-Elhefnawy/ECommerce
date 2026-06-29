@@ -11,5 +11,7 @@ public class BrandConfiguratioon : IEntityTypeConfiguration<ProductBrand>
         builder.Property(p => p.Name)
             .IsRequired()
             .HasMaxLength(150);
+
+        builder.HasQueryFilter(h => !h.IsDeleted);
     }
 }
