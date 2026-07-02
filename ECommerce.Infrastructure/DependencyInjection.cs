@@ -5,6 +5,7 @@ using ECommerce.Infrastructure.Persistent;
 using ECommerce.Infrastructure.Persistent.Interceptors;
 using ECommerce.Infrastructure.Persistent.Repositories;
 using ECommerce.Infrastructure.Persistent.Seedings;
+using ECommerce.Infrastructure.Queries;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +45,8 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         // Register Generic Repository (optional - UnitOfWork handles this)
         //services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+        services.AddScoped<IProductQueryService, ProductQueryService>();
 
         return services;
     }
