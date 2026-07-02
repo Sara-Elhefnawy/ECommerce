@@ -20,6 +20,7 @@
 
 	<ItemGroup>
 		<!-- Infrastructure depends ONLY on Domain -->
+		<ProjectReference Include="..\ECommerce.APP\ECommerce.APP.csproj" />
 		<ProjectReference Include="..\ECommerce.Domain\ECommerce.Domain.csproj" />
 	</ItemGroup>
 

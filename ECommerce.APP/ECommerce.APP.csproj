@@ -6,9 +6,4 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<!-- APP depends on Infrastructure -->
-		<ProjectReference Include="..\ECommerce.Infrastructure\ECommerce.Infrastructure.csproj" />
-	</ItemGroup>
-
 </Project>

@@ -1,11 +1,12 @@
-﻿using ECommerce.Domain.Entities;
+﻿using ECommerce.Domain.Abstractions.Interceptors;
+using ECommerce.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace ECommerce.Infrastructure.Interceptors;
+namespace ECommerce.Infrastructure.Persistent.Interceptors;
 
-public sealed class AuditInterceptor : SaveChangesInterceptor
+public sealed class AuditInterceptor : SaveChangesInterceptor, IAuditInterceptor
 {
     private readonly ILogger<AuditInterceptor>? _logger;
 
@@ -51,8 +52,7 @@ public sealed class AuditInterceptor : SaveChangesInterceptor
 
                 case EntityState.Deleted:
                     entry.State = EntityState.Modified;
-                    entry.Property(nameof(BaseEntity.IsDeleted)).CurrentValue = true;
-                    entry.Property(nameof(BaseEntity.UpdatedAt)).CurrentValue = now;
+                    entry.Entity.MarkDeleted();
                     _logger?.LogDebug("Soft-deleted {Type} at {Now}",
                         entry.Entity.GetType().Name, now);
                     break;

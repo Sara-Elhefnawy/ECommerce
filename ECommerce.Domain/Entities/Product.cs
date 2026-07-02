@@ -51,7 +51,7 @@ public class Product : BaseEntity
         var validationResult = ValidateAll(name, description, pictureUrl, price, brandId, typeId);
 
         if (validationResult.IsFailure)
-            return ResultOfT<Product>.BadRequest(validationResult.Error!);
+            return validationResult.Error!;
 
         return ResultOfT<Product>.Created(new Product(
             name, description, pictureUrl, price, brandId, typeId));
