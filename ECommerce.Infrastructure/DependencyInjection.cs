@@ -1,4 +1,7 @@
-﻿using ECommerce.APP.Products;
+﻿using ECommerce.APP.Brands;
+using ECommerce.APP.Products;
+using ECommerce.APP.Products.Commands;
+using ECommerce.APP.Types;
 using ECommerce.Domain.Abstractions.Interceptors;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Infrastructure.Persistent;
@@ -47,6 +50,8 @@ public static class DependencyInjection
         //services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
         services.AddScoped<IProductQueryService, ProductQueryService>();
+        services.AddScoped<IBrandQueryService, BrandQueryService>();
+        services.AddScoped<ITypeQueryService, TypeQueryService>();
 
         return services;
     }

@@ -1,4 +1,5 @@
 ﻿using ECommerce.APP.Brands.Queries;
+using ECommerce.APP.Products.Commands;
 using ECommerce.APP.Products.Queries;
 using ECommerce.APP.Types.Queries;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,7 @@ public static class DependencyInjection
         services.AddScoped<DetailsProductQuery>();
         services.AddScoped<GetAllBrandsQuery>();
         services.AddScoped<GetAllTypesQuery>();
+        services.AddScoped<CreateProductCommand>();
 
         return services;
     }

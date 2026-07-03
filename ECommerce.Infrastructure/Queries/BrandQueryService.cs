@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.Infrastructure.Queries;
 
-public sealed class BrandsQueryService(ECommerceDbContext dbContext) : IBrandQueryService
+public sealed class BrandQueryService(ECommerceDbContext dbContext) : IBrandQueryService
 {
     public async Task<IReadOnlyList<GetAllBrandsResponse>> GetAllAsync(CancellationToken ct = default)
         => await dbContext.Brands

@@ -1,31 +1,29 @@
 <Project>
-	<ItemGroup>
-		<!-- ===== Swagger/OpenAPI ===== -->
-		<PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
-		<PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
-
-		<!-- ===== Entity Framework Core ===== -->
-		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9" />
-
-		<!-- ===== Microsoft Extensions (Abstractions - used by multiple layers) ===== -->
-		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
-		<PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.9" />
-
-		<!-- ===== SERILOG (Implementation - ONLY API layer) ===== -->
-		<PackageVersion Include="Serilog" Version="4.2.0" />
-		<PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
-		<PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
-		<PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
-		<PackageVersion Include="Serilog.Sinks.PostgreSQL" Version="2.3.0" />
-		<PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
-		<PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
-		<PackageVersion Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
-
-		<!-- ===== PostgreSQL Driver ===== -->
-		<PackageVersion Include="Npgsql" Version="9.0.3" />
-	</ItemGroup>
+  <ItemGroup>
+    <!-- ===== Swagger/OpenAPI ===== -->
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Swagger" Version="10.2.3" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
+    <!-- ===== Entity Framework Core ===== -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.9" />
+    <!-- ===== Microsoft Extensions (Abstractions - used by multiple layers) ===== -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.9" />
+    <!-- ===== SERILOG (Implementation - ONLY API layer) ===== -->
+    <PackageVersion Include="Serilog" Version="4.2.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.PostgreSQL" Version="2.3.0" />
+    <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageVersion Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
+    <!-- ===== PostgreSQL Driver ===== -->
+    <PackageVersion Include="Npgsql" Version="9.0.3" />
+  </ItemGroup>
 </Project>

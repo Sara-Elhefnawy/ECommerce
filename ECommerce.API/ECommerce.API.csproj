@@ -2,8 +2,7 @@
 
 	<ItemGroup>
 		<!-- Swagger -->
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
+		<PackageReference Include="Swashbuckle.AspNetCore" />
 
 		<!-- EF Core Design (for migrations) -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design">

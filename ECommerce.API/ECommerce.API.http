@@ -1,6 +1,37 @@
-@ECommerce.API_HostAddress = http://localhost:5218
+@Host = http://localhost:5218/api
+@ProductId = fb0b3ca0-117a-4619-c3ae-08ded55b1e05
 
-GET {{ECommerce.API_HostAddress}}/weatherforecast/
+GET {{Host}}/products/
 Accept: application/json
+
+###
+
+GET {{Host}}/products/{{ProductId}}
+Accept: application/json
+
+###
+
+GET {{Host}}/brands/
+Accept: application/json
+
+###
+
+GET {{Host}}/types/
+Accept: application/json
+
+###
+
+POST {{Host}}/products/
+Content-Type: application/json
+Accept: application/json
+
+{
+  "Name": "Test POST 2",
+  "Description": "this is desc 2",
+  "PictureUrl": "this is photo 2",
+  "Price": 60.00,
+  "BrandId": "6db03d2e-8452-4629-3c7b-08ded55b1db5",
+  "TypeId": "f3a7ec15-9ef5-4386-6cd0-08ded55b1ddb"
+}
 
 ###

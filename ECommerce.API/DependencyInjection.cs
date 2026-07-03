@@ -11,6 +11,13 @@ public static class DependencyInjection
 
         services.AddExceptionHandler<GlobalExceptionMiddleware>();
 
+        // discovers Minimal API routes (MapGet, etc.) for OpenAPI
+        services.AddEndpointsApiExplorer();
+
+        // Registers the service that generate the Swagger / OpenAPI file
+        //      that describes every API in the app
+        services.AddSwaggerGen();
+
         return services;
     }
 }

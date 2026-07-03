@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.Infrastructure.Queries;
 
-public sealed class TypesQueryService(ECommerceDbContext dbContext) : ITypeQueryService
+public sealed class TypeQueryService(ECommerceDbContext dbContext) : ITypeQueryService
 {
     public async Task<IReadOnlyList<GetAllTypesResponse>> GetAllAsync(CancellationToken ct = default)
        => await dbContext.Types
