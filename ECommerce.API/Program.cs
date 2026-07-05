@@ -16,6 +16,9 @@ builder.Services.AddPresentation()
 
 var app = builder.Build();
 
+// outer layer — pushes TraceId first
+app.UseTraceIdEnrichment();
+// inner layer — now covered by the enrichment
 app.UseSerilogRequestLoggingConfigured();
 
 // Activates the GlobalExceptionMiddleware registered in AddPresentation().

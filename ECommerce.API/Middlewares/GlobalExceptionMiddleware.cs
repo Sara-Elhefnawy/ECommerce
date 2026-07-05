@@ -16,9 +16,9 @@ public class GlobalExceptionMiddleware(IProblemDetailsService problemDetails, IL
 
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-        var problemDetailsContext = new ProblemDetailsContext 
-        { 
-            HttpContext = httpContext ,
+        var problemDetailsContext = new ProblemDetailsContext
+        {
+            HttpContext = httpContext,
             Exception = exception,
             ProblemDetails = new ProblemDetails
             {

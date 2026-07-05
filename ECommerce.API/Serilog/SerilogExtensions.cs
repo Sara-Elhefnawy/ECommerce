@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using Serilog.Context;
 
 namespace ECommerce.API.Serilog;
 
@@ -86,6 +87,29 @@ public static class SerilogExtensions
                 if (httpContext.User.Identity?.IsAuthenticated == true)
                     diagnosticContext.Set("UserId", httpContext.User.FindFirst("sub")?.Value);
             };
+        });
+
+        return app;
+    }
+
+    /// <summary>
+    /// Pushes the current request's TraceIdentifier into Serilog's LogContext,
+    /// so EVERY log line written during this request — info, warnings, errors,
+    /// including ones from GlobalExceptionMiddleware — carries the SAME TraceId
+    /// that gets returned to the client in ApiMeta/ProblemDetails.traceId.
+    /// This is what lets you take a traceId the frontend reports and find the
+    /// exact request's full log trail in PostgreSQL.
+    /// Must run EARLY in the pipeline — before routing/endpoints/exception handling —
+    /// so the property is already active when anything downstream logs.
+    /// </summary>
+    public static WebApplication UseTraceIdEnrichment(this WebApplication app)
+    {
+        app.Use(async (context, next) =>
+        {
+            using (LogContext.PushProperty("TraceId", context.TraceIdentifier))
+            {
+                await next();
+            }
         });
 
         return app;

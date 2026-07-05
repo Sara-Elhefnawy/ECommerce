@@ -1,4 +1,5 @@
 ﻿using ECommerce.API.Extensions;
+using ECommerce.API.Result;
 using ECommerce.APP.Types.Queries;
 
 namespace ECommerce.API.Endpoints;
@@ -9,7 +10,7 @@ public static class TypeEndpoints
     {
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-        app.MapGet("/api/types", async (GetAllTypesQuery query, CancellationToken ct = default) =>
+        app.MapGet("/api/types", async (GetAllTypesQuery query, HttpContext httpContext, CancellationToken ct = default) =>
         {
             logger.LogInformation("Retrieving all types from database");
 
@@ -17,7 +18,7 @@ public static class TypeEndpoints
 
             logger.LogInformation("Query completed with result: {Result}", result);
 
-            return result.ToApiResult();
+            return result.ToApiResult(httpContext);
         });
     }
 }

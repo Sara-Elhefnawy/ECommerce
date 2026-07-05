@@ -28,6 +28,13 @@ public static class ColumnOptionsHelper
             { "thread_id",        new SinglePropertyColumnWriter("ThreadId",      PropertyWriteMethod.Raw, NpgsqlDbType.Integer) }, // from .Enrich.WithThreadId()
             { "correlation_id",   new SinglePropertyColumnWriter("CorrelationId", PropertyWriteMethod.Raw, NpgsqlDbType.Text) },    // from .Enrich.WithCorrelationId()
 
+            // NEW: dedicated column for the request TraceId, pushed via LogContext in
+            // UseTraceIdEnrichment(). This is the SAME value returned to the client in
+            // ApiMeta.TraceId / ProblemDetails.traceId — so when a user reports a
+            // traceId, you query this column directly to pull every log line for
+            // that exact request, instead of digging through the properties JSONB.
+            { "trace_id",         new SinglePropertyColumnWriter("TraceId",       PropertyWriteMethod.Raw, NpgsqlDbType.Text) },
+
             // Request context fields — populated by LogContext.PushProperty(...) or DiagnosticContext.
             { "user_id",          new SinglePropertyColumnWriter("UserId",        PropertyWriteMethod.Raw, NpgsqlDbType.Text) },    // set when user is authenticated
             { "request_path",     new SinglePropertyColumnWriter("RequestPath",   PropertyWriteMethod.Raw, NpgsqlDbType.Text) },    // e.g. /api/products

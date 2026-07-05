@@ -9,6 +9,14 @@ public sealed class CreateProductCommand(IUnitOfWork uow)
 {
     public async Task<ResultOfT<Product>> Execute(CreateProductRequest request, CancellationToken ct = default)
     {
+        var brandExists = await uow.Repository<ProductBrand>().GetByIdAsync(request.BrandId, ct) is not null;
+        if (!brandExists)
+            return ProductErrors.InvalidBrand;
+
+        var typeExists = await uow.Repository<ProductType>().GetByIdAsync(request.TypeId, ct) is not null;
+        if (!typeExists)
+            return ProductErrors.InvalidType;
+
         var result = Product.Create(
             request.Name, request.Description, request.PictureUrl,
             request.Price, request.BrandId, request.TypeId);

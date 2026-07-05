@@ -11,7 +11,7 @@ namespace ECommerce.API.Extensions;
 public static class ResultExtensions
 {
     // For non-generic Result (e.g. commands with no return value)
-    public static IResult ToApiResult(this Result result)
+    public static IResult ToApiResult(this Domain.Common.Result result)
     {
         if (result.IsSuccess)
         {

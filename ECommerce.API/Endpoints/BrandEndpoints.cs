@@ -1,4 +1,5 @@
 ﻿using ECommerce.API.Extensions;
+using ECommerce.API.Result;
 using ECommerce.APP.Brands.Queries;
 
 namespace ECommerce.API.Endpoints;
@@ -9,7 +10,7 @@ public static class BrandEndpoints
     {
         var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-        app.MapGet("/api/brands", async (GetAllBrandsQuery query, CancellationToken ct = default) =>
+        app.MapGet("/api/brands", async (GetAllBrandsQuery query, HttpContext httpContext, CancellationToken ct = default) =>
         {
             logger.LogInformation("Retrieving all brands from database");
 
@@ -17,7 +18,7 @@ public static class BrandEndpoints
 
             logger.LogInformation("Query completed with result: {Result}", result);
 
-            return result.ToApiResult();
+            return result.ToApiResult(httpContext);
         });
     }
 }
