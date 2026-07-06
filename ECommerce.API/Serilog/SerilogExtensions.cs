@@ -82,10 +82,14 @@ public static class SerilogExtensions
             {
                 diagnosticContext.Set("RequestPath", httpContext.Request.Path);
                 diagnosticContext.Set("RequestMethod", httpContext.Request.Method);
-                diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault());
+                diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault() ?? "unknown");
 
                 if (httpContext.User.Identity?.IsAuthenticated == true)
-                    diagnosticContext.Set("UserId", httpContext.User.FindFirst("sub")?.Value);
+                {
+                    var userId = httpContext.User.FindFirst("sub")?.Value;
+                    if (!string.IsNullOrEmpty(userId))
+                        diagnosticContext.Set("UserId", userId);
+                }
             };
         });
 

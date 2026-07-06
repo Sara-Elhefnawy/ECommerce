@@ -1,11 +1,14 @@
 ﻿using ECommerce.API.Middlewares;
+using ECommerce.APP.Products.Commands;
+using ECommerce.Domain.Abstractions.Cloudinaryy;
+using ECommerce.Infrastructure.Persistent.Cloudinaryy;
 
 namespace ECommerce.API;
 
 public static class DependencyInjection
 {
     // could return void but IServiceCollection return type makes it useful to chain
-    public static IServiceCollection AddPresentation(this IServiceCollection services)
+    public static IServiceCollection AddPresentation(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddProblemDetails(options =>
         {
@@ -32,6 +35,16 @@ public static class DependencyInjection
         // Registers the service that generate the Swagger / OpenAPI file
         //      that describes every API in the app
         services.AddSwaggerGen();
+
+        // Add Cloudinary settings
+        services.Configure<CloudinarySettings>(
+            configuration.GetSection("CloudinarySettings"));
+
+        // Register Cloudinary service
+        services.AddScoped<ICloudinaryService, CloudinaryService>();
+
+        // Make sure your other services are registered
+        services.AddScoped<CreateProductCommand>();
 
         return services;
     }

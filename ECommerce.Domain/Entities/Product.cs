@@ -1,4 +1,5 @@
 ﻿using ECommerce.Domain.Common;
+using Microsoft.AspNetCore.Http;
 
 namespace ECommerce.Domain.Entities;
 
@@ -7,6 +8,16 @@ public class Product : BaseEntity
     public const int MaxNameLength = 150;
     public const int MaxDescriptionLength = 1000;
     public const int MaxPictureUrlLength = 500;
+
+    // Add image validation constants
+    public const long MaxImageSizeInBytes = 5 * 1024 * 1024; // 5MB
+    public static readonly string[] AllowedImageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+    public static readonly string[] AllowedImageTypes = {
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp"
+    };
 
     public string Name { get; private set; } = default!;
     public string Description { get; private set; } = default!;
@@ -110,6 +121,25 @@ public class Product : BaseEntity
 
         if (value.Length > MaxDescriptionLength)
             return Result.BadRequest(ProductErrors.InvalidDescription);
+
+        return Result.Ok();
+    }
+
+    // Add method to validate image file before upload
+    public static Result ValidateImageFile(IFormFile imageFile)
+    {
+        if (imageFile is null || imageFile.Length is 0)
+            return Result.BadRequest(ProductErrors.ImageRequired);
+
+        if (imageFile.Length > MaxImageSizeInBytes)
+            return Result.BadRequest(ProductErrors.ImageTooLarge);
+
+        var extension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+        if (!AllowedImageExtensions.Contains(extension))
+            return Result.BadRequest(ProductErrors.InvalidImageExtension);
+
+        if (!AllowedImageTypes.Contains(imageFile.ContentType))
+            return Result.BadRequest(ProductErrors.InvalidImageType);
 
         return Result.Ok();
     }

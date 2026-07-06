@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddSerilogLogging();
 
-builder.Services.AddPresentation()
+builder.Services.AddPresentation(builder.Configuration)
                 .AddInfrastructure(builder.Configuration)
                 .AddApp();
 

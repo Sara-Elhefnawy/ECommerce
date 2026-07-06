@@ -17,6 +17,23 @@ public class ProductErrors
         "Product.InvalidPictureUrl",
         $"Product picture URL cannot be empty or exceed {Product.MaxPictureUrlLength} characters.");
 
+    // Add new image validation errors
+    public static readonly Error ImageRequired = Error.Validation(
+        "Product.ImageRequired",
+        "An image file is required");
+
+    public static readonly Error ImageTooLarge = Error.Validation(
+        "Product.ImageTooLarge",
+        $"Image file size must be less than {Product.MaxImageSizeInBytes / 1024 / 1024}MB");
+
+    public static readonly Error InvalidImageExtension = Error.Validation(
+        "Product.InvalidImageExtension",
+        $"Image file must be one of: {string.Join(", ", Product.AllowedImageExtensions)}");
+
+    public static readonly Error InvalidImageType = Error.Validation(
+        "Product.InvalidImageType",
+        $"Image must be one of: {string.Join(", ", Product.AllowedImageTypes)}");
+
     public static readonly Error InvalidPrice = Error.Validation(
         "Product.InvalidPrice",
         "Product price cannot be negative.");

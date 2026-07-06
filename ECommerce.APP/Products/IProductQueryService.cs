@@ -11,6 +11,4 @@ public interface IProductQueryService
     Task<IReadOnlyList<GetAllProductsResponse>?> GetByBrandIdAsync(Guid brandId, CancellationToken ct = default);
 
     Task<IReadOnlyList<GetAllProductsResponse>?> GetByTypeIdAsync(Guid typeId, CancellationToken ct = default);
-
-    Task CreateAsync(CreateProductRequest request, CancellationToken ct = default);
 }

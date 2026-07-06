@@ -43,9 +43,10 @@ public static class ProductExtensions
             brandName
         );
 
-    public static CreateProductRequest ToCreateResponse(this Product product)
+    public static CreateProductResponse ToCreateResponse(this Product product)
         => new
         (
+            product.Id,
             product.Name,
             product.Description,
             product.PictureUrl,

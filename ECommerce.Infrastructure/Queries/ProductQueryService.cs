@@ -1,7 +1,6 @@
 ﻿using ECommerce.APP.Products;
 using ECommerce.APP.Products.Responses;
 using ECommerce.APP.Products.Responses.Extensions;
-using ECommerce.Domain.Entities;
 using ECommerce.Infrastructure.Persistent;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,7 +44,7 @@ public class ProductQueryService(ECommerceDbContext dbContext) : IProductQuerySe
             TypeName = p.Type.Name,
             BrandName = p.Brand.Name
         })
-        .FirstOrDefaultAsync(p => p.Id == id, ct);
+        .FirstOrDefaultAsync(ct);
 
         if (item is null) return null;
 
@@ -92,20 +91,5 @@ public class ProductQueryService(ECommerceDbContext dbContext) : IProductQuerySe
         return data
             .Select(x => x.Id.ToGetAllResponse(x.Name, x.Description, x.PictureUrl, x.Price, x.TypeName, x.BrandName))
             .ToList();
-    }
-
-    public async Task CreateAsync(CreateProductRequest request, CancellationToken ct = default)
-    {
-        var product = Product.Create(
-            request.Name,
-            request.Description,
-            request.PictureUrl,
-            request.Price,
-            request.TypeId,
-            request.BrandId
-        );
-
-        dbContext.Products.Add(product.Value);
-        await dbContext.SaveChangesAsync(ct);
     }
 }

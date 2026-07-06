@@ -4,6 +4,7 @@ using ECommerce.API.Result;
 using ECommerce.APP.Products.Commands;
 using ECommerce.APP.Products.Queries;
 using ECommerce.APP.Products.Responses;
+using Microsoft.AspNetCore.Mvc;
 using Serilog.Context;
 
 namespace ECommerce.API.Endpoints.V1;
@@ -51,17 +52,28 @@ public static class ProductEndpoints
         .WithSummary("Get product by id")
         .WithDescription("Returns a single product's details, or 404 if the id doesn't exist or the product was soft-deleted.");
 
-        group.MapPost("/api/products", async (CreateProductRequest request, HttpContext httpContext, CreateProductCommand command, CancellationToken ct) =>
+        group.MapPost("/", async (
+            [FromForm] CreateProductRequest request,  // Use [FromForm] for multipart/form-data
+            HttpContext httpContext, 
+            CreateProductCommand command, 
+            CancellationToken ct) =>
         {
             var result = await command.Execute(request, ct);
 
-            return result.ToApiResult(httpContext);
+            // Pass location for 201 Created response
+            var location = result.IsSuccess
+                ? $"/api/v1/products/{result.Value.Id}"
+                : null;
+
+            return result.ToApiResult(location);
         })
         .WithName("CreateProduct")
         .WithGroupName("v1")
-        .Produces<ApiResponse<CreateProductRequest>>(StatusCodes.Status200OK)
+        .Produces<ApiResponse<CreateProductResponse>>(StatusCodes.Status201Created)
         .ProducesValidationProblem(StatusCodes.Status400BadRequest)
         .WithSummary("Create  product")
-        .WithDescription("Create product in DB, or 400 if validation fails or if BrandId/TypeId don't reference existing records");
+        .WithDescription("Create product in DB, or 400 if validation fails or if BrandId/TypeId don't reference existing records")
+        .Accepts<CreateProductRequest>("multipart/form-data")
+        .DisableAntiforgery();
     }
 }
