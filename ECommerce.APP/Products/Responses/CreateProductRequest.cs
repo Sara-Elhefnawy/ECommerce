@@ -3,7 +3,7 @@
 public record CreateProductRequest(
     string Name, 
     string Description, 
-    string PictureUrl, 
+    string PictureUrl,
     decimal Price, 
     Guid BrandId,
     Guid TypeId

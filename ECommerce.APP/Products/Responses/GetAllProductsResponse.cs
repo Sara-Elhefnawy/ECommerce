@@ -4,7 +4,7 @@ public record GetAllProductsResponse(
     Guid Id,
     string Name,
     string Description,
-    string PhotoUrl,
+    string PictureUrl,
     decimal Price,
     string TypeName,
     string BrandName
