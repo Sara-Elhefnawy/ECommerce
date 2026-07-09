@@ -1,8 +1,8 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Result;
-using ECommerce.APP.Brands.Queries;
-using ECommerce.APP.Brands.Response;
+using ECommerce.APP.Abstractions.Mediator;
+using ECommerce.APP.Brands.Queries.GetAll;
 
 namespace ECommerce.API.Endpoints.V2;
 
@@ -14,11 +14,11 @@ public static class BrandEndpointsV2
 
         var group = app.MapVersionedEndpoint("brands", ApiVersions.V2);
 
-        group.MapGet("/", async (GetAllBrandsQuery query, HttpContext httpContext, CancellationToken ct = default) =>
+        group.MapGet("/", async (IMediator mediator, HttpContext httpContext, CancellationToken ct = default) =>
         {
             logger.LogInformation("Retrieving all brands from database");
 
-            var result = await query.Execute(ct);
+            var result = await mediator.Send(new GetAllBrandsQuery(), ct);
 
             logger.LogInformation("Query completed with result: {Result}", result);
 

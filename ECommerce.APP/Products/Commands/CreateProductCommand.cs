@@ -1,7 +1,7 @@
-﻿using ECommerce.APP.Brands.Queries;
-using ECommerce.APP.Products.Responses;
-using ECommerce.APP.Products.Responses.Extensions;
-using ECommerce.APP.Types.Queries;
+﻿using ECommerce.APP.Abstractions.Mediator;
+using ECommerce.APP.Brands.Queries.Details;
+using ECommerce.APP.Products.Extensions;
+using ECommerce.APP.Types.Queries.Details;
 using ECommerce.Domain.Abstractions.Cloudinaryy;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Common;
@@ -11,24 +11,23 @@ namespace ECommerce.APP.Products.Commands;
 
 public sealed class CreateProductCommand(
     IUnitOfWork uow,
-    DetailsBrandQuery brandQuery,
-    DetailsTypeQuery typeQuery,
-    ICloudinaryService cloudinaryService)
+    IMediator mediator,
+    ICloudinaryService cloudinaryService) :
+    IRequestHandler<CreateProductRequest, ResultOfT<CreateProductResponse>>
 {
-    public async Task<ResultOfT<CreateProductResponse>> Execute(
+    public async Task<ResultOfT<CreateProductResponse>> Handle(
         CreateProductRequest request,
         CancellationToken ct = default)
     {
-        // Validate image using domain rules
         var imageValidation = Product.ValidateImageFile(request.ImageFile);
         if (imageValidation.IsFailure)
             return imageValidation.Error!;
 
-        var brandExists = await brandQuery.Execute(request.BrandId, ct);
+        var brandExists = await mediator.Send(new DetailsBrandQuery(request.BrandId), ct);
         if (brandExists.IsFailure)
             return ProductErrors.InvalidBrand;
 
-        var typeExists = await typeQuery.Execute(request.TypeId, ct);
+        var typeExists = await mediator.Send(new DetailsTypeQuery(request.TypeId), ct);
         if (typeExists.IsFailure)
             return ProductErrors.InvalidType;
 

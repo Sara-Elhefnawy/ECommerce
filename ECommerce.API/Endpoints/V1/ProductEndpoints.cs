@@ -1,9 +1,10 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Result;
+using ECommerce.APP.Abstractions.Mediator;
 using ECommerce.APP.Products.Commands;
-using ECommerce.APP.Products.Queries;
-using ECommerce.APP.Products.Responses;
+using ECommerce.APP.Products.Queries.Details;
+using ECommerce.APP.Products.Queries.GetAll;
 using Microsoft.AspNetCore.Mvc;
 using Serilog.Context;
 
@@ -17,11 +18,11 @@ public static class ProductEndpoints
 
         var group = app.MapVersionedEndpoint("products", ApiVersions.V1);
 
-        group.MapGet("/", async (GetAllProductsQuery query, HttpContext httpContext, CancellationToken ct) =>
+        group.MapGet("/", async (IMediator mediator, HttpContext httpContext, CancellationToken ct) =>
         {
             logger.LogInformation("Retrieving all products from database");
 
-            var result = await query.Execute(ct);
+            var result = await mediator.Send(new GetAllProductsQuery(), ct);
 
             logger.LogInformation("Query completed with result: {Result}", result);
 
@@ -34,14 +35,14 @@ public static class ProductEndpoints
             .WithSummary("Get products")
             .WithDescription("Returns all products in DB, or 404 if list is empty");
 
-        group.MapGet("/{id:guid}", async (Guid id, DetailsProductQuery query, HttpContext httpContext, CancellationToken ct) =>
+        group.MapGet("/{id:guid}", async (Guid id, IMediator mediator, HttpContext httpContext, CancellationToken ct) =>
         {
             // It's a Serilog feature, not part of your Result pattern at all.
             // Inside the using block, every log line written automatically
             // gets a ProductId field attached in the structured log output
             using (LogContext.PushProperty("ProductId", id))
             {
-                var result = await query.Execute(id, ct);
+                var result = await mediator.Send(new DetailsProductQuery(id), ct);
                 return result.ToApiResult(httpContext);
             }
         })
@@ -54,18 +55,18 @@ public static class ProductEndpoints
 
         group.MapPost("/", async (
             [FromForm] CreateProductRequest request,  // Use [FromForm] for multipart/form-data
+            IMediator mediator,
             HttpContext httpContext, 
-            CreateProductCommand command, 
             CancellationToken ct) =>
         {
-            var result = await command.Execute(request, ct);
+            var result = await mediator.Send(request, ct);
 
             // Pass location for 201 Created response
             var location = result.IsSuccess
                 ? $"/api/v1/products/{result.Value.Id}"
                 : null;
 
-            return result.ToApiResult(location);
+            return result.ToApiResult(httpContext, location);
         })
             .WithName("CreateProduct")
             .WithGroupName("v1")
