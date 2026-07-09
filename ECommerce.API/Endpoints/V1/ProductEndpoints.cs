@@ -27,12 +27,12 @@ public static class ProductEndpoints
 
             return result.ToApiResult(httpContext);
         })
-        .WithName("GetProducts")
-        .WithGroupName("v1")
-        .Produces<ApiResponse<IReadOnlyList<GetAllProductsResponse>>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status404NotFound)
-        .WithSummary("Get products")
-        .WithDescription("Returns all products in DB, or 404 if list is empty");
+            .WithName("GetProducts")
+            .WithGroupName("v1")
+            .Produces<ApiResponse<IReadOnlyList<GetAllProductsResponse>>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Get products")
+            .WithDescription("Returns all products in DB, or 404 if list is empty");
 
         group.MapGet("/{id:guid}", async (Guid id, DetailsProductQuery query, HttpContext httpContext, CancellationToken ct) =>
         {
@@ -45,12 +45,12 @@ public static class ProductEndpoints
                 return result.ToApiResult(httpContext);
             }
         })
-        .WithName("GetProductById")
-        .WithGroupName("v1")
-        .Produces<ApiResponse<DetailsProductResponse>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status404NotFound)
-        .WithSummary("Get product by id")
-        .WithDescription("Returns a single product's details, or 404 if the id doesn't exist or the product was soft-deleted.");
+            .WithName("GetProductById")
+            .WithGroupName("v1")
+            .Produces<ApiResponse<DetailsProductResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Get product by id")
+            .WithDescription("Returns a single product's details, or 404 if the id doesn't exist or the product was soft-deleted.");
 
         group.MapPost("/", async (
             [FromForm] CreateProductRequest request,  // Use [FromForm] for multipart/form-data
@@ -67,13 +67,13 @@ public static class ProductEndpoints
 
             return result.ToApiResult(location);
         })
-        .WithName("CreateProduct")
-        .WithGroupName("v1")
-        .Produces<ApiResponse<CreateProductResponse>>(StatusCodes.Status201Created)
-        .ProducesValidationProblem(StatusCodes.Status400BadRequest)
-        .WithSummary("Create  product")
-        .WithDescription("Create product in DB, or 400 if validation fails or if BrandId/TypeId don't reference existing records")
-        .Accepts<CreateProductRequest>("multipart/form-data")
-        .DisableAntiforgery();
+            .WithName("CreateProduct")
+            .WithGroupName("v1")
+            .Produces<ApiResponse<CreateProductResponse>>(StatusCodes.Status201Created)
+            .ProducesValidationProblem(StatusCodes.Status400BadRequest)
+            .WithSummary("Create  product")
+            .WithDescription("Create product in DB, or 400 if validation fails or if BrandId/TypeId don't reference existing records")
+            .Accepts<CreateProductRequest>("multipart/form-data")
+            .DisableAntiforgery();
     }
 }

@@ -13,9 +13,13 @@ public static class DependencyInjection
     {
         services.AddScoped<GetAllProductsQuery>();
         services.AddScoped<DetailsProductQuery>();
-        services.AddScoped<GetAllBrandsQuery>();
-        services.AddScoped<GetAllTypesQuery>();
         services.AddScoped<CreateProductCommand>();
+
+        services.AddScoped<GetAllBrandsQuery>();
+        services.AddScoped<DetailsBrandQuery>();
+
+        services.AddScoped<GetAllTypesQuery>();
+        services.AddScoped<DetailsTypeQuery>();
 
         return services;
     }

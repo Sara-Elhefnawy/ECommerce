@@ -1,5 +1,7 @@
-﻿using ECommerce.APP.Products.Responses;
+﻿using ECommerce.APP.Brands.Queries;
+using ECommerce.APP.Products.Responses;
 using ECommerce.APP.Products.Responses.Extensions;
+using ECommerce.APP.Types.Queries;
 using ECommerce.Domain.Abstractions.Cloudinaryy;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Common;
@@ -9,6 +11,8 @@ namespace ECommerce.APP.Products.Commands;
 
 public sealed class CreateProductCommand(
     IUnitOfWork uow,
+    DetailsBrandQuery brandQuery,
+    DetailsTypeQuery typeQuery,
     ICloudinaryService cloudinaryService)
 {
     public async Task<ResultOfT<CreateProductResponse>> Execute(
@@ -20,12 +24,12 @@ public sealed class CreateProductCommand(
         if (imageValidation.IsFailure)
             return imageValidation.Error!;
 
-        var brandExists = await uow.Repository<ProductBrand>().GetByIdAsync(request.BrandId, ct) is not null;
-        if (!brandExists)
+        var brandExists = await brandQuery.Execute(request.BrandId, ct);
+        if (brandExists.IsFailure)
             return ProductErrors.InvalidBrand;
 
-        var typeExists = await uow.Repository<ProductType>().GetByIdAsync(request.TypeId, ct) is not null;
-        if (!typeExists)
+        var typeExists = await typeQuery.Execute(request.TypeId, ct);
+        if (typeExists.IsFailure)
             return ProductErrors.InvalidType;
 
         // Upload image to Cloudinary

@@ -24,11 +24,25 @@ public static class TypeEndpoints
 
             return result.ToApiResult(httpContext);
         })
-        .WithName("GetTypes")
-        .WithGroupName("v1")
-        .Produces<ApiResponse<IReadOnlyList<GetAllTypesResponse>>>(StatusCodes.Status200OK)
-        .ProducesProblem(StatusCodes.Status404NotFound)
-        .WithSummary("Get types")
-        .WithDescription("Returns all types in DB, or 404 if list is empty");
+            .WithName("GetTypes")
+            .WithGroupName("v1")
+            .Produces<ApiResponse<IReadOnlyList<GetAllTypesResponse>>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Get types")
+            .WithDescription("Returns all types in DB, or 404 if list is empty");
+
+        group.MapGet("/{id:guid}", async (DetailsTypeQuery query, Guid id, HttpContext httpContext, CancellationToken ct = default) =>
+        {
+            logger.LogInformation("Retrieving type with ID {Id} from database", id);
+            var result = await query.Execute(id, ct);
+            logger.LogInformation("Query completed with result: {Result}", result);
+            return result.ToApiResult(httpContext);
+        })
+            .WithName("GetTypeById")
+            .WithGroupName("v1")
+            .Produces<ApiResponse<DetailsTypeResponse>>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .WithSummary("Get type by ID")
+            .WithDescription("Returns a type by its ID, or 404 if not found");
     }
 }
