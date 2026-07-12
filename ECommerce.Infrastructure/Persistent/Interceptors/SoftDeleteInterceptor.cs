@@ -1,11 +1,10 @@
-﻿using ECommerce.Domain.Abstractions.Interceptors;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace ECommerce.Infrastructure.Persistent.Interceptors;
 
-public class SoftDeleteInterceptor : SaveChangesInterceptor, ISoftDeleteInterceptor
+public class SoftDeleteInterceptor : SaveChangesInterceptor
 {
     private readonly ILogger<SoftDeleteInterceptor>? _logger;
 

@@ -2,7 +2,7 @@
 
 	<ItemGroup>
 		<!-- Abstractions only - no implementation -->
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+		<PackageReference Include="Microsoft.AspNetCore.Http" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
 	</ItemGroup>
 

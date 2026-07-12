@@ -1,9 +1,11 @@
 using ECommerce.API;
 using ECommerce.API.Endpoints.V1;
 using ECommerce.API.Endpoints.V2;
+using ECommerce.API.Extensions;
 using ECommerce.API.Serilog;
 using ECommerce.APP;
 using ECommerce.Infrastructure;
+using ECommerce.Infrastructure.HealthChecks;
 using ECommerce.Infrastructure.Persistent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -30,6 +32,20 @@ builder.Services.AddSwaggerGen(c =>
     // Show endpoints based on GroupName
     c.DocInclusionPredicate((docName, apiDesc) => apiDesc.GroupName == docName);
 });
+
+// Register ALL Health Checks
+var timeout = builder.Configuration
+    .GetValue<int>("HealthChecksSettings:TimeoutSeconds");
+
+builder.Services.AddApplicationHealthChecks(
+    builder.Configuration.GetConnectionString("DefaultConnection")!,
+    timeout);
+
+// Setup Authorization for protected endpoints
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+//});
 
 var app = builder.Build();
 
@@ -66,6 +82,9 @@ if (app.Environment.IsDevelopment())
     // Seeds initial data (brands, types, products) if the tables are empty.
     await seeder.SeedAllAsync();
 }
+
+// Map ALL Health Check Endpoints
+app.MapApplicationHealthChecks();
 
 app.MapProductEndpoints();
 app.MapTypeEndpoints();

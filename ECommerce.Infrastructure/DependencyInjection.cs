@@ -1,5 +1,4 @@
-﻿using ECommerce.Domain.Abstractions.Interceptors;
-using ECommerce.Domain.Abstractions.Repositories;
+﻿using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Infrastructure.Persistent;
 using ECommerce.Infrastructure.Persistent.Interceptors;
 using ECommerce.Infrastructure.Persistent.Repositories;
@@ -15,8 +14,8 @@ public static class DependencyInjection
     // could return void but IServiceCollection return type makes it useful to chain
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<IAuditInterceptor, AuditInterceptor>();
-        services.AddScoped<ISoftDeleteInterceptor, SoftDeleteInterceptor>();
+        services.AddSingleton<AuditInterceptor>();
+        services.AddSingleton<SoftDeleteInterceptor>();
 
         services.AddScoped<AuditInterceptor>();
         services.AddScoped<SoftDeleteInterceptor>();

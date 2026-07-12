@@ -1,12 +1,11 @@
-﻿using ECommerce.Domain.Abstractions.Interceptors;
-using ECommerce.Domain.Entities;
+﻿using ECommerce.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace ECommerce.Infrastructure.Persistent.Interceptors;
 
-public sealed class AuditInterceptor : SaveChangesInterceptor, IAuditInterceptor
+public sealed class AuditInterceptor : SaveChangesInterceptor
 {
     private readonly ILogger<AuditInterceptor>? _logger;
 

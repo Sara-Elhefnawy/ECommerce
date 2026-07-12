@@ -1,5 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup>  <UserSecretsId>fcaa5e55-47c9-4d72-8c30-6111fed1f86a</UserSecretsId>
-  </PropertyGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<UserSecretsId>fcaa5e55-47c9-4d72-8c30-6111fed1f86a</UserSecretsId>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<!-- Swagger -->

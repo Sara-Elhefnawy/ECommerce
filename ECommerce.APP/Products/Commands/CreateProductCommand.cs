@@ -1,6 +1,7 @@
 ﻿using ECommerce.APP.Abstractions.Mediator;
 using ECommerce.APP.Brands.Queries.Details;
 using ECommerce.APP.Products.Extensions;
+using ECommerce.APP.Products.Validators;
 using ECommerce.APP.Types.Queries.Details;
 using ECommerce.Domain.Abstractions.Cloudinaryy;
 using ECommerce.Domain.Abstractions.Repositories;
@@ -19,7 +20,11 @@ public sealed class CreateProductCommand(
         CreateProductRequest request,
         CancellationToken ct = default)
     {
-        var imageValidation = Product.ValidateImageFile(request.ImageFile);
+        var imageValidation = ImageValidator.Validate(
+            request.ImageFile.Length,
+            Path.GetExtension(request.ImageFile.FileName),
+            request.ImageFile.ContentType);
+
         if (imageValidation.IsFailure)
             return imageValidation.Error!;
 

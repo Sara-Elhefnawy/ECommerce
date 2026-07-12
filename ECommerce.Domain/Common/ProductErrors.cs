@@ -1,4 +1,5 @@
 ﻿using ECommerce.Domain.Entities;
+using ECommerce.Domain.Images;
 
 namespace ECommerce.Domain.Common;
 
@@ -24,15 +25,15 @@ public class ProductErrors
 
     public static readonly Error ImageTooLarge = Error.Validation(
         "Product.ImageTooLarge",
-        $"Image file size must be less than {Product.MaxImageSizeInBytes / 1024 / 1024}MB");
+        $"Image file size must be less than {ImageRules.MaxImageSizeInBytes / 1024 / 1024}MB");
 
     public static readonly Error InvalidImageExtension = Error.Validation(
         "Product.InvalidImageExtension",
-        $"Image file must be one of: {string.Join(", ", Product.AllowedImageExtensions)}");
+        $"Image file must be one of: {string.Join(", ", ImageRules.AllowedExtensions)}");
 
     public static readonly Error InvalidImageType = Error.Validation(
         "Product.InvalidImageType",
-        $"Image must be one of: {string.Join(", ", Product.AllowedImageTypes)}");
+        $"Image must be one of: {string.Join(", ", ImageRules.AllowedContentTypes)}");
 
     public static readonly Error InvalidPrice = Error.Validation(
         "Product.InvalidPrice",
