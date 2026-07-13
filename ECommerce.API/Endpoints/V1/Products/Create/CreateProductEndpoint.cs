@@ -30,13 +30,10 @@ public class CreateProductEndpoint : IEndpoint
         [FromForm] CreateProductRequest request,  // Use [FromForm] for multipart/form-data
         IMediator mediator,
         HttpContext httpContext,
-        ILogger<CreateProductEndpoint> logger,
         CancellationToken ct)
     {
         using (LogContext.PushProperty("ProductName", request.Name))
         {
-            logger.LogInformation("Creating a product: {name}", request.Name);
-
             var command = request.ToCommand();
 
             var result = await mediator.Send(command, ct);
@@ -45,8 +42,6 @@ public class CreateProductEndpoint : IEndpoint
             var location = result.IsSuccess
                 ? $"/api/{Version}/products/{result.Value.Id}"
                 : null;
-
-            logger.LogInformation("Command completed with result: {Result}", result);
 
             return result.ToApiResult(httpContext, location);
         }

@@ -24,14 +24,9 @@ public class GetAllTypesEndpoint : IEndpoint
     public static async Task<IResult> Handle(
         IMediator mediator,
         HttpContext httpContext,
-        ILogger<GetAllBrandsEndpoint> logger,
         CancellationToken ct = default)
     {
-        logger.LogInformation("Retrieving all types from database");
-
         var result = await mediator.Send(new GetAllTypesQuery(), ct);
-
-        logger.LogInformation("Query completed with result: {Result}", result);
 
         return result.ToApiResult(httpContext);
     }

@@ -18,24 +18,19 @@ public class GetProductByIdEndpoint : IEndpoint
             .WithGroupName("v1")
             .Produces<ApiResponse<IReadOnlyList<GetProductByIdResponse>>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .WithSummary("Get products")
+            .WithSummary("Retrieve product by ID")
             .WithDescription("Returns all products in DB, or 404 if list is empty");
 
     public static async Task<IResult> Handle(
         Guid id,
         IMediator mediator,
         HttpContext httpContext,
-        ILogger<GetProductByIdEndpoint> logger,
         CancellationToken ct = default
         )
     {
         using (LogContext.PushProperty("ProductId", id))
         {
-            logger.LogInformation("Retrieving product with ID {Id} from database", id);
-
             var result = await mediator.Send(new GetProductByIdQuery(id), ct);
-
-            logger.LogInformation("Query completed with result: {Result}", result);
 
             return result.ToApiResult(httpContext);
         }

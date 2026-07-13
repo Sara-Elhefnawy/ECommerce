@@ -18,23 +18,18 @@ public class GetTypeByIdEndpoint : IEndpoint
             .WithName("GetTypeById")
             .WithGroupName("v1")
             .Produces<ApiResponse<GetTypeByIdResponse>>(StatusCodes.Status200OK)
-            .WithSummary("Get type by id")
+            .WithSummary("Retrieve type by id")
             .WithDescription("Returns a type by id from DB");
 
     public static async Task<IResult> Handle(
         Guid id,
         IMediator mediator,
         HttpContext httpContext,
-        ILogger<GetAllBrandsEndpoint> logger,
         CancellationToken ct = default)
     {
         using (LogContext.PushProperty("TypeId", id))
         {
-            logger.LogInformation("Retrieving type with id {Id} from database", id);
-
             var result = await mediator.Send(new GetTypeByIdQuery(id), ct);
-
-            logger.LogInformation("Query completed with result: {Result}", result);
 
             return result.ToApiResult(httpContext);
         }

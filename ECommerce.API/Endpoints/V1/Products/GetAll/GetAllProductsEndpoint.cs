@@ -23,14 +23,9 @@ public class GetAllProductsEndpoint : IEndpoint
     public static async Task<IResult> Handle(
         IMediator mediator, 
         HttpContext httpContext,
-        ILogger<GetAllProductsEndpoint> logger,
         CancellationToken ct = default)
     {
-        logger.LogInformation("Retrieving all products from database");
-
         var result = await mediator.Send(new GetAllProductsQuery(), ct);
-
-        logger.LogInformation("Query completed with result: {Result}", result);
 
         return result.ToApiResult(httpContext);
     }

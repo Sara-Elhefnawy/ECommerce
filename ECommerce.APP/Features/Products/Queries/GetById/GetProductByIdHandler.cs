@@ -1,5 +1,4 @@
 ﻿using ECommerce.APP.Abstractions.Mediator;
-using ECommerce.APP.Features.Products.Queries.GetById;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Common;
 using ECommerce.Domain.Entities;
