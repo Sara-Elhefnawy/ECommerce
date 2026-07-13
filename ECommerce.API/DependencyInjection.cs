@@ -1,7 +1,6 @@
 ﻿using ECommerce.API.Middlewares;
-using ECommerce.APP.Products.Commands;
-using ECommerce.Domain.Abstractions.Cloudinaryy;
-using ECommerce.Infrastructure.Persistent.Cloudinaryy;
+using ECommerce.Domain.Abstractions.ImageCloudinary;
+using ECommerce.Infrastructure.ImageCloudinary;
 
 namespace ECommerce.API;
 
@@ -29,12 +28,8 @@ public static class DependencyInjection
 
         services.AddExceptionHandler<GlobalExceptionMiddleware>();
 
-        // discovers Minimal API routes (MapGet, etc.) for OpenAPI
+        // discovers Fast Endpoints routes (MapGet, etc.) for OpenAPI
         services.AddEndpointsApiExplorer();
-
-        // Registers the service that generate the Swagger / OpenAPI file
-        //      that describes every API in the app
-        services.AddSwaggerGen();
 
         // Add Cloudinary settings
         services.Configure<CloudinarySettings>(
@@ -42,9 +37,6 @@ public static class DependencyInjection
 
         // Register Cloudinary service
         services.AddScoped<ICloudinaryService, CloudinaryService>();
-
-        // Make sure your other services are registered
-        services.AddScoped<CreateProductCommand>();
 
         return services;
     }

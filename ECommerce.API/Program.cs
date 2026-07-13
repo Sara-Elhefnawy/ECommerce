@@ -1,6 +1,4 @@
 using ECommerce.API;
-using ECommerce.API.Endpoints.V1;
-using ECommerce.API.Endpoints.V2;
 using ECommerce.API.Extensions;
 using ECommerce.API.Serilog;
 using ECommerce.APP;
@@ -17,9 +15,6 @@ builder.AddSerilogLogging();
 builder.Services.AddPresentation(builder.Configuration)
                 .AddInfrastructure(builder.Configuration)
                 .AddApp();
-
-// This allows Swagger to find and document all endpoints
-builder.Services.AddEndpointsApiExplorer();
 
 // Configures Swagger documentation generation
 builder.Services.AddSwaggerGen(c =>
@@ -86,9 +81,6 @@ if (app.Environment.IsDevelopment())
 // Map ALL Health Check Endpoints
 app.MapApplicationHealthChecks();
 
-app.MapProductEndpoints();
-app.MapTypeEndpoints();
-app.MapBrandEndpoints();
-app.MapBrandEndpointsV2();
+app.MapEndpoints();
 
 app.Run();
