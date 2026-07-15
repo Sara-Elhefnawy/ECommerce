@@ -3,5 +3,22 @@
 /// <summary>
 /// Pagination details — only used when Meta.Pagination is set.
 /// </summary>
-public sealed record PaginationMeta(
-    int Page, int PageSize, int TotalCount, int TotalPages);
+public sealed class PaginationMeta
+{
+    public int PageNumber { get; init; }
+    public int PageSize { get; init; }
+    public int TotalCount { get; init; }
+    public int TotalPages { get; init; }
+    public bool HasPreviousPage { get; init; }
+    public bool HasNextPage { get; init; }
+
+    public PaginationMeta(int pageNumber, int pageSize, int totalCount)
+    {
+        PageNumber = pageNumber;
+        PageSize = pageSize;
+        TotalCount = totalCount;
+        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        HasPreviousPage = PageNumber > 1;
+        HasNextPage = PageNumber < TotalPages;
+    }
+}

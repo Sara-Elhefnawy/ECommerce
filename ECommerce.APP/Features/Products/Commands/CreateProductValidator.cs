@@ -1,11 +1,10 @@
-﻿using ECommerce.APP.Features.Products.Commands;
-using FluentValidation;
+﻿using FluentValidation;
 
-namespace ECommerce.APP.Features.Products.Validators;
+namespace ECommerce.APP.Features.Products.Commands;
 
-public sealed class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+public sealed class CreateProductValidator : AbstractValidator<CreateProductCommand>
 {
-    public CreateProductCommandValidator()
+    public CreateProductValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty()

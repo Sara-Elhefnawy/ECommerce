@@ -1,4 +1,5 @@
 ﻿using ECommerce.API.Common;
+using ECommerce.APP.Features.Products.Queries.GetPagination.Constants;
 using ECommerce.Domain.Common;
 using ECommerce.Domain.Common.Enums;
 
@@ -13,8 +14,8 @@ public static class ResultExtensions
 {
     // For non-generic Result (e.g. commands with no return value)
     public static IResult ToApiResult(
-        this Domain.Common.Result result, 
-        HttpContext httpContext, 
+        this Domain.Common.Result result,
+        HttpContext httpContext,
         string? successMessage = null)
     {
         if (result.IsSuccess)
@@ -38,7 +39,7 @@ public static class ResultExtensions
 
     // For ResultOfT<T> (e.g. queries that return data)
     public static IResult ToApiResult<T>(
-        this ResultOfT<T> result, 
+        this ResultOfT<T> result,
         HttpContext httpContext,
         string? locationRoute = null,
         string? successMessage = null)
@@ -62,12 +63,39 @@ public static class ResultExtensions
         return MapError(result.Error!);
     }
 
-    // No HttpContext param and no manual "traceId" extension here anymore:
-    //      Results.ValidationProblem()/Results.Problem() both produce a real
-    //      ProblemDetails object, and EVERY ProblemDetails response now gets
-    //      traceId attached automatically via CustomizeProblemDetails in DI —
-    //              including GlobalExceptionMiddleware's 500s.
-    //      One central place, zero chance of a future error path forgetting it.
+    // For paginated results - FIXED: proper generic parameter
+    public static IResult ToPaginatedApiResult<T>(
+        this ResultOfT<PagedResult<T>> result,
+        HttpContext httpContext,
+        int? pageNumber,
+        int? pageSize,
+        string? locationRoute = null,
+        string? successMessage = null)
+    {
+        if (result.IsSuccess)
+        {
+            var response = new ApiResponse<IReadOnlyList<T>>(
+                Success: true,
+                Message: successMessage,
+                Data: result.Value.Items,
+                Meta: new ApiMeta(
+                    httpContext.TraceIdentifier,
+                    new PaginationMeta(
+                        pageNumber ?? ValidatorsConstant.DefaultPageNumber,
+                        pageSize ?? ValidatorsConstant.DefaultPageSize,
+                        result.Value.TotalCount)));
+
+            return result.ResultType switch
+            {
+                ResultTypes.Created => Results.Created(locationRoute ?? string.Empty, response),
+                ResultTypes.NoContent => Results.NoContent(),
+                _ => Results.Ok(response)
+            };
+        }
+
+        return MapError(result.Error!);
+    }
+
     private static IResult MapError(Error error)
     {
         if (error.Type == ErrorTypes.Validation)
