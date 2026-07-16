@@ -2,11 +2,14 @@ using ECommerce.API;
 using ECommerce.API.Extensions;
 using ECommerce.API.Serilog;
 using ECommerce.APP;
+using ECommerce.APP.Features.Products.Queries.GetPagination.Enums;
 using ECommerce.Infrastructure;
 using ECommerce.Infrastructure.HealthChecks;
 using ECommerce.Infrastructure.Persistent;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,12 @@ builder.Services.AddSwaggerGen(c =>
     // Tells Swagger which endpoints belong to which version
     // Show endpoints based on GroupName
     c.DocInclusionPredicate((docName, apiDesc) => apiDesc.GroupName == docName);
+});
+
+// Make System.Text.Json serialize/deserialize enums as strings
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
 // Register ALL Health Checks

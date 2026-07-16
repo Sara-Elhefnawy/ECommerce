@@ -3,4 +3,4 @@ using ECommerce.Domain.Common;
 
 namespace ECommerce.APP.Features.Products.Queries.GetAll;
 
-public sealed record GetAllProductsQuery : IRequest<ResultOfT<IReadOnlyList<GetAllProductsResponse>>>;
+public sealed record GetAllProductsQuery(int? Count) : IRequest<ResultOfT<IReadOnlyList<GetAllProductsResponse>>>;

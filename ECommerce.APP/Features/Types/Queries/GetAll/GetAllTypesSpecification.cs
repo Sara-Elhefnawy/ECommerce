@@ -5,10 +5,15 @@ namespace ECommerce.APP.Features.Types.Queries.GetAll;
 
 public sealed class GetAllTypesSpecification : Specification<ProductType, GetAllTypesResponse>
 {
-    public GetAllTypesSpecification()
+    public GetAllTypesSpecification(int? count)
     {
         Query
-            .OrderBy(type => type.Name)
-            .Select(type => new GetAllTypesResponse(type.Id, type.Name));
+            .OrderBy(type => type.Name);
+
+        if (count is int value)
+            Query.Take(count.Value);
+
+        Query
+            .Select(type => new GetAllTypesResponse(type.Id, type.Name, type.Products.Count));
     }
 }

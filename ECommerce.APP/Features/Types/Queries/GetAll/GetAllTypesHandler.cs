@@ -11,7 +11,7 @@ public sealed class GetAllTypesHandler(IReadRepository<ProductType> repository) 
     public async Task<ResultOfT<IReadOnlyList<GetAllTypesResponse>>> Handle(
         GetAllTypesQuery request, CancellationToken ct)
     {
-        var types = await repository.ListAsync(new GetAllTypesSpecification(), ct);
+        var types = await repository.ListAsync(new GetAllTypesSpecification(request.Count), ct);
 
         return ResultOfT<IReadOnlyList<GetAllTypesResponse>>.Ok(types);
     }

@@ -1,5 +1,4 @@
 ﻿using ECommerce.API.Common;
-using ECommerce.API.Endpoints.V1.Brands.GetAll;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
 using ECommerce.API.Result;
@@ -22,12 +21,13 @@ public class GetAllTypesEndpoint : IEndpoint
 
 
     public static async Task<IResult> Handle(
+        [AsParameters] GetAllTypesRequest request,
         IMediator mediator,
         HttpContext httpContext,
         CancellationToken ct = default)
     {
-        var result = await mediator.Send(new GetAllTypesQuery(), ct);
+        var result = await mediator.Send(new GetAllTypesQuery(request.Count), ct);
 
-        return result.ToApiResult(httpContext);
+        return result.ToApiResult(httpContext, "Retrieved all types successfully");
     }
 }

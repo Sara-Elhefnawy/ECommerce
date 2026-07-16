@@ -4,7 +4,7 @@ using ECommerce.API.Extensions.Abstraction;
 using ECommerce.API.Result;
 using ECommerce.APP.Abstractions.Mediator;
 using ECommerce.APP.Features.Products.Queries.GetAll;
-using Microsoft.AspNetCore.Mvc;
+using FluentValidation;
 
 namespace ECommerce.API.Endpoints.V1.Products.GetPagination;
 
@@ -23,14 +23,20 @@ public class GetProductsPaginationEndpoint : IEndpoint
 
     public async static Task<IResult> Handle(
         [AsParameters] GetProductsPaginationRequest request,
+        IValidator<GetProductsPaginationRequest> validator,
         IMediator mediator,
         HttpContext httpContext,
         CancellationToken ct = default)
     {
+        var validation = await validator.ValidateAsync(request, ct);
+
+        if (!validation.IsValid)
+            return Results.ValidationProblem(validation.ToDictionary());
+
         var query = request.ToQuery();
 
         var result = await mediator.Send(query, ct);
 
-        return result.ToPaginatedApiResult(httpContext, request.PageNumber, request.PageSize);
+        return result.ToPaginatedApiResult(httpContext, request.PageNumber, request.PageSize, "Retrieved paginated products successfully");
     }
 }

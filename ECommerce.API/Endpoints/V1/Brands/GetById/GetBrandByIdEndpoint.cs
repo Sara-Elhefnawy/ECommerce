@@ -31,7 +31,7 @@ public class GetBrandByIdEndpoint : IEndpoint
         {
             var result = await mediator.Send(new GetBrandByIdQuery(id), ct);
 
-            return result.ToApiResult(httpContext);
+            return result.ToApiResult(httpContext, "Retrieved brand ID data successfully");
         }
     }
 }

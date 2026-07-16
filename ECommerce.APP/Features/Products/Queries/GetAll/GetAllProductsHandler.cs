@@ -11,7 +11,7 @@ public sealed class GetAllProductsHandler(IReadRepository<Product> repository) :
     public async Task<ResultOfT<IReadOnlyList<GetAllProductsResponse>>> Handle(
         GetAllProductsQuery request, CancellationToken ct = default)
     {
-        var products = await repository.ListAsync(new GetAllProductsSpecification(), ct);
+        var products = await repository.ListAsync(new GetAllProductsSpecification(request.Count), ct);
 
         return ResultOfT<IReadOnlyList<GetAllProductsResponse>>.Ok(products);
     }

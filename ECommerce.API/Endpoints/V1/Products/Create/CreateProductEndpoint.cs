@@ -43,7 +43,7 @@ public class CreateProductEndpoint : IEndpoint
                 ? $"/api/{Version}/products/{result.Value.Id}"
                 : null;
 
-            return result.ToApiResult(httpContext, location);
+            return result.ToApiResult(httpContext, "Created product successfully", location);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ECommerce.API.Middlewares;
 using ECommerce.Domain.Abstractions.ImageCloudinary;
 using ECommerce.Infrastructure.ImageCloudinary;
+using FluentValidation;
 
 namespace ECommerce.API;
 
@@ -37,6 +38,9 @@ public static class DependencyInjection
 
         // Register Cloudinary service
         services.AddScoped<ICloudinaryService, CloudinaryService>();
+
+        // Register all validators in the API assembly
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
         return services;
     }

@@ -16,7 +16,7 @@ public static class ResultExtensions
     public static IResult ToApiResult(
         this Domain.Common.Result result,
         HttpContext httpContext,
-        string? successMessage = null)
+        string successMessage)
     {
         if (result.IsSuccess)
         {
@@ -41,8 +41,8 @@ public static class ResultExtensions
     public static IResult ToApiResult<T>(
         this ResultOfT<T> result,
         HttpContext httpContext,
-        string? locationRoute = null,
-        string? successMessage = null)
+        string successMessage,
+        string? locationRoute = null)
     {
         if (result.IsSuccess)
         {
@@ -69,8 +69,8 @@ public static class ResultExtensions
         HttpContext httpContext,
         int? pageNumber,
         int? pageSize,
-        string? locationRoute = null,
-        string? successMessage = null)
+        string successMessage,
+        string? locationRoute = null)
     {
         if (result.IsSuccess)
         {

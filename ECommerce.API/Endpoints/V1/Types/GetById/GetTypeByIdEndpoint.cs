@@ -31,7 +31,7 @@ public class GetTypeByIdEndpoint : IEndpoint
         {
             var result = await mediator.Send(new GetTypeByIdQuery(id), ct);
 
-            return result.ToApiResult(httpContext);
+            return result.ToApiResult(httpContext, "Retrieved type ID data successfully");
         }
     }
 }

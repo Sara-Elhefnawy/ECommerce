@@ -19,12 +19,13 @@ public class GetAllBrandsEndpoint : IEndpoint
             .WithDescription("Returns all brands in DB with additional fields");
 
     public static async Task<IResult> Handle(
+        [AsParameters] GetAllBrandsRequest request,
         IMediator mediator,
         HttpContext httpContext,
         CancellationToken ct = default)
     {
-        var result = await mediator.Send(new GetAllBrandsQuery(), ct);
+        var result = await mediator.Send(new GetAllBrandsQuery(request.Count), ct);
 
-        return result.ToApiResult(httpContext);
+        return result.ToApiResult(httpContext, "Retrieved all brands successfully");
     }
 }

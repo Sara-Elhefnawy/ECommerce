@@ -21,12 +21,13 @@ public class GetAllProductsEndpoint : IEndpoint
             .WithDescription("Returns all products in DB, or 404 if list is empty");
 
     public static async Task<IResult> Handle(
+        [AsParameters] GetAllProductsRequest request,
         IMediator mediator, 
         HttpContext httpContext,
         CancellationToken ct = default)
     {
-        var result = await mediator.Send(new GetAllProductsQuery(), ct);
+        var result = await mediator.Send(new GetAllProductsQuery(request.Count), ct);
 
-        return result.ToApiResult(httpContext);
+        return result.ToApiResult(httpContext, "Retrieved all products successfully");
     }
 }

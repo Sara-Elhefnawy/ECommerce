@@ -1,5 +1,3 @@
 ﻿namespace ECommerce.APP.Features.Brands.Queries.GetAll;
 
-public record GetAllBrandsResponse(Guid Id, string Name)
-{
-}
+public record GetAllBrandsResponse(Guid Id, string Name, int ProductsCount);

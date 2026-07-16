@@ -5,9 +5,14 @@ namespace ECommerce.APP.Features.Products.Queries.GetAll;
 
 public sealed class GetAllProductsSpecification : Specification<Product, GetAllProductsResponse>
 {
-    public GetAllProductsSpecification()
+    public GetAllProductsSpecification(int? count)
     {
-        Query.OrderBy(p => p.Name)
+        Query.OrderBy(p => p.Name);
+
+        if (count is int value)
+            Query.Take(count.Value);
+
+        Query
             .Select(p => new GetAllProductsResponse
             (
                 p.Id,

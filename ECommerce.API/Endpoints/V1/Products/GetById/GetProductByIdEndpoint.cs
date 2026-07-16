@@ -32,7 +32,7 @@ public class GetProductByIdEndpoint : IEndpoint
         {
             var result = await mediator.Send(new GetProductByIdQuery(id), ct);
 
-            return result.ToApiResult(httpContext);
+            return result.ToApiResult(httpContext, "Retrieved product ID data successfully");
         }
     }
 }

@@ -5,9 +5,13 @@ namespace ECommerce.APP.Features.Brands.Queries.GetAll;
 
 public sealed class GetAllBrandsSpecification : Specification<ProductBrand, GetAllBrandsResponse>
 {
-    public GetAllBrandsSpecification()
+    public GetAllBrandsSpecification(int? count)
     {
-        Query.OrderBy(brand => brand.Name)
-            .Select(brand => new GetAllBrandsResponse(brand.Id, brand.Name));
+        Query.OrderBy(b => b.Name);
+
+        if (count is int value)
+            Query.Take(value);
+
+        Query.Select(b => new GetAllBrandsResponse(b.Id, b.Name, b.Products.Count));
     }
 }
