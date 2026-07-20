@@ -1,10 +1,11 @@
-﻿using ECommerce.APP.Abstractions.Mediator;
-using ECommerce.APP.Features.Brands.Queries.GetByName;
+﻿using ECommerce.APP.Features.Brands.Queries.GetByName;
 using ECommerce.APP.Features.Products.Validators;
 using ECommerce.APP.Features.Types.Queries.GetByName;
+using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.ImageCloudinary;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Common;
+using ECommerce.Domain.Common.Errors;
 using ECommerce.Domain.Entities;
 
 namespace ECommerce.APP.Features.Products.Commands;

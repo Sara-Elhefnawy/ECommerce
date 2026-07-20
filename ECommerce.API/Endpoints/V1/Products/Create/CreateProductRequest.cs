@@ -1,5 +1,5 @@
-﻿using ECommerce.APP.Abstractions.Mediator;
-using ECommerce.APP.Features.Products.Commands;
+﻿using ECommerce.APP.Features.Products.Commands;
+using ECommerce.APP.Mediator;
 using ECommerce.Domain.Common;
 
 namespace ECommerce.API.Endpoints.V1.Products.Create;

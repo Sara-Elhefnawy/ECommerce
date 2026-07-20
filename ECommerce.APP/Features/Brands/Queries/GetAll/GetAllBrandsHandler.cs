@@ -1,4 +1,4 @@
-﻿using ECommerce.APP.Abstractions.Mediator;
+﻿using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Common;
 using ECommerce.Domain.Entities;

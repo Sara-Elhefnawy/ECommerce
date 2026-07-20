@@ -2,9 +2,8 @@
 using ECommerce.API.Endpoints.V1.Brands.GetAll;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
-using ECommerce.API.Result;
-using ECommerce.APP.Abstractions.Mediator;
 using ECommerce.APP.Features.Types.Queries.GetById;
+using ECommerce.APP.Mediator;
 using Serilog.Context;
 
 namespace ECommerce.API.Endpoints.V1.Types.GetById;

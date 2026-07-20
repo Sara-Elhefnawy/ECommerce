@@ -1,4 +1,5 @@
 ﻿using ECommerce.Domain.Common;
+using ECommerce.Domain.Common.Errors;
 
 namespace ECommerce.Domain.Entities;
 

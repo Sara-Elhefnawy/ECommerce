@@ -1,4 +1,5 @@
 ﻿using ECommerce.Infrastructure.Persistent;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -8,9 +9,11 @@ public static class HealthCheckExtensions
 {
     public static IServiceCollection AddApplicationHealthChecks(
         this IServiceCollection services,
-        string connectionString,
-        int timeoutSeconds)
+        IConfiguration configuration)
     {
+        var connectionString = configuration.GetConnectionString("DefaultConnection")!;
+        var timeoutSeconds = configuration.GetValue<int>("HealthChecksSettings:TimeoutSeconds");
+
         services.AddHealthChecks()
             // Checks if the application is running
             // Used by: Kubernetes liveness probe
@@ -26,15 +29,6 @@ public static class HealthCheckExtensions
                 name: "ecommerce-db",
                 failureStatus: HealthStatus.Unhealthy, // DB is critical!
                 tags: ["ready", "db"]);
-
-            //// Checks if products exist in the database
-            //// Why: We want to know if our app has data to serve
-            //// Note: Custom check - we wrote this ourselves
-            //.AddCheck<ProductsAvailabilityHealthCheck>(
-            //    name: "products-availability",
-            //    timeout: TimeSpan.FromSeconds(timeoutSeconds),
-            //    failureStatus: HealthStatus.Degraded, // No products = degraded, not dead
-            //    tags: ["ready", "business"]);
 
         return services;
     }

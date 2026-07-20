@@ -1,6 +1,7 @@
-﻿using ECommerce.APP.Abstractions.Mediator;
+﻿using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Common;
+using ECommerce.Domain.Common.Errors;
 using ECommerce.Domain.Entities;
 
 namespace ECommerce.APP.Features.Types.Queries.GetById;
@@ -15,7 +16,7 @@ public sealed class GetTypeByIdHandler(IReadRepository<ProductType> repository) 
         var type = await repository.FirstOrDefaultAsync(new GetTypeByIdSpecification(request.Id), ct);
 
         return type is null
-            ? ProductErrors.NotFound
+            ? TypeErrors.NotFound
             : type;
     }
 }

@@ -1,6 +1,11 @@
 <Project>
   <ItemGroup>
+    <!-- ===== Caching ===== -->
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="10.8.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.10" />
     <!-- ===== Health Checks ===== -->
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.9" />
     <!-- ===== Swagger ===== -->
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
@@ -19,12 +24,12 @@
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageVersion Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
-	<!-- ===== Fluent Validation for Mediator Pipeline ===== -->
-	<PackageVersion Include="FluentValidation" Version="12.1.1" />
+    <!-- ===== Fluent Validation for Mediator Pipeline ===== -->
+    <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-	<!-- ===== Others ===== -->
+    <!-- ===== Others ===== -->
     <PackageVersion Include="CloudinaryDotNet" Version="1.29.2" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
     <PackageVersion Include="Npgsql" Version="9.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.Http" Version="2.3.11" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.9" />

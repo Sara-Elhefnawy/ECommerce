@@ -1,9 +1,8 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
-using ECommerce.API.Result;
-using ECommerce.APP.Abstractions.Mediator;
 using ECommerce.APP.Features.Products.Commands;
+using ECommerce.APP.Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Serilog.Context;
 

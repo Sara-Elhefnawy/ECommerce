@@ -1,4 +1,4 @@
-﻿using ECommerce.APP.Abstractions.Mediator;
+﻿using ECommerce.APP.Mediator;
 using ECommerce.Domain.Common;
 
 namespace ECommerce.APP.Features.Types.Queries.GetByName;

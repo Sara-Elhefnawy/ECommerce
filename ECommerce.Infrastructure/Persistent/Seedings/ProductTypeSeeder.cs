@@ -12,14 +12,22 @@ public class ProductTypeSeeder(ECommerceDbContext dbContext) : IDataSeeder
         if (await dbContext.Types.AnyAsync(ct))
             return;
 
-        var types = new List<ProductType>
-        {
-            ProductType.Create("Tops"),
-            ProductType.Create("Bottoms"),
-            ProductType.Create("Outerwear & Dresses"),
-            ProductType.Create("Accessories & Footwear")
-        };
+        var types = new List<ProductType>();
 
-        await dbContext.Types.AddRangeAsync(types, ct);
+        var typeNames = new[] { "Tops", "Bottoms", "Outerwear & Dresses", "Accessories & Footwear" };
+
+        foreach (var name in typeNames)
+        {
+            var result = ProductType.Create(name);
+
+            // In development, we want to know if seed data is invalid
+            if (result.IsFailure)
+                throw new InvalidOperationException($"Failed to create type '{name}': {result.Error?.Message}");
+
+            types.Add(result.Value);
+        }
+
+        if (types.Count != 0)
+            await dbContext.Types.AddRangeAsync(types, ct);
     }
 }

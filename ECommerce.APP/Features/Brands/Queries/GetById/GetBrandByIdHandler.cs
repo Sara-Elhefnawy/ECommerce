@@ -1,6 +1,7 @@
-﻿using ECommerce.APP.Abstractions.Mediator;
+﻿using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Common;
+using ECommerce.Domain.Common.Errors;
 using ECommerce.Domain.Entities;
 
 namespace ECommerce.APP.Features.Brands.Queries.GetById;
@@ -15,7 +16,7 @@ public sealed class GetBrandByIdHandler(IReadRepository<ProductBrand> repository
         var brand = await repository.FirstOrDefaultAsync(new GetBrandByIdSpecification(request.Id), ct);
 
         return brand is null
-            ? ProductErrors.NotFound
+            ? BrandErrors.NotFound
             : brand;
     }
 }

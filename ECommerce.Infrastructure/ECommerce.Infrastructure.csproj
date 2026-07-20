@@ -3,8 +3,17 @@
 	<ItemGroup>
 		<!-- Abstractions only -->
 		<PackageReference Include="CloudinaryDotNet" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+		
+		
+		<!-- ===== Cachings ===== -->
+		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+
+		<!-- ===== Health Checks ===== -->
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
 
 		<!-- EF Core -->
 		<PackageReference Include="Microsoft.EntityFrameworkCore" />

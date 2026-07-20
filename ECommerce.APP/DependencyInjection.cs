@@ -1,7 +1,7 @@
-﻿using ECommerce.APP.Abstractions.Mediator;
-using ECommerce.APP.Abstractions.Mediator.Behaviors;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using FluentValidation;
+using ECommerce.APP.Mediator;
+using ECommerce.APP.Mediator.Behaviors;
 
 namespace ECommerce.APP;
 

@@ -1,4 +1,5 @@
 ﻿using ECommerce.Domain.Common;
+using ECommerce.Domain.Common.Errors;
 using ECommerce.Domain.Images;
 
 namespace ECommerce.APP.Features.Products.Validators;

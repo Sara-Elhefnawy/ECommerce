@@ -1,4 +1,6 @@
-﻿using ECommerce.Domain.Common;
+﻿using ECommerce.API.Common;
+using ECommerce.APP.Features.Products.Queries.GetPagination.Constants;
+using ECommerce.Domain.Common;
 using ECommerce.Domain.Common.Enums;
 
 namespace ECommerce.API.Extensions;
@@ -6,20 +8,29 @@ namespace ECommerce.API.Extensions;
 /// <summary>
 /// Converts a Result/ResultOfT<T> (domain-facing) into an IResult (HTTP-facing).
 /// This is the ONE place that knows how ResultTypes/ErrorTypes map to HTTP status codes —
-/// every endpoint reuses this instead of re-writing the switch statement.
+///     every endpoint reuses this instead of re-writing the switch statement.
 /// </summary>
 public static class ResultExtensions
 {
     // For non-generic Result (e.g. commands with no return value)
-    public static IResult ToApiResult(this Domain.Common.Result result)
+    public static IResult ToApiResult(
+        this Result result,
+        HttpContext httpContext,
+        string successMessage)
     {
         if (result.IsSuccess)
         {
+            var response = new ApiResponse<object?>(
+                Success: true,
+                Message: successMessage,
+                Data: null,
+                Meta: new ApiMeta(httpContext.TraceIdentifier));
+
             return result.ResultType switch
             {
                 ResultTypes.Created => Results.Created(),
                 ResultTypes.NoContent => Results.NoContent(),
-                _ => Results.Ok()
+                _ => Results.Ok(response)
             };
         }
 
@@ -27,32 +38,91 @@ public static class ResultExtensions
     }
 
     // For ResultOfT<T> (e.g. queries that return data)
-    public static IResult ToApiResult<T>(this ResultOfT<T> result, string? locationRoute = null)
+    public static IResult ToApiResult<T>(
+        this ResultOfT<T> result,
+        HttpContext httpContext,
+        string successMessage,
+        string? locationRoute = null)
     {
         if (result.IsSuccess)
         {
+            var response = new ApiResponse<T>(
+                Success: true,
+                Message: successMessage,
+                Data: result.Value,
+                Meta: new ApiMeta(httpContext.TraceIdentifier));
+
             return result.ResultType switch
             {
-                ResultTypes.Created => Results.Created(locationRoute ?? string.Empty, result.Value),
+                ResultTypes.Created => Results.Created(locationRoute ?? string.Empty, response),
                 ResultTypes.NoContent => Results.NoContent(),
-                _ => Results.Ok(result.Value)
+                _ => Results.Ok(response)
             };
         }
 
         return MapError(result.Error!);
     }
 
-    // Shared failure mapping — the ONLY place ErrorTypes -> HTTP status is decided
-    private static IResult MapError(Error error) => error.Type switch
+    // For paginated results - FIXED: proper generic parameter
+    public static IResult ToPaginatedApiResult<T>(
+        this ResultOfT<PagedResult<T>> result,
+        HttpContext httpContext,
+        int? pageNumber,
+        int? pageSize,
+        string successMessage,
+        string? locationRoute = null)
     {
-        ErrorTypes.Validation => Results.BadRequest(new { error.Code, error.Message }),
-        ErrorTypes.NotFound => Results.NotFound(new { error.Code, error.Message }),
-        ErrorTypes.Conflict => Results.Conflict(new { error.Code, error.Message }),
-        ErrorTypes.UnAuthorized => Results.Unauthorized(),
-        ErrorTypes.Forbidden => Results.Forbid(),
-        _ => Results.Problem(
-            title: "Internal Server Error",
-            detail: "An error occurred. Please try again later.",
-            statusCode: 500)
-    };
+        if (result.IsSuccess)
+        {
+            var response = new ApiResponse<IReadOnlyList<T>>(
+                Success: true,
+                Message: successMessage,
+                Data: result.Value.Items,
+                Meta: new ApiMeta(
+                    httpContext.TraceIdentifier,
+                    new PaginationMeta(
+                        pageNumber ?? ValidatorsConstant.DefaultPageNumber,
+                        pageSize ?? ValidatorsConstant.DefaultPageSize,
+                        result.Value.TotalCount)));
+
+            return result.ResultType switch
+            {
+                ResultTypes.Created => Results.Created(locationRoute ?? string.Empty, response),
+                ResultTypes.NoContent => Results.NoContent(),
+                _ => Results.Ok(response)
+            };
+        }
+
+        return MapError(result.Error!);
+    }
+
+    private static IResult MapError(Error error)
+    {
+        if (error.Type == ErrorTypes.Validation)
+        {
+            var errors = new Dictionary<string, string[]>
+            {
+                [error.Code] = [error.Message]
+            };
+
+            return Results.ValidationProblem(
+                errors: errors,
+                title: "Validation Failed",
+                statusCode: StatusCodes.Status400BadRequest);
+        }
+
+        var (status, title) = error.Type switch
+        {
+            ErrorTypes.NotFound => (StatusCodes.Status404NotFound, "Not Found"),
+            ErrorTypes.Conflict => (StatusCodes.Status409Conflict, "Conflict"),
+            ErrorTypes.UnAuthorized => (StatusCodes.Status401Unauthorized, "Unauthorized"),
+            ErrorTypes.Forbidden => (StatusCodes.Status403Forbidden, "Forbidden"),
+            _ => (StatusCodes.Status500InternalServerError, "Internal Server Error")
+        };
+
+        return Results.Problem(
+            detail: error.Message,
+            statusCode: status,
+            title: title);
+    }
 }
