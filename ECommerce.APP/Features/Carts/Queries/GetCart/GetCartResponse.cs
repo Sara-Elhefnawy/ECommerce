@@ -3,8 +3,8 @@
 public record GetCartResponse(
     Guid BuyerId,
     IReadOnlyList<CartItemResponse> Items,
-    int TotalItems,
-    decimal SubTotal);
+    int TotalQuantity,
+    decimal GrandTotalPrice);
 
 public record CartItemResponse(
     Guid ProductId,
@@ -12,4 +12,4 @@ public record CartItemResponse(
     string PictureUrl,
     decimal UnitPrice,
     int Quantity,
-    decimal LineTotal);
+    decimal SubTotalPrice);

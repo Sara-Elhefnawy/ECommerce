@@ -1,6 +1,7 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Carts.Commands.MergeGuestCart;
 using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Mediator;
@@ -30,12 +31,17 @@ public sealed class MergeCartsEndpoint : IEndpoint
         if (buyerIdResult.IsFailure)
             return buyerIdResult.ToApiResult(httpContext, "");
 
-        var command = new MergeCartCommand(
+        using (LoggingExtensions.WithCartContext(
             buyerIdResult.Value,
-            request.AnonymousBuyerId);
+            request.AnonymousBuyerId))
+        {
+            var command = new MergeCartCommand(
+                buyerIdResult.Value,
+                request.AnonymousBuyerId);
 
-        var result = await mediator.Send(command, ct);
+            var result = await mediator.Send(command, ct);
 
-        return result.ToApiResult(httpContext, "Carts merged successfully");
+            return result.ToApiResult(httpContext, "Carts merged successfully");
+        }
     }
 }

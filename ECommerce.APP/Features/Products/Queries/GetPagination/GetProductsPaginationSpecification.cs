@@ -32,7 +32,11 @@ public sealed class GetProductsPaginationSpecification : Specification<Product, 
         if (typeId is Guid typeIdValue)
             Query.Where(p => p.TypeId == typeIdValue);
 
-        if (sortBy is not null)
+        if (sortBy is null)
+        {
+            Query.OrderBy(p => p.Name);
+        }
+        else
         {
             switch (sortBy)
             {

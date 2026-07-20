@@ -41,6 +41,7 @@ public static class ColumnOptionsHelper
             { "request_method",   new SinglePropertyColumnWriter("RequestMethod", PropertyWriteMethod.Raw, NpgsqlDbType.Text) },    // e.g. GET, POST
             { "status_code",      new SinglePropertyColumnWriter("StatusCode",    PropertyWriteMethod.Raw, NpgsqlDbType.Integer) }, // e.g. 200, 404, 500
             { "elapsed_ms",       new SinglePropertyColumnWriter("ElapsedMs",     PropertyWriteMethod.Raw, NpgsqlDbType.Double) },  // how long the request took
+            { "buyer_id",         new SinglePropertyColumnWriter("BuyerId",       PropertyWriteMethod.Raw, NpgsqlDbType.Uuid) }     // set the buyer's id before authentications
         };
     }
 }

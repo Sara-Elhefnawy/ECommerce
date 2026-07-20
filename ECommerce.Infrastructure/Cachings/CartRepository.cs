@@ -29,5 +29,5 @@ public class CartRepository(ICache<Cart> cache) : ICartRepository
     public Task DeleteAsync(Guid buyerId, CancellationToken ct = default)
         => cache.RemoveAsync(BuildCacheKey(buyerId), ct);
 
-    private static string BuildCacheKey(Guid buyerId) => $"cart: {buyerId}";
+    private static string BuildCacheKey(Guid buyerId) => $"cart:{buyerId}";
 }

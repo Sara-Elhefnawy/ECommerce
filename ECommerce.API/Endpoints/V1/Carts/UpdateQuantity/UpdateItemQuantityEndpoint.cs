@@ -21,6 +21,7 @@ public sealed class UpdateItemQuantityEndpoint : IEndpoint
             .WithDescription("Update a product's quantity in the buyer's cart");
 
     public static async Task<IResult> Handle(
+        Guid productId,
         UpdateItemQuantityRequest request,
         IMediator mediator,
         HttpContext httpContext,
@@ -33,7 +34,7 @@ public sealed class UpdateItemQuantityEndpoint : IEndpoint
 
         var command = new UpdateCartItemQuantityCommand(
             buyerIdResult.Value,
-            request.ProductId,
+            productId,
             request.Quantity);
 
         var result = await mediator.Send(command, ct);

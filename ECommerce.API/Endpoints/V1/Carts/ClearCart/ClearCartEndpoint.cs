@@ -1,8 +1,6 @@
-﻿using ECommerce.API.Common;
-using ECommerce.API.Extensions;
+﻿using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
 using ECommerce.APP.Features.Carts.Commands.ClearCart;
-using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Mediator;
 
 namespace ECommerce.API.Endpoints.V1.Carts.ClearCart;
@@ -15,7 +13,7 @@ public sealed class ClearCartEndpoint : IEndpoint
             .WithTags("Cart")
             .WithName("ClearCart")
             .WithGroupName("v1")
-            .Produces<ApiResponse<GetCartResponse>>(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status204NoContent)
             .WithSummary("Clear Cart")
             .WithDescription("Clear the buyer's cart");
 

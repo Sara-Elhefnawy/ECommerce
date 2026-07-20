@@ -1,8 +1,6 @@
-﻿using ECommerce.API.Common;
-using ECommerce.API.Extensions;
+﻿using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
 using ECommerce.APP.Features.Carts.Commands.RemoveItem;
-using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Mediator;
 
 namespace ECommerce.API.Endpoints.V1.Carts.RemoveItem;
@@ -15,7 +13,7 @@ public sealed class RemoveItemEndpoint : IEndpoint
             .WithTags("Cart")
             .WithName("RemoveCartItem")
             .WithGroupName("v1")
-            .Produces<ApiResponse<GetCartResponse>>(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status204NoContent)
             .ProducesValidationProblem(StatusCodes.Status404NotFound)
             .WithSummary("Remove item from cart")
             .WithDescription("Remove item from cart in the buyer's cart");

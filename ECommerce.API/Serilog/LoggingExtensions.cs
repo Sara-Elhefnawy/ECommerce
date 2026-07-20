@@ -45,6 +45,19 @@ public static class LoggingExtensions
         return context;
     }
 
+    public static IDisposable WithCartContext(Guid buyerId, Guid? guestBuyerId = null)
+    {
+        var buyer = LogContext.PushProperty("BuyerId", buyerId);
+
+        if (guestBuyerId is Guid guest)
+        {
+            var guestContext = LogContext.PushProperty("GuestBuyerId", guest);
+            return new DisposableCombiner(buyer, guestContext);
+        }
+
+        return buyer;
+    }
+
     public static IDisposable WithCorrelationId(string correlationId)
         => LogContext.PushProperty("CorrelationId", correlationId);
 
