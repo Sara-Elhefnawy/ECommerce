@@ -1,6 +1,6 @@
-﻿using ECommerce.Domain.Common.Enums;
+﻿using ECommerce.Domain.Entities.Enums;
 
-namespace ECommerce.Domain.Common;
+namespace ECommerce.Domain.Results;
 
 public sealed class ResultOfT<T> : Result
 {

@@ -1,7 +1,7 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.APP.Features.Products.Queries.GetPagination.Constants;
-using ECommerce.Domain.Common;
-using ECommerce.Domain.Common.Enums;
+using ECommerce.Domain.Entities.Enums;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.API.Extensions;
 

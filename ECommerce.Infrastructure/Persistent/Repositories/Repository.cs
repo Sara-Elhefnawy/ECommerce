@@ -1,6 +1,6 @@
 ﻿using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Entities;
-using ECommerce.Domain.Specification;
+using ECommerce.Domain.Specifications;
 using ECommerce.Infrastructure.Persistent.Specifications;
 using Microsoft.EntityFrameworkCore;
 

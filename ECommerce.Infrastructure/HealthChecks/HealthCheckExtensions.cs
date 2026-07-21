@@ -28,7 +28,16 @@ public static class HealthCheckExtensions
             .AddDbContextCheck<ECommerceDbContext>(
                 name: "ecommerce-db",
                 failureStatus: HealthStatus.Unhealthy, // DB is critical!
-                tags: ["ready", "db"]);
+                tags: ["ready", "db"])
+
+            .AddRedis(
+                redisConnectionString: configuration.GetConnectionString("Redis")!,
+                name: "redis",
+                // Unhealthy (not just Degraded) if Redis is unreachable — for a cache
+                // this isn't fatal to the app, but you want the signal to be loud
+                // while you're debugging, not buried.
+                failureStatus: HealthStatus.Unhealthy,
+                timeout: TimeSpan.FromSeconds(3));
 
         return services;
     }

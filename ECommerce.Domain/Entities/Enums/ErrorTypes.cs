@@ -1,4 +1,4 @@
-﻿namespace ECommerce.Domain.Common.Enums;
+﻿namespace ECommerce.Domain.Entities.Enums;
 
 public enum ErrorTypes
 {

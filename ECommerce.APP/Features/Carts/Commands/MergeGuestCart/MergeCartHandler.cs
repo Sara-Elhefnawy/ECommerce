@@ -1,19 +1,22 @@
 ﻿using ECommerce.APP.Cachings;
 using ECommerce.APP.Features.Carts.Queries.GetCart;
+using ECommerce.APP.Features.Inventories.Queries;
 using ECommerce.APP.Mediator;
-using ECommerce.Domain.Common;
-using ECommerce.Domain.Common.Errors;
+using ECommerce.Domain.Abstractions.Repositories;
+using ECommerce.Domain.Entities;
+using ECommerce.Domain.Entities.Errors;
+using ECommerce.Domain.Results;
 using Microsoft.Extensions.Logging;
 
 namespace ECommerce.APP.Features.Carts.Commands.MergeGuestCart;
 
 public sealed class MergeCartHandler(
     ICartRepository repo,
+    IReadRepository<Inventory> inventoryRepo,
     ILogger<MergeCartHandler> logger)
     : IRequestHandler<MergeCartCommand, ResultOfT<GetCartResponse>>
 {
     public async Task<ResultOfT<GetCartResponse>> Handle(
-
         MergeCartCommand request, CancellationToken ct = default)
     {
         if (request.AnonymousBuyerId == Guid.Empty)
@@ -51,6 +54,32 @@ public sealed class MergeCartHandler(
         }
 
         var cart = await repo.GetOrCreateAsync(request.BuyerId, ct);
+
+        foreach (var guestItem in anonymousCart.Items)
+        {
+            var inventory = await inventoryRepo.FirstOrDefaultAsync(
+                new InventoryByProductIdSpecification(guestItem.ProductId), ct);
+
+            if (inventory is null)
+            {
+                logger.LogWarning(
+                    "Cart merge failed. Inventory not found for product. BuyerId={BuyerId}, ProductId={ProductId}",
+                    request.BuyerId,
+                    guestItem.ProductId);
+                return ResultOfT<GetCartResponse>.Failure(InventoryErrors.NotFound);
+            }
+
+            var existingQuantity = cart.Items.FirstOrDefault(i => i.ProductId == guestItem.ProductId)?.Quantity ?? 0;
+
+            if (!inventory.HasEnough(existingQuantity + guestItem.Quantity))
+            {
+                logger.LogWarning(
+                    "Cart merge failed. Insufficient stock for product. BuyerId={BuyerId}, ProductId={ProductId}",
+                    request.BuyerId,
+                    guestItem.ProductId);
+                return ResultOfT<GetCartResponse>.Failure(InventoryErrors.NotEnoughStock);
+            }
+        }
 
         var mergeResult = cart.MergeCartFromGuestCart(anonymousCart);
 

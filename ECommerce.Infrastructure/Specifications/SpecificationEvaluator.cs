@@ -1,4 +1,4 @@
-﻿using ECommerce.Domain.Specification;
+﻿using ECommerce.Domain.Specifications;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

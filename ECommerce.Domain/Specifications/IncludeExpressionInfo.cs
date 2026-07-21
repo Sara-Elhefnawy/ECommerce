@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ECommerce.Domain.Specification;
+namespace ECommerce.Domain.Specifications;
 
 public sealed record IncludeExpressionInfo(
         LambdaExpression LambdaExpression, // ThenInclude(p => p.sfs)

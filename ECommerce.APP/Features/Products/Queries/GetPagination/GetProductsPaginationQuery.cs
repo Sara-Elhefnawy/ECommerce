@@ -2,7 +2,7 @@
 using ECommerce.APP.Features.Products.Queries.GetPagination.Constants;
 using ECommerce.APP.Features.Products.Queries.GetPagination.Enums;
 using ECommerce.APP.Mediator;
-using ECommerce.Domain.Common;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.APP.Features.Products.Queries.GetPagination;
 

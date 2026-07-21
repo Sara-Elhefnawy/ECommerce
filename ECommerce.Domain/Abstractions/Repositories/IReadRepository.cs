@@ -1,5 +1,5 @@
 ﻿using ECommerce.Domain.Entities;
-using ECommerce.Domain.Specification;
+using ECommerce.Domain.Specifications;
 
 namespace ECommerce.Domain.Abstractions.Repositories;
 

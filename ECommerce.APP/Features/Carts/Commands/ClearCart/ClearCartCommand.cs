@@ -1,5 +1,5 @@
 ﻿using ECommerce.APP.Mediator;
-using ECommerce.Domain.Common;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.APP.Features.Carts.Commands.ClearCart;
 

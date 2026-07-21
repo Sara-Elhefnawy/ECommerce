@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ECommerce.Infrastructure.Persistent.Configuration;
 
-public class TypeConfiguratioon : IEntityTypeConfiguration<ProductType>
+public class TypeConfiguration : IEntityTypeConfiguration<ProductType>
 {
     public void Configure(EntityTypeBuilder<ProductType> builder)
     {

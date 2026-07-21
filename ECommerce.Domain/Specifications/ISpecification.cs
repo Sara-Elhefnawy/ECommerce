@@ -1,6 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using ECommerce.Domain.Specifications;
+using System.Linq.Expressions;
 
-namespace ECommerce.Domain.Specification;
+namespace ECommerce.Domain.Specifications;
 
 public interface ISpecification<T>
 {

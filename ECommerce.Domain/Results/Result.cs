@@ -1,6 +1,6 @@
-﻿using ECommerce.Domain.Common.Enums;
+﻿using ECommerce.Domain.Entities.Enums;
 
-namespace ECommerce.Domain.Common;
+namespace ECommerce.Domain.Results;
 
 /// <summary>
 /// The Result Pattern - A wrapper that explicitly represents success or failure of an operation

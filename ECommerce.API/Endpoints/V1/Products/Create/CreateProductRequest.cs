@@ -1,6 +1,6 @@
 ﻿using ECommerce.APP.Features.Products.Commands;
 using ECommerce.APP.Mediator;
-using ECommerce.Domain.Common;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.API.Endpoints.V1.Products.Create;
 

@@ -1,6 +1,6 @@
-﻿using ECommerce.Domain.Common.Enums;
+﻿using ECommerce.Domain.Entities.Enums;
 
-namespace ECommerce.Domain.Common;
+namespace ECommerce.Domain.Results;
 
 // Result<Product>.Failure("Product.Already", "Product already exists");
 public sealed record Error(string Code, string Message, ErrorTypes Type)

@@ -1,5 +1,5 @@
-﻿using ECommerce.Domain.Common;
-using ECommerce.Domain.Common.Errors;
+﻿using ECommerce.Domain.Entities.Errors;
+using ECommerce.Domain.Results;
 using System.Text.Json.Serialization;
 
 namespace ECommerce.Domain.Entities;
@@ -34,7 +34,6 @@ public sealed class Cart
     }
 
     // Adds a product or increases quantity when the product is already in the cart.
-    // ##############Step 1 of price policy: capture the current catalog price at add-time.
     public Result AddItem(
         Guid productId,
         string productName,
@@ -42,6 +41,9 @@ public sealed class Cart
         decimal unitPrice,
         int quantity)
     {
+        if (quantity <= 0)
+            return Result.Failure(CartErrors.InvalidQuantity);
+
         var existingItem = Items.FirstOrDefault(item => item.ProductId == productId);
 
         if (existingItem is not null)
@@ -76,10 +78,16 @@ public sealed class Cart
 
     public Result UpdateItemQuantity(Guid productId, int quantity)
     {
+        if (quantity < 0)
+            return Result.Failure(CartErrors.InvalidQuantity);
+
         var item = Items.FirstOrDefault(i => i.ProductId == productId);
 
         if (item is null)
             return Result.Failure(CartErrors.ItemNotFound);
+
+        if (quantity == 0)
+            return RemoveItem(item.ProductId);
 
         return item.SetQuantity(quantity);
     }

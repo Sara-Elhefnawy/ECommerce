@@ -1,14 +1,11 @@
-﻿using ECommerce.Domain.Common;
-using ECommerce.Domain.Common.Errors;
+﻿using ECommerce.Domain.Entities.Errors;
+using ECommerce.Domain.Results;
 using System.Text.Json.Serialization;
 
 namespace ECommerce.Domain.Entities;
 
 public sealed class CartItem : BaseEntity
 {
-    public const int MinQuantity = 1;
-    public const int MaxQuantity = 100;  // get quantity in DB
-
     // why not have only productId and quantity then get product data from somewhere else
     public Guid ProductId { get; private set; }
     public string ProductName { get; private set; } = default!;
@@ -58,7 +55,7 @@ public sealed class CartItem : BaseEntity
         if (unitPrice <= 0)
             return ResultOfT<CartItem>.Failure(CartErrors.InvalidUnitPrice);
 
-        if (quantity is < MinQuantity or > MaxQuantity)
+        if (quantity is < 0)
             return ResultOfT<CartItem>.Failure(CartErrors.InvalidQuantity);
 
         return new CartItem(
@@ -69,27 +66,22 @@ public sealed class CartItem : BaseEntity
             quantity);
     }
 
+    public Result SetQuantity(int quantity)
+    {
+        if (quantity < 0)
+            return Result.Failure(CartErrors.InvalidQuantity);
+
+        Quantity = quantity;
+
+        return Result.Ok();
+    }
+
     public Result IncreaseQuantity(int amount)
     {
         if (amount <= 0)
             return Result.Failure(CartErrors.InvalidQuantityIncrement);
 
-        var newQuantity = Quantity + amount;
-
-        if (newQuantity > MaxQuantity)
-            return Result.Failure(CartErrors.QuantityTooHigh);
-
-        Quantity = newQuantity;
-
-        return Result.Ok();
-    }
-
-    public Result SetQuantity(int quantity)
-    {
-        if (quantity is < MinQuantity or > MaxQuantity)
-            return Result.Failure(CartErrors.InvalidQuantity);
-
-        Quantity = quantity;
+        Quantity += amount;
 
         return Result.Ok();
     }

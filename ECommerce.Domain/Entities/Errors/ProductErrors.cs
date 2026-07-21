@@ -1,10 +1,14 @@
-﻿using ECommerce.Domain.Entities;
-using ECommerce.Domain.Images;
+﻿using ECommerce.Domain.Images;
+using ECommerce.Domain.Results;
 
-namespace ECommerce.Domain.Common.Errors;
+namespace ECommerce.Domain.Entities.Errors;
 
 public class ProductErrors
 {
+    public static readonly Error InvalidCount = Error.Validation(
+        "Product.InvalidCount",
+        "Invalid count requested.");
+
     // Validation Errors (400 Bad Request)
     public static readonly Error InvalidName = Error.Validation(
         "Product.InvalidName",
@@ -20,11 +24,11 @@ public class ProductErrors
 
     public static readonly Error InvalidBrand = Error.Validation(
         "Product.InvalidBrand",
-        "Product brand is required.");
+        "Valid product brand is required.");
 
     public static readonly Error InvalidType = Error.Validation(
         "Product.InvalidType",
-        "Product type is required.");
+        "Valid product type is required.");
 
     // Add new image validation errors
     public static readonly Error InvalidPictureUrl = Error.Validation(

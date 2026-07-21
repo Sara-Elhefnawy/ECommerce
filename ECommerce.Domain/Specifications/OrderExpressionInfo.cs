@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ECommerce.Domain.Specification;
+namespace ECommerce.Domain.Specifications;
 
 public sealed record OrderExpressionInfo<T>(
     Expression<Func<T, object?>> KeySelector,

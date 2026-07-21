@@ -1,6 +1,6 @@
-﻿using ECommerce.Domain.Entities;
+﻿using ECommerce.Domain.Results;
 
-namespace ECommerce.Domain.Common.Errors;
+namespace ECommerce.Domain.Entities.Errors;
 
 public static class CartErrors
 {
@@ -29,6 +29,16 @@ public static class CartErrors
             "Cart.InvalidProductName",
             "Product name is required.");
 
+    public static readonly Error InvalidQuantity =
+        Error.Validation(
+            "Cart.InvalidQuantity",
+            $"Quantity must be more than");
+
+    public static readonly Error InvalidQuantityIncrement =
+        Error.Validation(
+            "Cart.InvalidQuantityIncrement",
+            "Quantity increment must be greater than zero.");
+
     public static readonly Error InvalidPictureUrl =
         Error.Validation(
             "Cart.InvalidPictureUrl",
@@ -38,21 +48,6 @@ public static class CartErrors
         Error.Validation(
             "Cart.InvalidUnitPrice",
             "Unit price must be greater than zero.");
-
-    public static readonly Error InvalidQuantity =
-        Error.Validation(
-            "Cart.InvalidQuantity",
-            $"Quantity must be between {CartItem.MinQuantity} and {CartItem.MaxQuantity}.");
-
-    public static readonly Error InvalidQuantityIncrement =
-        Error.Validation(
-            "Cart.InvalidQuantityIncrement",
-            "Quantity increment must be greater than zero.");
-
-    public static readonly Error QuantityTooHigh =
-        Error.Validation(
-            "Cart.QuantityTooHigh",
-            $"Total quantity for a product cannot exceed {CartItem.MaxQuantity}.");
 
     public static readonly Error ItemNotFound =
         Error.NotFound(

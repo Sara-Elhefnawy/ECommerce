@@ -1,9 +1,13 @@
-﻿using ECommerce.Domain.Entities;
+﻿using ECommerce.Domain.Results;
 
-namespace ECommerce.Domain.Common.Errors;
+namespace ECommerce.Domain.Entities.Errors;
 
 public static class TypeErrors
 {
+    public static readonly Error InvalidCount = Error.Validation(
+        "Type.InvalidCount",
+        "Invalid count requested.");
+
     // Validation Errors (400 Bad Request)
     public static readonly Error InvalidId = Error.Validation(
         "Type.InvalidId",

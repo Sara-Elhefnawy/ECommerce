@@ -1,5 +1,5 @@
-﻿using ECommerce.Domain.Common;
-using ECommerce.Domain.Entities;
+﻿using ECommerce.Domain.Entities;
+using ECommerce.Domain.Results;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.Infrastructure.Persistent.Seedings;

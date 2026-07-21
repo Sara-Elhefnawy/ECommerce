@@ -1,7 +1,7 @@
 ﻿using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
-using ECommerce.Domain.Common;
 using ECommerce.Domain.Entities;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.APP.Features.Brands.Commands;
 

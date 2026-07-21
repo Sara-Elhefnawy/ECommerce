@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
-using ECommerce.Domain.Common;
-using ECommerce.APP.Mediator;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.APP.Mediator.Behaviors;
 
