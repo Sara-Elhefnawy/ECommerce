@@ -1,10 +1,10 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Brands.Commands;
 using ECommerce.APP.Mediator;
 using Microsoft.AspNetCore.Mvc;
-using Serilog.Context;
 
 namespace ECommerce.API.Endpoints.V1.Brands.Create;
 
@@ -31,12 +31,12 @@ public class CreateBrandEndpoint : IEndpoint
         HttpContext httpContext,
         CancellationToken ct)
     {
-        using (LogContext.PushProperty("BrandName", request.Name))
+        var command = request.ToCommand();
+
+        var result = await mediator.Send(command, ct);
+
+        using (LoggingExtensions.WithBrandContext(result.Value.Id))
         {
-            var command = request.ToCommand();
-
-            var result = await mediator.Send(command, ct);
-
             // Pass location for 201 Created response
             var location = result.IsSuccess
                 ? $"/api/{Version}/brands/{result.Value.Id}"

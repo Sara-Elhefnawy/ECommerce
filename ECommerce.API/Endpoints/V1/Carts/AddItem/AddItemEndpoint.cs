@@ -1,6 +1,7 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Carts.Commands.AddItemToCart;
 using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Mediator;
@@ -32,13 +33,16 @@ public sealed class AddItemEndpoint : IEndpoint
         if (buyerIdResult.IsFailure)
             return buyerIdResult.ToApiResult(httpContext, "");
 
-        var command = new AddCartItemCommand(
+        using (LoggingExtensions.WithCartContext(buyerIdResult.Value))
+        {
+            var command = new AddCartItemCommand(
             buyerIdResult.Value,
             request.ProductId,
             request.Quantity);
 
-        var result = await mediator.Send(command, ct);
+            var result = await mediator.Send(command, ct);
 
-        return result.ToApiResult(httpContext, "Item added to cart");
+            return result.ToApiResult(httpContext, "Item added to cart");
+        }
     }
 }

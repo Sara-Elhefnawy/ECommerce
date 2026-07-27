@@ -1,5 +1,6 @@
 ﻿using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Carts.Commands.RemoveItem;
 using ECommerce.APP.Mediator;
 
@@ -29,10 +30,13 @@ public sealed class RemoveItemEndpoint : IEndpoint
         if (buyerIdResult.IsFailure)
             return buyerIdResult.ToApiResult(httpContext, "");
 
-        var result = await mediator.Send(new RemoveCartItemCommand(
+        using (LoggingExtensions.WithCartContext(buyerIdResult.Value))
+        {
+            var result = await mediator.Send(new RemoveCartItemCommand(
                 buyerIdResult.Value,
                 productId), ct);
 
-        return Results.NoContent();
+            return Results.NoContent();
+        }
     }
 }

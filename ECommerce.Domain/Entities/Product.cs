@@ -1,5 +1,5 @@
-﻿using ECommerce.Domain.Common;
-using ECommerce.Domain.Common.Errors;
+﻿using ECommerce.Domain.Entities.Errors;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.Domain.Entities;
 
@@ -146,6 +146,69 @@ public class Product : BaseEntity
     {
         if (typeId == Guid.Empty)
             return Result.BadRequest(ProductErrors.InvalidType);
+
+        return Result.Ok();
+    }
+
+    public Result Rename(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name.Length > MaxNameLength)
+            return Result.Failure(ProductErrors.InvalidName);
+
+        Name = name.Trim();
+
+        return Result.Ok();
+    }
+
+    public Result ChangeDescription(string description)
+    {
+        if (string.IsNullOrWhiteSpace(description) || description.Length > MaxDescriptionLength)
+            return Result.Failure(ProductErrors.InvalidDescription);
+
+        Description = description.Trim();
+
+        return Result.Ok();
+    }
+
+    public Result ChangePictureUrl(string pictureUrl)
+    {
+        if (string.IsNullOrWhiteSpace(pictureUrl))
+            return Result.Failure(ProductErrors.InvalidPictureUrl);
+
+        if (pictureUrl.Length > MaxPictureUrlLength)
+            return Result.Failure(ProductErrors.ImageTooLarge);
+
+        PictureUrl = pictureUrl.Trim();
+
+        return Result.Ok();
+    }
+
+    public Result ChangePrice(decimal price)
+    {
+        if (price <= 0)
+            return Result.Failure(ProductErrors.InvalidPrice);
+
+        Price = price;
+
+        return Result.Ok();
+    }
+
+    public Result ChangeBrand(Guid productBrandId)
+    {
+        if (productBrandId == Guid.Empty)
+            return Result.Failure(ProductErrors.InvalidBrand);
+
+        BrandId = productBrandId;
+
+        return Result.Ok();
+    }
+
+    public Result ChangeType(Guid productTypeId)
+    {
+        if (productTypeId == Guid.Empty)
+            return Result.Failure(ProductErrors.InvalidType);
+
+        TypeId = productTypeId;
 
         return Result.Ok();
     }

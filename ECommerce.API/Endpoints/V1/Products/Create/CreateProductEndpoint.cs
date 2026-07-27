@@ -1,10 +1,10 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Products.Commands;
 using ECommerce.APP.Mediator;
 using Microsoft.AspNetCore.Mvc;
-using Serilog.Context;
 
 namespace ECommerce.API.Endpoints.V1.Products.Create;
 
@@ -31,12 +31,12 @@ public class CreateProductEndpoint : IEndpoint
         HttpContext httpContext,
         CancellationToken ct)
     {
-        using (LogContext.PushProperty("ProductName", request.Name))
+        var command = request.ToCommand();
+
+        var result = await mediator.Send(command, ct);
+
+        using (LoggingExtensions.WithProductContext(result.Value.Id))
         {
-            var command = request.ToCommand();
-
-            var result = await mediator.Send(command, ct);
-
             // Pass location for 201 Created response
             var location = result.IsSuccess
                 ? $"/api/{Version}/products/{result.Value.Id}"

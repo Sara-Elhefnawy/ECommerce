@@ -9,7 +9,7 @@ namespace ECommerce.API.Endpoints.V1.Types.GetAll;
 public class GetAllTypesEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
-        => app.MapVersionedEndpoint("api/types", ApiVersions.V1)
+        => app.MapVersionedEndpoint("types", ApiVersions.V1)
             .MapGet("/", Handle)
             .WithTags("Types")
             .WithName("GetTypes")

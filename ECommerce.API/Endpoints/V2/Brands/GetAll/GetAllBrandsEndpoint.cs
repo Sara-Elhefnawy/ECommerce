@@ -9,7 +9,8 @@ namespace ECommerce.API.Endpoints.V2.Brands.GetAll;
 public class GetAllBrandsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
-        => app.MapGet("/brands/v2", Handle)
+        => app.MapVersionedEndpoint("brands", ApiVersions.V2)
+            .MapGet("/", Handle)
             .WithName("GetBrandsV2")
             .WithGroupName("v2")
             .Produces<ApiResponse<IReadOnlyList<GetAllBrandsResponse>>>(StatusCodes.Status200OK)

@@ -1,16 +1,16 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Products.Queries.GetById;
 using ECommerce.APP.Mediator;
-using Serilog.Context;
 
-namespace ECommerce.API.Endpoints.V1.Products.Details;
+namespace ECommerce.API.Endpoints.V1.Products.GetById;
 
 public class GetProductByIdEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
-        => app.MapVersionedEndpoint("products/", ApiVersions.V1)
+        => app.MapVersionedEndpoint("products", ApiVersions.V1)
             .MapGet("/{id:guid}", Handle)
             .WithTags("Products")
             .WithName("GetProductByID")
@@ -27,7 +27,7 @@ public class GetProductByIdEndpoint : IEndpoint
         CancellationToken ct = default
         )
     {
-        using (LogContext.PushProperty("ProductId", id))
+        using (LoggingExtensions.WithProductContext(id))
         {
             var result = await mediator.Send(new GetProductByIdQuery(id), ct);
 
@@ -35,4 +35,3 @@ public class GetProductByIdEndpoint : IEndpoint
         }
     }
 }
-

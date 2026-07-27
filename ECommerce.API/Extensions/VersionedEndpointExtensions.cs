@@ -1,4 +1,6 @@
-﻿namespace ECommerce.API.Extensions;
+﻿using ECommerce.API.Filters;
+
+namespace ECommerce.API.Extensions;
 
 public static class ApiVersions
 {
@@ -15,6 +17,7 @@ public static class VersionedEndpointExtensions
     {
         var versionPath = version.Split('.')[0]; ;
 
-        return app.MapGroup($"/api/v{versionPath}/{path}");
+        return app.MapGroup($"/api/v{versionPath}/{path}")
+            .AddEndpointFilter<AuditEndpointFilter>();
     }
 }

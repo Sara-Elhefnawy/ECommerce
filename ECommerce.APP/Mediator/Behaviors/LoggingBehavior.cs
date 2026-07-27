@@ -24,13 +24,9 @@ public sealed class LoggingBehavior<TRequest, TResponse>(
 
             return response;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            logger.LogError(
-                ex,
-                "Unhandled exception while handling {RequestName}",
-                requestName);
-
+            // exception logging is in GlobalExceptionMiddleware
             throw;
         }
     }

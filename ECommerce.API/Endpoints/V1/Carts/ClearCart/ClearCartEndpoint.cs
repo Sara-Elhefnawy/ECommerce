@@ -1,5 +1,6 @@
 ﻿using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Carts.Commands.ClearCart;
 using ECommerce.APP.Mediator;
 
@@ -27,8 +28,11 @@ public sealed class ClearCartEndpoint : IEndpoint
         if (buyerIdResult.IsFailure)
             return buyerIdResult.ToApiResult(httpContext, "");
 
-        var result = await mediator.Send(new ClearCartCommand(buyerIdResult.Value), ct);
+        using (LoggingExtensions.WithCartContext(buyerIdResult.Value))
+        {
+            var result = await mediator.Send(new ClearCartCommand(buyerIdResult.Value), ct);
 
-        return Results.NoContent();
+            return Results.NoContent();
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Mediator;
 
@@ -29,8 +30,11 @@ public class GetCartEndpoint : IEndpoint
         if (buyerIdResult.IsFailure)
             return buyerIdResult.ToApiResult(httpContext, "");
 
-        var result = await mediator.Send(new GetCartQuery(buyerIdResult.Value), ct);
+        using (LoggingExtensions.WithCartContext(buyerIdResult.Value))
+        {
+            var result = await mediator.Send(new GetCartQuery(buyerIdResult.Value), ct);
 
-        return result.ToApiResult(httpContext, "Retrieved cart successfully");
+            return result.ToApiResult(httpContext, "Retrieved cart successfully");
+        }
     }
 }

@@ -1,17 +1,16 @@
 ﻿using ECommerce.API.Common;
-using ECommerce.API.Endpoints.V1.Brands.GetAll;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Types.Queries.GetById;
 using ECommerce.APP.Mediator;
-using Serilog.Context;
 
 namespace ECommerce.API.Endpoints.V1.Types.GetById;
 
 public class GetTypeByIdEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
-        => app.MapVersionedEndpoint("api/types", ApiVersions.V1)
+        => app.MapVersionedEndpoint("types", ApiVersions.V1)
             .MapGet("/{id:guid}", Handle)
             .WithTags("Types")
             .WithName("GetTypeById")
@@ -26,7 +25,7 @@ public class GetTypeByIdEndpoint : IEndpoint
         HttpContext httpContext,
         CancellationToken ct = default)
     {
-        using (LogContext.PushProperty("TypeId", id))
+        using (LoggingExtensions.WithTypeContext(id))
         {
             var result = await mediator.Send(new GetTypeByIdQuery(id), ct);
 

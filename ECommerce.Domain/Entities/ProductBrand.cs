@@ -1,5 +1,5 @@
-﻿using ECommerce.Domain.Common;
-using ECommerce.Domain.Common.Errors;
+﻿using ECommerce.Domain.Entities.Errors;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.Domain.Entities;
 
@@ -30,9 +30,17 @@ public class ProductBrand : BaseEntity
 
         return ResultOfT<ProductBrand>.Created(new ProductBrand(name));
     }
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
-        return new() { Name = name.Trim() };
+    public Result Rename(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure(BrandErrors.InvalidName);
+
+        if (name.Length > MaxNameLength)
+            return Result.Failure(BrandErrors.NameTooLong);
+
+        Name = name.Trim();
+
+        return Result.Ok();
     }
 }

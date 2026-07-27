@@ -1,9 +1,9 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Brands.Queries.GetById;
 using ECommerce.APP.Mediator;
-using Serilog.Context;
 
 namespace ECommerce.API.Endpoints.V1.Brands.GetById;
 
@@ -26,7 +26,7 @@ public class GetBrandByIdEndpoint : IEndpoint
         HttpContext httpContext,
         CancellationToken ct = default)
     {
-        using (LogContext.PushProperty("BrandId", id))
+        using (LoggingExtensions.WithBrandContext(id))
         {
             var result = await mediator.Send(new GetBrandByIdQuery(id), ct);
 

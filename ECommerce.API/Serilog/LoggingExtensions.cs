@@ -12,36 +12,31 @@ namespace ECommerce.API.Serilog;
 //   } // ← ProductId is removed from context here
 public static class LoggingExtensions
 {
-    public static IDisposable WithProductContext(Guid productId, string? productName = null)
+    public static IDisposable WithProductContext(Guid productId)
     {
         var context = LogContext.PushProperty("ProductId", productId);
-        if (!string.IsNullOrEmpty(productName))
-        {
-            var nameContext = LogContext.PushProperty("ProductName", productName);
-            return new DisposableCombiner(context, nameContext);
-        }
+           
         return context;
     }
 
-    public static IDisposable WithUserContext(Guid userId, string? userName = null)
+    public static IDisposable WithBrandContext(Guid brandId)
     {
-        var context = LogContext.PushProperty("UserId", userId);
-        if (!string.IsNullOrEmpty(userName))
-        {
-            var nameContext = LogContext.PushProperty("UserName", userName);
-            return new DisposableCombiner(context, nameContext);
-        }
+        var context = LogContext.PushProperty("BrandId", brandId);
+
         return context;
     }
 
-    public static IDisposable WithOrderContext(Guid orderId, string? orderNumber = null)
+    public static IDisposable WithTypeContext(Guid typeId)
     {
-        var context = LogContext.PushProperty("OrderId", orderId);
-        if (!string.IsNullOrEmpty(orderNumber))
-        {
-            var numberContext = LogContext.PushProperty("OrderNumber", orderNumber);
-            return new DisposableCombiner(context, numberContext);
-        }
+        var context = LogContext.PushProperty("TypeId", typeId);
+
+        return context;
+    }
+
+    public static IDisposable WithInventoryContext(Guid? inventoryProductId)
+    {
+        var context = LogContext.PushProperty("InventoryProductId", inventoryProductId);
+        
         return context;
     }
 

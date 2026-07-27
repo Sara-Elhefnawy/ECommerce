@@ -1,6 +1,7 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Inventories.Commands.CreateInventory;
 using ECommerce.APP.Mediator;
 
@@ -8,8 +9,10 @@ namespace ECommerce.API.Endpoints.V1.Inventories.Create;
 
 public sealed class CreateInventoryEndpoint : IEndpoint
 {
+    private const string Version = ApiVersions.V1;
+
     public void MapEndpoint(IEndpointRouteBuilder app)
-        => app.MapVersionedEndpoint("inventories", ApiVersions.V1)
+        => app.MapVersionedEndpoint("inventories", Version)
             .MapPost("/", Handle)
             .WithTags("Inventories")
             .WithName("CreateInventory")
@@ -25,10 +28,18 @@ public sealed class CreateInventoryEndpoint : IEndpoint
         HttpContext httpContext,
         CancellationToken ct = default)
     {
-        var command = new CreateInventoryCommand(request.ProductId, request.Quantity);
+        using (LoggingExtensions.WithInventoryContext(request.ProductId))
+        {
+            var command = new CreateInventoryCommand(request.ProductId, request.Quantity);
 
-        var result = await mediator.Send(command, ct);
+            var result = await mediator.Send(command, ct);
 
-        return result.ToApiResult(httpContext, "Inventory created successfully");
+            // Pass location for 201 Created response
+            var location = result.IsSuccess
+                ? $"/api/{Version}/inventories/{request.ProductId}"
+                : null;
+
+            return result.ToApiResult(httpContext, "Inventory created successfully", location);
+        }
     }
 }

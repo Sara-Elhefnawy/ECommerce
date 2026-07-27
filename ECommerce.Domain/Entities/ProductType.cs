@@ -1,5 +1,5 @@
-﻿using ECommerce.Domain.Common;
-using ECommerce.Domain.Common.Errors;
+﻿using ECommerce.Domain.Entities.Errors;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.Domain.Entities;
 
@@ -31,5 +31,16 @@ public class ProductType : BaseEntity
         return ResultOfT<ProductType>.Created(new ProductType(name));
     }
 
+    public Result Rename(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return Result.Failure(TypeErrors.InvalidName);
+
+        if (name.Length > MaxNameLength)
+            return Result.Failure(TypeErrors.NameTooLong);
+
+        Name = name.Trim();
+
+        return Result.Ok();
     }
 }
