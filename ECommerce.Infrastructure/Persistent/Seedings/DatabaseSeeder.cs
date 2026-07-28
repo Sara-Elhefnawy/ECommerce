@@ -1,5 +1,4 @@
-﻿using ECommerce.Infrastructure.Persistent;
-using ECommerce.Infrastructure.Persistent.Seedings;
+﻿namespace ECommerce.Infrastructure.Persistent.Seedings;
 
 public sealed class DatabaseSeeder(
     ECommerceDbContext dbContext,

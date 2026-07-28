@@ -5,6 +5,7 @@ using ECommerce.APP;
 using ECommerce.Infrastructure;
 using ECommerce.Infrastructure.HealthChecks;
 using ECommerce.Infrastructure.Persistent;
+using ECommerce.Infrastructure.Persistent.Seedings;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

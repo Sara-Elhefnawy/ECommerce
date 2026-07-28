@@ -1,6 +1,7 @@
 ﻿using ECommerce.APP.Cachings;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Infrastructure.Cachings;
+using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.Persistent;
 using ECommerce.Infrastructure.Persistent.Interceptors;
 using ECommerce.Infrastructure.Persistent.Repositories;
@@ -19,9 +20,6 @@ public static class DependencyInjection
     // could return void but IServiceCollection return type makes it useful to chain
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<AuditInterceptor>();
-        services.AddSingleton<SoftDeleteInterceptor>();
-
         services.AddScoped<AuditInterceptor>();
         services.AddScoped<SoftDeleteInterceptor>();
 
@@ -33,13 +31,24 @@ public static class DependencyInjection
             var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-            options.UseSqlServer(connectionString);
+            options.UseSqlServer(connectionString, sql =>
+                sql.MigrationsHistoryTable("__ApplicationMigrationsHistroy"));
 
             options.AddInterceptors(softDeleteInterceptor, auditInterceptor);
         });
 
+        services.AddDbContext<ECommerceIdentityDbContext>(options =>
+        {
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+            options.UseSqlServer(connectionString, sql =>
+                sql.MigrationsHistoryTable("__IdentityMigrationsHistroy"));
+        });
+
         services.AddScoped<DatabaseSeeder>();
 
+        services.AddScoped<IDataSeeder, IdentitySeeder>();
         services.AddScoped<IDataSeeder, ProductBrandSeeder>();
         services.AddScoped<IDataSeeder, ProductTypeSeeder>();
         services.AddScoped<IDataSeeder, ProductSeeder>();
@@ -83,7 +92,7 @@ public static class DependencyInjection
                 options.ConfigurationOptions = configOptions;
                 options.InstanceName = "ECommerceRoute:";   // prefixes every key, helps you spot cart keys in redis-cli
             });
-        };
+        }
 
         services.AddHybridCache(options =>
         {

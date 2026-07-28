@@ -47,8 +47,8 @@ public static class SerilogExtensions
             .Enrich.WithCorrelationId()  // adds CorrelationId (from HTTP headers) to every log entry
             .CreateLogger();
 
-        Log.Information("Application starting. PostgreSQL connection string: {ConnectionString}",
-            builder.Configuration.GetConnectionString("LogsDb"));
+        Log.Information("Application starting. LogsDb connection configured: {IsConfigured}",
+            !string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("LogsDb")));
 
         // Replace the default .NET logging pipeline with Serilog.
         // All ILogger<T> injections throughout the app will now route through Serilog.

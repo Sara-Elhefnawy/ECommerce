@@ -30,7 +30,7 @@ public sealed class Cart
         if (buyerId == Guid.Empty)
             return ResultOfT<Cart>.BadRequest(CartErrors.InvalidBuyerId);
 
-        return new Cart(buyerId);
+        return ResultOfT<Cart>.Created(new Cart(buyerId));
     }
 
     // Adds a product or increases quantity when the product is already in the cart.

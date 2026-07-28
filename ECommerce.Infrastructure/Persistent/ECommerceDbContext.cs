@@ -3,18 +3,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.Infrastructure.Persistent;
 
-public class ECommerceDbContext : DbContext
+public class ECommerceDbContext(DbContextOptions<ECommerceDbContext> options) : DbContext(options)
 {
     public DbSet<Product> Products { get; set; }
     public DbSet<ProductBrand> Brands { get; set; }
     public DbSet<ProductType> Types { get; set; }
-
-    public ECommerceDbContext(DbContextOptions<ECommerceDbContext> options)
-        : base(options) { }
+    public DbSet<UserAddress> UserAddresses { get; set; }
+    public DbSet<Inventory> Inventories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(
-            typeof(ECommerceDbContext).Assembly);
+            typeof(ECommerceDbContext).Assembly,
+            type => type.Namespace == "ECommerce.Infrastructure.Persistent.Configuration");
     }
 }

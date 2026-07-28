@@ -58,12 +58,12 @@ public sealed class CartItem : BaseEntity
         if (quantity is < 0)
             return ResultOfT<CartItem>.Failure(CartErrors.InvalidQuantity);
 
-        return new CartItem(
+        return ResultOfT<CartItem>.Created(new CartItem(
             productId,
             productName.Trim(),
             pictureUrl.Trim(),
             unitPrice,
-            quantity);
+            quantity));
     }
 
     public Result SetQuantity(int quantity)

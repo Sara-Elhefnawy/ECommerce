@@ -1,7 +1,9 @@
 ﻿using ECommerce.API.Middlewares;
 using ECommerce.Domain.Abstractions.ImageCloudinary;
+using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.ImageCloudinary;
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi;
 using System.Text.Json.Serialization;
 
@@ -66,6 +68,55 @@ public static class DependencyInjection
         {
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
         });
+
+        // AddIdentityCore, not AddIdentity:
+        // AddIdentity<TUser,TRole> lives in Microsoft.AspNetCore.Identity
+        //      and pulls in cookie-auth types that force a FrameworkReference to Microsoft.AspNetCore.App —
+        //          i.e. the whole ASP.NET Core shared framework — onto whatever project calls it (Infrastructure).
+        // AddIdentityCore lives in Microsoft.Extensions.Identity.Core
+        //      (a plain NuGet package, no framework reference),
+        // so Infrastructure stays a class library that doesn't know about the web host at all.
+        services.AddIdentityCore<ApplicationUser>(options =>
+        {
+            // Password policy: min length 8, must include a digit, an uppercase letter, and
+            // a non-alphanumeric character (e.g. !@#$). No RequireLowercase set explicitly,
+            // so it stays at its default (true) — lowercase is still required.
+            options.Password.RequiredLength = 8;
+            options.Password.RequireDigit = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+
+            // Rejects registration if the email is already in use by another account.
+            options.User.RequireUniqueEmail = true;
+
+            // After 5 failed login attempts, the account is locked out for 15 minutes.
+            // This is enforced by SignInManager.CheckPasswordSignInAsync
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+
+            // NOTE: RequireConfirmedEmail and RequireConfirmedPhoneNumber
+            //      both being true means a user literally cannot sign in
+            //      until BOTH an email confirmation link AND an SMS/phone confirmation code have been completed.
+            // If you don't have a phone-confirmation flow built
+            //      (SMS provider, OTP endpoint, etc.) yet,
+            //      every single user will be permanently locked out at sign-in with no way to unblock themselves.
+            options.SignIn.RequireConfirmedPhoneNumber = true;
+            options.SignIn.RequireConfirmedEmail = true;
+        })
+            .AddRoles<ApplicationRole>()                     // AddIdentityCore doesn't wire up roles by default —
+                                                             // this restores RoleManager<ApplicationRole> and role-based claims
+            .AddSignInManager()                              // Registers SignInManager<ApplicationUser> —
+                                                             // handles password checks, lockout tracking, and 2FA flow.
+            .AddEntityFrameworkStores<ECommerceIdentityDbContext>()   // Wires UserStore/RoleStore to persist through EF Core
+                                                                      // against your Identity DbContext.
+            .AddDefaultTokenProviders();                     // Registers providers for password-reset tokens, email-confirmation
+                                                             // tokens, and 2FA tokens —
+                                                             // without this, GeneratePasswordResetTokenAsync return null instead of a usable token.
+
+        // No scheme configured yet (no AddJwtBearer/AddCookie) —
+        //      this call alone only satisfies DI validation at startup.
+        // Nothing can actually authenticate a request until a real scheme is added here.
+        services.AddAuthentication();
 
         return services;
     }
