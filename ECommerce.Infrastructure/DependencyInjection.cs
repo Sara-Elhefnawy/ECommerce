@@ -1,4 +1,5 @@
 ﻿using ECommerce.APP.Cachings;
+using ECommerce.APP.Token;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Infrastructure.Cachings;
 using ECommerce.Infrastructure.Identity;
@@ -6,6 +7,7 @@ using ECommerce.Infrastructure.Persistent;
 using ECommerce.Infrastructure.Persistent.Interceptors;
 using ECommerce.Infrastructure.Persistent.Repositories;
 using ECommerce.Infrastructure.Persistent.Seedings;
+using ECommerce.Infrastructure.Token;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
@@ -57,6 +59,9 @@ public static class DependencyInjection
 
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped(typeof(IReadRepository<>), typeof(Repository<>));
+
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         AddCartCaching(services, configuration);
 

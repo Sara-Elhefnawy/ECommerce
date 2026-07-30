@@ -9,11 +9,6 @@ public static class UserAddressErrors
             "UserAddress.NotFound",
             "Address was not found.");
 
-    //public static readonly Error InvalidId =
-    //    Error.Validation(
-    //        "UserAddress.InvalidId",
-    //        "Address id is required.");
-
     public static readonly Error InvalidUserId =
         Error.Validation(
             "UserAddress.InvalidUserId",

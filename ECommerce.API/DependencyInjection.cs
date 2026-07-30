@@ -3,9 +3,14 @@ using ECommerce.Domain.Abstractions.ImageCloudinary;
 using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.ImageCloudinary;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi;
 using System.Text.Json.Serialization;
+using Microsoft.IdentityModel.Tokens;
+using ECommerce.APP.Token;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ECommerce.API;
 
@@ -113,10 +118,59 @@ public static class DependencyInjection
                                                              // tokens, and 2FA tokens —
                                                              // without this, GeneratePasswordResetTokenAsync return null instead of a usable token.
 
-        // No scheme configured yet (no AddJwtBearer/AddCookie) —
-        //      this call alone only satisfies DI validation at startup.
+        var jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+            ?? throw new InvalidOperationException(
+                $"Configuration section '{JwtSettings.SectionName}' is missing.");
+
+        // HS256 secret must be long enough (reject short / empty secrets at startup).
+        if (string.IsNullOrWhiteSpace(jwtSettings.Secret) || jwtSettings.Secret.Length < 32)
+            throw new InvalidOperationException("Jwt:Secret must be at least 32 characters.");
+
+
         // Nothing can actually authenticate a request until a real scheme is added here.
-        services.AddAuthentication();
+        services.AddAuthentication(options =>
+        {
+            // Which scheme runs when you call [Authorize] / RequireAuthorization (read the JWT).
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme; // "Bearer"
+
+            // Which scheme runs when auth fails (401 Challenge — WWW-Authenticate: Bearer).
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+            // Rules applied to every incoming Bearer token.
+            .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                NameClaimType = JwtRegisteredClaimNames.Sub,
+                RoleClaimType = "role",
+
+                // must match Jwt:Issuer (reject tokens from other APIs).
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings.Issuer,
+
+                // must match Jwt:Audience (reject tokens meant for another client/API).
+                ValidateAudience = true,
+                ValidAudience = jwtSettings.Audience,
+
+                // Signature must be valid using our shared secret (HS256).
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+
+                // Reject expired tokens (check exp claim).
+                ValidateLifetime = true,
+
+                // It overrides the default 5-minute buffer, allowing tokens to be accepted
+                // as valid for up to one minute past their strict expiration time to account
+                // for minor time differences between servers
+                ClockSkew = TimeSpan.FromSeconds(30)
+            };
+            // Without it, the JWT handler may translate standard JWT claims
+            // like sub and email into the older XML-based claim types internally
+            options.MapInboundClaims = false;
+        });
+
+        // Enables [Authorize] / policies (roles, etc.) after authentication has set HttpContext.User.
+        services.AddAuthorization();
 
         return services;
     }

@@ -15,7 +15,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- ===== SERILOG - Implementation (only API needs this) ===== -->
+		<!-- SERILOG - Implementation (only API needs this) -->
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="Serilog.AspNetCore" />
 		<PackageReference Include="Serilog.Sinks.Console" />
@@ -25,6 +25,11 @@
 		<PackageReference Include="Serilog.Enrichers.Thread" />
 		<PackageReference Include="Serilog.Enrichers.CorrelationId" />
 		<PackageReference Include="Npgsql" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Others -->
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
 	</ItemGroup>
 
 	<ItemGroup>

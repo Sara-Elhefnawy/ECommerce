@@ -55,6 +55,9 @@ if (app.Environment.IsDevelopment())
     await seeder.SeedAllAsync();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 // Map ALL Health Check Endpoints
 app.MapApplicationHealthChecks();
 
