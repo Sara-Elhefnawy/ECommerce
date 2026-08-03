@@ -1,16 +1,19 @@
 ﻿using ECommerce.API.Middlewares;
+using ECommerce.APP.Features.Users.Commands.UpdateUser.Common;
+using ECommerce.APP.Token;
 using ECommerce.Domain.Abstractions.ImageCloudinary;
 using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.ImageCloudinary;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.OpenApi;
-using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using ECommerce.APP.Token;
-using System.Text;
+using Microsoft.OpenApi;
 using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 namespace ECommerce.API;
 
@@ -57,21 +60,38 @@ public static class DependencyInjection
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
         // Configures Swagger documentation generation
-        services.AddSwaggerGen(c =>
+        services.AddSwaggerGen(options =>
         {
             // Define a Swagger document for API version 1, 2
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "ECommerce API V1", Version = "v1" });
-            c.SwaggerDoc("v2", new OpenApiInfo { Title = "ECommerce API V2", Version = "v2" });
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "ECommerce API V1", Version = "v1" });
+            options.SwaggerDoc("v2", new OpenApiInfo { Title = "ECommerce API V2", Version = "v2" });
 
             // Tells Swagger which endpoints belong to which version
             // Show endpoints based on GroupName
-            c.DocInclusionPredicate((docName, apiDesc) => apiDesc.GroupName == docName);
+            options.DocInclusionPredicate((docName, apiDesc) => apiDesc.GroupName == docName);
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Description = "JWT Bearer. Example: Bearer {token}",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT"
+            });
+
+            options.AddSecurityRequirement(document =>
+                new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                });
         });
 
         // Make System.Text.Json serialize/deserialize enums as strings
         services.ConfigureHttpJsonOptions(options =>
         {
             options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            options.SerializerOptions.Converters.Add(new OptionalJsonConverterFactory());
         });
 
         // AddIdentityCore, not AddIdentity:
@@ -171,6 +191,47 @@ public static class DependencyInjection
 
         // Enables [Authorize] / policies (roles, etc.) after authentication has set HttpContext.User.
         services.AddAuthorization();
+
+        // Needed so CurrentUserService can read claims from the current request.
+        services.AddHttpContextAccessor();
+
+        services.AddRateLimiter(options =>
+        {
+            options.AddPolicy("verify-code", httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 10,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0
+                }));
+
+            options.OnRejected = async (context, ct) =>
+            {
+                context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+                // Route through the same IProblemDetailsService your other error
+                // responses use (GlobalExceptionMiddleware's 500s, MapError's 4xxs) —
+                // so this gets the same shape AND picks up the traceId automatically
+                // via the CustomizeProblemDetails callback already configured in
+                // AddProblemDetails(), instead of a bespoke plain-text body.
+                var problemDetailsService = context.HttpContext.RequestServices
+                    .GetRequiredService<IProblemDetailsService>();
+
+                await problemDetailsService.WriteAsync(new ProblemDetailsContext
+                {
+                    HttpContext = context.HttpContext,
+                    ProblemDetails = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status429TooManyRequests,
+                        Title = "Too Many Requests",
+                        Detail = "Too many requests. Try again shortly.",
+                        Type = "https://tools.ietf.org/html/rfc6585#section-4"
+                    }
+                });
+            };
+        });
 
         return services;
     }

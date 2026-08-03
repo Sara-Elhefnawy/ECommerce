@@ -1,7 +1,10 @@
 ﻿using ECommerce.APP.Cachings;
+using ECommerce.APP.Email;
+using ECommerce.APP.Identity;
 using ECommerce.APP.Token;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Infrastructure.Cachings;
+using ECommerce.Infrastructure.Email;
 using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.Persistent;
 using ECommerce.Infrastructure.Persistent.Interceptors;
@@ -14,6 +17,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using System.Net;
+using System.Net.Mail;
 
 namespace ECommerce.Infrastructure;
 
@@ -61,7 +66,36 @@ public static class DependencyInjection
         services.AddScoped(typeof(IReadRepository<>), typeof(Repository<>));
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+        services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IEmailVerification, EmailVerification>();
+
+        services.Configure<EmailVerificationSettings>(
+            configuration.GetSection(EmailVerificationSettings.SectionName));
+
+        services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
+
+        var emailSettings = configuration.GetSection(EmailSettings.SectionName).Get<EmailSettings>()
+            ?? throw new InvalidOperationException($"Configuration section '{EmailSettings.SectionName}' is missing.");
+
+        services.AddFluentEmail(emailSettings.FromEmail, emailSettings.FromName)
+            .AddSmtpSender(() => new SmtpClient(emailSettings.Host, emailSettings.Port)
+            {
+                // Without this, SmtpClient defaults to UseDefaultCredentials = false
+                // with no credentials attached at all — which is exactly the "please
+                // authenticate first" error Brevo (and any real SMTP provider) throws.
+                // Mailpit doesn't require auth, which is why this gap went unnoticed
+                // through all the dev testing so far.
+                Credentials = new NetworkCredential(emailSettings.Username, emailSettings.Password),
+
+                // Brevo's port 587 uses STARTTLS (plaintext connection that upgrades
+                // to TLS) rather than implicit TLS on connect. EnableSsl = true tells
+                // SmtpClient to issue the STARTTLS command after connecting.
+                EnableSsl = true
+            });
+
+        services.AddScoped<IEmailSender, FluentEmailSender>();
 
         AddCartCaching(services, configuration);
 

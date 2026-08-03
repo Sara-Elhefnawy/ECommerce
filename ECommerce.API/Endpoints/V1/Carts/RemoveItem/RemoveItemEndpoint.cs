@@ -36,8 +36,8 @@ public sealed class RemoveItemEndpoint : IEndpoint
                 buyerIdResult.Value,
                 productId), ct);
 
-            if (result.IsFailure)
-                return result.ToApiResult(httpContext, "");
+            //if (result.IsFailure)
+            //    return result.ToApiResult(httpContext, "");
 
             return Results.NoContent();
         }

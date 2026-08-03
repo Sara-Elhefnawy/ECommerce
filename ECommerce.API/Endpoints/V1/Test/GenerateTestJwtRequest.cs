@@ -3,5 +3,5 @@
 public sealed record GenerateTestJwtRequest(
     Guid UserId, 
     string Email, 
-    string? DisplayName, 
+    string? UserDisplayName, 
     string[] Roles);

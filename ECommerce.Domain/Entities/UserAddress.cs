@@ -22,6 +22,10 @@ public sealed class UserAddress : BaseEntity
     public string PostalCode { get; private set; } = default!;
     public bool IsDefault { get; private set; }
 
+    public void ClearDefault() => IsDefault = false;
+
+    public void MarkAsDefault() => IsDefault = true;
+
     private UserAddress() { }
 
     public UserAddress(Guid userId, string recipientFirstName, string recipientLastName, string phoneNumber, string country, string city, string street, string postalCode, bool isDefault)

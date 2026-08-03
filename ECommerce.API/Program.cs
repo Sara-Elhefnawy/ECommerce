@@ -58,6 +58,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseRateLimiter();
+
 // Map ALL Health Check Endpoints
 app.MapApplicationHealthChecks();
 

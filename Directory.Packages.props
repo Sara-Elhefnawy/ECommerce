@@ -29,6 +29,9 @@
     <!-- ===== Fluent Validation for Mediator Pipeline ===== -->
     <PackageVersion Include="FluentValidation" Version="12.1.1" />
     <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+	<!-- ===== Email Service ===== -->
+	<PackageVersion Include="FluentEmail.Core" Version="3.0.2" />
+	<PackageVersion Include="FluentEmail.Smtp" Version="3.0.2" />
     <!-- ===== Others ===== -->
     <PackageVersion Include="CloudinaryDotNet" Version="1.29.2" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />

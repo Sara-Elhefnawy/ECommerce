@@ -22,7 +22,7 @@ public class TestEndpoint : IEndpoint
         var token = jwtTokenGenerator.GenerateToken(
             request.UserId,
             request.Email,
-            request.DisplayName,
+            request.UserDisplayName,
             request.Roles);
 
         return Results.Ok(token);

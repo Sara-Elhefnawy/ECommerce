@@ -53,7 +53,7 @@ public sealed class IdentitySeeder(
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
 
-            UserDisplayName = section["DisplayName"] ?? "Super Admin"
+            UserDisplayName = section["UserDisplayName"] ?? "Super Admin"
         };
 
         var result = await userManager.CreateAsync(user, password);
