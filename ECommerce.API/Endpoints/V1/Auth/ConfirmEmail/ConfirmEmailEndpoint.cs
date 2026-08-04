@@ -11,7 +11,7 @@ public sealed class ConfirmEmailEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
         => app.MapVersionedEndpoint("auth", ApiVersions.V1)
-            .MapGet("/confirm-email", Handle)
+            .MapPost("/confirm-email", Handle)
             .WithTags("Auth")
             .WithName("Email Confirmation")
             .WithGroupName("v1")

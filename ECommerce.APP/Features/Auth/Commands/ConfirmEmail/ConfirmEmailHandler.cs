@@ -2,6 +2,7 @@
 using ECommerce.APP.Identity;
 using ECommerce.APP.Mediator;
 using ECommerce.APP.Token;
+using ECommerce.APP.Token.RefreshTokens;
 using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
 
@@ -10,8 +11,9 @@ namespace ECommerce.APP.Features.Auth.Commands.ConfirmEmail;
 public sealed class ConfirmEmailHandler(
     IIdentityService identityService,
     IEmailVerification emailVerification,
-    IJwtTokenGenerator jwtTokenGenerator
-        ) : IRequestHandler<ConfirmEmailCommand, ResultOfT<AuthResponse>>
+    IJwtTokenGenerator jwtTokenGenerator,
+    IRefreshTokenService refreshTokenService
+    ) : IRequestHandler<ConfirmEmailCommand, ResultOfT<AuthResponse>>
 {
     public async Task<ResultOfT<AuthResponse>> Handle(
         ConfirmEmailCommand request,
@@ -49,12 +51,15 @@ public sealed class ConfirmEmailHandler(
             user.Email,
             user.UserDisplayName,
             roles);
+        var refreshToken = await refreshTokenService.IssueAsync(user.UserId, ct);
 
         return ResultOfT<AuthResponse>.Ok(new AuthResponse(
             user.UserId,
             user.Email,
             user.UserDisplayName,
             accessToken.AccessToken,
-            accessToken.ExpirationDate));
+            accessToken.ExpirationDate,
+            refreshToken.Token,
+            refreshToken.ExpiresAtUtc));
     }
 }

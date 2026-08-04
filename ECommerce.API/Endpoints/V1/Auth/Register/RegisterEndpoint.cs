@@ -11,7 +11,7 @@ public sealed class RegisterEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
         => app.MapVersionedEndpoint("auth", ApiVersions.V1)
-            .MapGet("/register", Handle)
+            .MapPost("/register", Handle)
             .WithTags("Auth")
             .WithName("Registeration")
             .WithGroupName("v1")

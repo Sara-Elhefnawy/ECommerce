@@ -2,6 +2,7 @@
 using ECommerce.APP.Email;
 using ECommerce.APP.Identity;
 using ECommerce.APP.Token;
+using ECommerce.APP.Token.RefreshTokens;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Infrastructure.Cachings;
 using ECommerce.Infrastructure.Email;
@@ -11,6 +12,7 @@ using ECommerce.Infrastructure.Persistent.Interceptors;
 using ECommerce.Infrastructure.Persistent.Repositories;
 using ECommerce.Infrastructure.Persistent.Seedings;
 using ECommerce.Infrastructure.Token;
+using ECommerce.Infrastructure.Token.RefreshTokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
@@ -68,6 +70,7 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IEmailVerification, EmailVerification>();
 

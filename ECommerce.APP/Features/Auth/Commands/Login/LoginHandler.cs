@@ -1,6 +1,7 @@
 ﻿using ECommerce.APP.Identity;
 using ECommerce.APP.Mediator;
 using ECommerce.APP.Token;
+using ECommerce.APP.Token.RefreshTokens;
 using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
 
@@ -8,8 +9,9 @@ namespace ECommerce.APP.Features.Auth.Commands.Login;
 
 public sealed class LoginHandler(
     IIdentityService identityService,
-    IJwtTokenGenerator jwtTokenGenerator
-        ) : IRequestHandler<LoginCommand, ResultOfT<AuthResponse>>
+    IJwtTokenGenerator jwtTokenGenerator,
+    IRefreshTokenService refreshTokenService
+    ) : IRequestHandler<LoginCommand, ResultOfT<AuthResponse>>
 {
     public async Task<ResultOfT<AuthResponse>> Handle(
         LoginCommand request,
@@ -37,12 +39,15 @@ public sealed class LoginHandler(
             user.Email,
             user.UserDisplayName,
             roles);
+        var refreshToken = await refreshTokenService.IssueAsync(user.UserId, ct);
 
         return ResultOfT<AuthResponse>.Ok(new AuthResponse(
             user.UserId,
             user.Email,
             user.UserDisplayName,
             accessToken.AccessToken,
-            accessToken.ExpirationDate));
+            accessToken.ExpirationDate,
+            refreshToken.Token,
+            refreshToken.ExpiresAtUtc));
     }
 }

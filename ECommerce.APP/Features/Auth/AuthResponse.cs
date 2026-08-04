@@ -5,4 +5,6 @@ public sealed record AuthResponse(
     string Email,
     string? UserDisplayName,
     string AccessToken,
-    DateTimeOffset ExpiresAtUtc);
+    DateTimeOffset ExpiresAtUtc,
+    string RefreshToken,
+    DateTimeOffset RefreshTokenExpiresAtUtc);
