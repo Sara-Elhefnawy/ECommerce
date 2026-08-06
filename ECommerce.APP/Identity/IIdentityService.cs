@@ -42,6 +42,16 @@ public interface IIdentityService
         Guid userId,
         CancellationToken ct = default);
 
+    Task<ResultOfT<AuthUserSnapshot>> AddRoleAsync(
+        Guid userId,
+        string role,
+        CancellationToken ct = default);
+
+    Task<ResultOfT<AuthUserSnapshot>> RemoveRoleAsync(
+        Guid userId,
+        string role,
+        CancellationToken ct = default);
+
     Task<Result> ResetPasswordAsync(
         Guid userId,
         string newPassword,

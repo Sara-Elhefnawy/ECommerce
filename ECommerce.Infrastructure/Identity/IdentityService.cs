@@ -8,7 +8,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ECommerce.Infrastructure.Identity;
 
-public sealed class IdentityService(UserManager<ApplicationUser> userManager) : IIdentityService
+public sealed class IdentityService(
+    UserManager<ApplicationUser> userManager,
+    RoleManager<ApplicationRole> roleManager) 
+    : IIdentityService
 {
     public async Task<ResultOfT<AuthUserSnapshot>> CreateUserAsync(
         string email,
@@ -201,5 +204,67 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
             return Result.Failure(
                 IdentityErrors.OperationFailed($"An unexpected error occurred: {ex.Message}"));
         }
+    }
+
+    public async Task<ResultOfT<AuthUserSnapshot>> AddRoleAsync(Guid userId, string role, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+
+        if (user == null)
+            return ResultOfT<AuthUserSnapshot>.Failure(IdentityErrors.UserNotFound);
+
+        if (!await roleManager.RoleExistsAsync(role))
+            return ResultOfT<AuthUserSnapshot>.Failure(
+                IdentityErrors.OperationFailed($"Role '{role}' does not exist."));
+
+        var userRoles = await userManager.GetRolesAsync(user);
+
+        if (userRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
+            return ResultOfT<AuthUserSnapshot>.Failure(
+                IdentityErrors.OperationFailed($"User already has the role '{role}'."));
+
+        var addResult = await userManager.AddToRoleAsync(user, role);
+
+        if (!addResult.Succeeded)
+            return ResultOfT<AuthUserSnapshot>.Failure(
+                IdentityErrors.OperationFailed(
+                    string.Join("; ", addResult.Errors.Select(e => e.Description))));
+
+        return ResultOfT<AuthUserSnapshot>.Ok(new AuthUserSnapshot(
+            user.Id,
+            user.Email!,
+            user.UserDisplayName
+            ));
+    }
+
+    public async Task<ResultOfT<AuthUserSnapshot>> RemoveRoleAsync(Guid userId, string role, CancellationToken ct = default)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+
+        if (user == null)
+            return ResultOfT<AuthUserSnapshot>.Failure(IdentityErrors.UserNotFound);
+
+        if (!await roleManager.RoleExistsAsync(role))
+            return ResultOfT<AuthUserSnapshot>.Failure(
+                IdentityErrors.OperationFailed($"Role '{role}' does not exist."));
+
+
+        var userRoles = await userManager.GetRolesAsync(user);
+
+        if (!userRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
+            return ResultOfT<AuthUserSnapshot>.Failure(
+                IdentityErrors.OperationFailed($"User does not have the role '{role}'."));
+
+        var removeResult = await userManager.RemoveFromRoleAsync(user, role);
+
+        if (!removeResult.Succeeded)
+            return ResultOfT<AuthUserSnapshot>.Failure(
+                IdentityErrors.OperationFailed(string.Join("; ", removeResult.Errors.Select(e => e.Description))));
+
+        return ResultOfT<AuthUserSnapshot>.Ok(new AuthUserSnapshot(
+            user.Id,
+            user.Email!,
+            user.UserDisplayName
+        ));
     }
 }
