@@ -14,7 +14,7 @@ builder.AddSerilogLogging();
 
 builder.Services.AddPresentation(builder.Configuration)
                 .AddInfrastructure(builder.Configuration)
-                .AddApp();
+                .AddApp(builder.Configuration);
 
 builder.Services.AddApplicationHealthChecks(
     builder.Configuration);

@@ -1,10 +1,15 @@
 ﻿using ECommerce.APP.Cachings;
+using ECommerce.APP.Cachings.Carts;
+using ECommerce.APP.Cachings.ResetPassword;
 using ECommerce.APP.Email;
 using ECommerce.APP.Identity;
+using ECommerce.APP.Settings;
 using ECommerce.APP.Token;
 using ECommerce.APP.Token.RefreshTokens;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Infrastructure.Cachings;
+using ECommerce.Infrastructure.Cachings.Carts;
+using ECommerce.Infrastructure.Cachings.ResetPassword;
 using ECommerce.Infrastructure.Email;
 using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.Persistent;
@@ -102,6 +107,8 @@ public static class DependencyInjection
 
         AddCartCaching(services, configuration);
 
+        services.AddScoped<IResetPasswordRepository, ResetPasswordRepository>();
+
         return services;
     }
 
@@ -144,6 +151,13 @@ public static class DependencyInjection
                 Expiration = TimeSpan.FromHours(1)              // L2 (Redis) — the real source of truth across instances/restarts
             };
         });
+
+        services.AddTransient<ICache<ResetPasswordToken>>(provider =>
+            new Cache<ResetPasswordToken>(
+                provider.GetRequiredService<HybridCache>(),
+                provider.GetRequiredService<IOptionsMonitor<CacheEntryPolicy>>()
+            )
+        );
 
         services.AddScoped(typeof(ICache<>), typeof(Cache<>));
         services.AddScoped<ICartRepository, CartRepository>();

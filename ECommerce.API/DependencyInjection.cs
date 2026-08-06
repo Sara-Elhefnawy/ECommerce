@@ -1,6 +1,6 @@
 ﻿using ECommerce.API.Middlewares;
 using ECommerce.APP.Features.Users.Commands.UpdateUser.Common;
-using ECommerce.APP.Token;
+using ECommerce.APP.Settings;
 using ECommerce.Domain.Abstractions.ImageCloudinary;
 using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.ImageCloudinary;

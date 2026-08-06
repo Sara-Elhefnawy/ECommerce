@@ -41,4 +41,9 @@ public interface IIdentityService
     Task<IReadOnlyList<string>> GetRolesAsync(
         Guid userId,
         CancellationToken ct = default);
+
+    Task<Result> ResetPasswordAsync(
+        Guid userId,
+        string newPassword,
+        CancellationToken ct = default);
 }

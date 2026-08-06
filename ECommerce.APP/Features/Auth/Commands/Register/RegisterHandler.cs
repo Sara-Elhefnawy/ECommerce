@@ -1,6 +1,7 @@
 ﻿using ECommerce.APP.Email;
 using ECommerce.APP.Identity;
 using ECommerce.APP.Mediator;
+using ECommerce.APP.Settings;
 using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
 using Microsoft.Extensions.Options;

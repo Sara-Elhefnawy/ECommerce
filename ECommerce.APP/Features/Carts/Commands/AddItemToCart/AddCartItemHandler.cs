@@ -1,4 +1,4 @@
-﻿using ECommerce.APP.Cachings;
+﻿using ECommerce.APP.Cachings.Carts;
 using ECommerce.APP.Features.Carts.Commands.AddItemToCart.ProductLookup;
 using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Features.Inventories.Queries;

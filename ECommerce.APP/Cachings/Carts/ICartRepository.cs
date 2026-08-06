@@ -1,6 +1,6 @@
 ﻿using ECommerce.Domain.Entities;
 
-namespace ECommerce.APP.Cachings;
+namespace ECommerce.APP.Cachings.Carts;
 
 public interface ICartRepository
 {

@@ -1,4 +1,4 @@
-﻿using ECommerce.APP.Token;
+﻿using ECommerce.APP.Settings;
 using ECommerce.APP.Token.RefreshTokens;
 using ECommerce.Domain.Entities;
 using ECommerce.Domain.Entities.Errors;

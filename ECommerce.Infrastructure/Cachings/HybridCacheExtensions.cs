@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
 
-namespace ECommerce.Infrastructure.Caching;
+namespace ECommerce.Infrastructure.Cachings;
 
 // HybridCache has no GetAsync() like Redis — only GetOrCreateAsync()
 // i created this extension method to for GetAsync() to get from cache

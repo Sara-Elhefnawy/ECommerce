@@ -1,4 +1,4 @@
-﻿namespace ECommerce.Infrastructure.Cachings;
+﻿namespace ECommerce.APP.Cachings;
 
 // is a marker interface for caching implementations (e.g., Redis, MemoryCache, etc.)
 // any caching implementation should implement this interface to be recognized as a cache provider in the application.

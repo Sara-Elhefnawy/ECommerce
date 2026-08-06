@@ -1,7 +1,8 @@
 ﻿using ECommerce.APP.Cachings;
+using ECommerce.APP.Cachings.Carts;
 using ECommerce.Domain.Entities;
 
-namespace ECommerce.Infrastructure.Cachings;
+namespace ECommerce.Infrastructure.Cachings.Carts;
 
 public class CartRepository(ICache<Cart> cache) : ICartRepository
 {

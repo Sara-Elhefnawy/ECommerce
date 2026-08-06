@@ -1,5 +1,4 @@
 ﻿using ECommerce.APP.Cachings;
-using ECommerce.Infrastructure.Caching;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Options;
 
@@ -130,28 +129,33 @@ public sealed class Cache<T>(HybridCache cache, IOptionsMonitor<CacheEntryPolicy
         DateTimeOffset createdAtUtc,
         DateTimeOffset lastAccessedAtUtc,
         DateTimeOffset utcNow
-        )
+    )
     {
-        var absoluteRemaining = createdAtUtc                 // account was created 10 days ago
-            .AddDays(_options.AbsoluteExpirationDays)        // AbsoluteExpirationDays is 30
-            .Subtract(utcNow);                               // remaining = createdAtUtc + AbsoluteExpirationDays - Today
+        // === MINUTE-BASED EXPIRATION (overrides day-based when set) ===
+        // Used by ResetPasswordToken (real config) and can be used by any
+        // type when AbsoluteExpirationMinutes is set in its Cache:<Name> section.
+        if (_options.AbsoluteExpirationMinutes > 0)
+        {
+            var expiresAt = createdAtUtc.AddMinutes(_options.AbsoluteExpirationMinutes);
+            var remaining = expiresAt.Subtract(utcNow);
+
+            return remaining <= TimeSpan.Zero ? null : remaining;
+        }
+
+        // === DAY-BASED EXPIRATION (absolute + sliding, e.g. Cart) ===
+        var absoluteRemaining = createdAtUtc
+            .AddDays(_options.AbsoluteExpirationDays)
+            .Subtract(utcNow);
 
         var slidingRemaining = lastAccessedAtUtc
             .AddDays(_options.SlidingExpirationDays)
             .Subtract(utcNow);
 
-        // check if they are negative
-        //      this will happen if user allowed 30 days but he opened cart on day 31
         if (absoluteRemaining <= TimeSpan.Zero || slidingRemaining <= TimeSpan.Zero)
             return null;
 
-        //            30         >=        7
         return absoluteRemaining >= slidingRemaining
-            ? absoluteRemaining         // return absolute to remove from cache
-            : slidingRemaining;         // return sliding 
-
-        // when sliding is bigger than absolute? 
-        // if user have 30 days but he accessed 2 days before absolute so sliding is added 7 days
-        //      then sliding is 30 - 2 + 7 
+            ? absoluteRemaining
+            : slidingRemaining;
     }
 }

@@ -160,4 +160,46 @@ public sealed class IdentityService(UserManager<ApplicationUser> userManager) : 
         var roles = await userManager.GetRolesAsync(user);
         return roles.ToList();
     }
+
+    // Resets a user's password to a new value.
+    // ASP.NET Core Identity requires generating a password reset token first,
+    // then using that token to reset the password. However, in a password reset flow,
+    // the token is managed by our application (stored in Redis), not Identity.
+    //      Solution: Use GeneratePasswordResetTokenAsync and ResetPasswordAsync together,
+    //      passing a dummy token that won't be validated (since we already validated our token).
+    public async Task<Result> ResetPasswordAsync(
+        Guid userId,
+        string newPassword,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var user = await userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null)
+                return Result.Failure(IdentityErrors.UserNotFound);
+
+            // Using Identity's Token-Based Reset
+            // Generate a password reset token from Identity
+            // This token is separate from our Redis-managed token
+            string identityToken = await userManager.GeneratePasswordResetTokenAsync(user);
+
+            // Reset the password using the Identity token
+            var result = await userManager.ResetPasswordAsync(user, identityToken, newPassword);
+
+            if (!result.Succeeded)
+            {
+                // Collect all Identity errors
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return Result.Failure(IdentityErrors.OperationFailed($"Password reset failed: {errors}"));
+            }
+
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(
+                IdentityErrors.OperationFailed($"An unexpected error occurred: {ex.Message}"));
+        }
+    }
 }

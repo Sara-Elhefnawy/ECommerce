@@ -1,4 +1,4 @@
-﻿namespace ECommerce.APP.Token;
+﻿namespace ECommerce.APP.Settings;
 
 public sealed class JwtSettings
 {

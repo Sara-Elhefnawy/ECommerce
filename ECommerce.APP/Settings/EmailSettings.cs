@@ -1,4 +1,4 @@
-﻿namespace ECommerce.APP.Email;
+﻿namespace ECommerce.APP.Settings;
 
 public sealed class EmailSettings
 {

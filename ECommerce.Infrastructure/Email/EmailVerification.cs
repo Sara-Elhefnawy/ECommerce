@@ -1,5 +1,6 @@
 ﻿using ECommerce.APP.Email;
-using ECommerce.Infrastructure.Caching;
+using ECommerce.APP.Settings;
+using ECommerce.Infrastructure.Cachings;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;

@@ -14,4 +14,6 @@ public class CacheEntryPolicy
     // only update LastAccessedUtc after the 30 minutes of SlidingRefreshThresholdMinutes
     // without this it will go to redis alot and that affect performance
     public int SlidingRefreshThresholdMinutes { get; set; } = 30;
+
+    public int AbsoluteExpirationMinutes { get; init; } = 0;
 }

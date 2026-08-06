@@ -1,4 +1,5 @@
-﻿using ECommerce.APP.Token;
+﻿using ECommerce.APP.Settings;
+using ECommerce.APP.Token;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
