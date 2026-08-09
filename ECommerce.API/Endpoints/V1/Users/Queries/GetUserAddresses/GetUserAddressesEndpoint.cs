@@ -4,6 +4,7 @@ using ECommerce.API.Extensions.Abstraction;
 using ECommerce.APP.Features.Users;
 using ECommerce.APP.Features.Users.Queries.GetUserAddresses;
 using ECommerce.APP.Mediator;
+using ECommerce.Domain.Constants;
 
 namespace ECommerce.API.Endpoints.V1.Users.Queries.GetUserAddresses;
 
@@ -19,7 +20,7 @@ public sealed class GetUserAddressesEndpoint : IEndpoint
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .WithDescription("Get the authenticated user's addresses.")
             .WithSummary("Get current user addresses")
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(Roles.User));
 
     public static async Task<IResult> Handle(
         IMediator mediator,

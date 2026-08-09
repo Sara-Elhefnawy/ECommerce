@@ -217,13 +217,18 @@ public sealed class IdentityService(
             return ResultOfT<AuthUserSnapshot>.Failure(
                 IdentityErrors.OperationFailed($"Role '{role}' does not exist."));
 
-        var userRoles = await userManager.GetRolesAsync(user);
+        if (!RoleHierarchy.Inherits.TryGetValue(role, out var rolesToGrant))
+            rolesToGrant = [role];
 
-        if (userRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
+        var currentRoles = await userManager.GetRolesAsync(user);
+
+        var rolesToAdd = rolesToGrant.Except(currentRoles, StringComparer.OrdinalIgnoreCase).ToList();
+
+        if (rolesToAdd.Count == 0)
             return ResultOfT<AuthUserSnapshot>.Failure(
-                IdentityErrors.OperationFailed($"User already has the role '{role}'."));
+                IdentityErrors.OperationFailed($"User already has the role '{role}' and everything it includes."));
 
-        var addResult = await userManager.AddToRoleAsync(user, role);
+        var addResult = await userManager.AddToRolesAsync(user, rolesToAdd);
 
         if (!addResult.Succeeded)
             return ResultOfT<AuthUserSnapshot>.Failure(
@@ -248,23 +253,28 @@ public sealed class IdentityService(
             return ResultOfT<AuthUserSnapshot>.Failure(
                 IdentityErrors.OperationFailed($"Role '{role}' does not exist."));
 
+        var currentRoles = await userManager.GetRolesAsync(user);
 
-        var userRoles = await userManager.GetRolesAsync(user);
-
-        if (!userRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
+        if (!currentRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
             return ResultOfT<AuthUserSnapshot>.Failure(
                 IdentityErrors.OperationFailed($"User does not have the role '{role}'."));
 
-        var removeResult = await userManager.RemoveFromRoleAsync(user, role);
+        if (!RoleHierarchy.Dependents.TryGetValue(role, out var rolesToRemove))
+            rolesToRemove = [role];
+
+        // Removing "Admin" from someone who never had "SuperAdmin" should just remove "Admin"
+        // Removing "Admin" from someone who had "SuperAdmin" should remove "Admin" and "SuperAdmin"
+        var actualRolesToRemove = rolesToRemove
+            .Intersect(currentRoles, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var removeResult = await userManager.RemoveFromRolesAsync(user, actualRolesToRemove);
 
         if (!removeResult.Succeeded)
             return ResultOfT<AuthUserSnapshot>.Failure(
                 IdentityErrors.OperationFailed(string.Join("; ", removeResult.Errors.Select(e => e.Description))));
 
         return ResultOfT<AuthUserSnapshot>.Ok(new AuthUserSnapshot(
-            user.Id,
-            user.Email!,
-            user.UserDisplayName
-        ));
+            user.Id, user.Email!, user.UserDisplayName));
     }
 }

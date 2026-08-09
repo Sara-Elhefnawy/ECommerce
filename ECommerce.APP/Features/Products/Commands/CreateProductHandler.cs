@@ -1,4 +1,5 @@
 ﻿using ECommerce.APP.Features.Brands.Queries.GetByName;
+using ECommerce.APP.Features.Products.Queries.GetProductByName;
 using ECommerce.APP.Features.Products.Validators;
 using ECommerce.APP.Features.Types.Queries.GetByName;
 using ECommerce.APP.Mediator;
@@ -42,6 +43,12 @@ public sealed class CreateProductHandler(
         {
             imageUrl = await cloudinaryService.UploadImageAsync(stream, request.ImageFileName, ct);
         }
+
+        var existing = await uow.Repository<Product>().FirstOrDefaultAsync(
+            new GetProductByNameSpecification(request.Name.ToUpperInvariant()), ct);
+
+        if (existing is not null)
+            return ProductErrors.AlreadyExists;
 
         var result = Product.Create(
             request.Name, request.Description, imageUrl,

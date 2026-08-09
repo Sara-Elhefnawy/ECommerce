@@ -1,7 +1,7 @@
 ﻿using ECommerce.API.Common;
 using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
-using ECommerce.APP.Features.Products.Queries.GetAll;
+using ECommerce.APP.Features.Products.Queries.GetPagination;
 using ECommerce.APP.Mediator;
 using FluentValidation;
 
@@ -15,7 +15,7 @@ public class GetProductsPaginationEndpoint : IEndpoint
             .WithTags("Products")
             .WithName("Get products with paginations")
             .WithGroupName("v1")
-            .Produces<ApiResponse<IReadOnlyList<GetAllProductsResponse>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<IReadOnlyList<GetProductsPaginatedResponse>>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Get products with paginations")
             .WithDescription("Returns paginated products in DB, or 404 if not found");

@@ -13,11 +13,17 @@ public static class VersionedEndpointExtensions
     public static RouteGroupBuilder MapVersionedEndpoint(
         this IEndpointRouteBuilder app,
         string path,
-        string version)
+        string version,
+        bool includeAudit = true)
     {
-        var versionPath = version.Split('.')[0]; ;
+        var versionPath = version.Split('.')[0];
 
-        return app.MapGroup($"/api/v{versionPath}/{path}")
-            .AddEndpointFilter<AuditEndpointFilter>();
+        var group = app.MapGroup($"/api/v{versionPath}/{path}");
+
+        // Health checks, and anything else not hit by real users, would otherwise
+        // flood the audit log with noise
+        return includeAudit
+            ? group.AddEndpointFilter<AuditEndpointFilter>()
+            : group;
     }
 }

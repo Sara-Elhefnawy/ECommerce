@@ -1,5 +1,4 @@
-﻿using ECommerce.APP.Features.Products.Queries.GetAll;
-using ECommerce.APP.Mediator;
+﻿using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Entities;
 using ECommerce.Domain.Results;
@@ -7,9 +6,9 @@ using ECommerce.Domain.Results;
 namespace ECommerce.APP.Features.Products.Queries.GetPagination;
 
 public sealed class GetProductsPaginationHandler(IReadRepository<Product> repository) :
-    IRequestHandler<GetProductsPaginationQuery, ResultOfT<PagedResult<GetAllProductsResponse>>>
+    IRequestHandler<GetProductsPaginationQuery, ResultOfT<PagedResult<GetProductsPaginatedResponse>>>
 {
-    public async Task<ResultOfT<PagedResult<GetAllProductsResponse>>> Handle(GetProductsPaginationQuery request, CancellationToken ct = default)
+    public async Task<ResultOfT<PagedResult<GetProductsPaginatedResponse>>> Handle(GetProductsPaginationQuery request, CancellationToken ct = default)
     {
         var countSpec = new GetProductsPaginationSpecification(request.SearchTerm, request.BrandId, request.TypeId);
 
@@ -19,6 +18,6 @@ public sealed class GetProductsPaginationHandler(IReadRepository<Product> reposi
 
         var items = await repository.ListAsync(listSpec, ct);
 
-        return ResultOfT<PagedResult<GetAllProductsResponse>>.Ok(new PagedResult<GetAllProductsResponse>(items, count, request.PageNumber, request.PageSize));
+        return ResultOfT<PagedResult<GetProductsPaginatedResponse>>.Ok(new PagedResult<GetProductsPaginatedResponse>(items, count, request.PageNumber, request.PageSize));
     }
 }

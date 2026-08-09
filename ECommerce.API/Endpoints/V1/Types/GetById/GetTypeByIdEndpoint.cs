@@ -25,10 +25,13 @@ public class GetTypeByIdEndpoint : IEndpoint
         HttpContext httpContext,
         CancellationToken ct = default)
     {
+        var result = await mediator.Send(new GetTypeByIdQuery(id), ct);
+
+        if (result.IsFailure)
+            return result.ToApiResult(httpContext, "");
+
         using (LoggingExtensions.WithTypeContext(id))
         {
-            var result = await mediator.Send(new GetTypeByIdQuery(id), ct);
-
             return result.ToApiResult(httpContext, "Retrieved type ID data successfully");
         }
     }

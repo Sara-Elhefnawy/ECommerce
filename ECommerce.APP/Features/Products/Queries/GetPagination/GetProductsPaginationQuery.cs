@@ -1,5 +1,4 @@
-﻿using ECommerce.APP.Features.Products.Queries.GetAll;
-using ECommerce.APP.Features.Products.Queries.GetPagination.Constants;
+﻿using ECommerce.APP.Features.Products.Queries.GetPagination.Constants;
 using ECommerce.APP.Features.Products.Queries.GetPagination.Enums;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Results;
@@ -14,4 +13,4 @@ public sealed record GetProductsPaginationQuery(
     Guid? TypeId = null,
     SortType? SortBy = null,
     bool IsSortDescending = false
-    ) : IRequest<ResultOfT<PagedResult<GetAllProductsResponse>>>;
+    ) : IRequest<ResultOfT<PagedResult<GetProductsPaginatedResponse>>>;

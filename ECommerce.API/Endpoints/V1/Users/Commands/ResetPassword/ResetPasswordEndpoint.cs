@@ -1,6 +1,5 @@
 ﻿using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
-using ECommerce.APP.Features.Users.Commands.ConfirmPasswordReset;
 using ECommerce.APP.Features.Users.Commands.ResetPassword;
 using ECommerce.APP.Mediator;
 
@@ -17,8 +16,7 @@ public sealed class ResetPasswordEndpoint : IEndpoint
             .Produces<ResetPasswordResponse>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .WithDescription("Resets the user's password using a reset token.")
-            .WithSummary("Reset password")
-            .AllowAnonymous();
+            .WithSummary("Reset password");
 
     public static async Task<IResult> Handle(
         ResetPasswordCommand command,

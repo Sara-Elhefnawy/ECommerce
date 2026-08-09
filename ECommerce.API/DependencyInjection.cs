@@ -47,8 +47,7 @@ public static class DependencyInjection
         // Add Cloudinary settings
         // services.Configure<CloudinarySettings>(...) was already correctly binding your user-secrets values to the class
         // this binding is only a safety net for the failure case
-        services
-            .AddOptions<CloudinarySettings>()
+        services.AddOptions<CloudinarySettings>()
             .Bind(configuration.GetSection("CloudinarySettings"))
             .ValidateDataAnnotations()   // needs the [Required] attributes in CloudinarySettings
             .ValidateOnStart();

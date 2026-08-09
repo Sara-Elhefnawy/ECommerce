@@ -1,6 +1,8 @@
-﻿using ECommerce.APP.Mediator;
+﻿using ECommerce.APP.Features.Brands.Queries.GetByName;
+using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Entities;
+using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
 
 namespace ECommerce.APP.Features.Brands.Commands;
@@ -18,6 +20,12 @@ public sealed class CreateBrandHandler(IUnitOfWork uow) :
             return result.Error!;
 
         var brandRepo = uow.Repository<ProductBrand>();
+
+        var brand = await brandRepo.FirstOrDefaultAsync(new GetBrandByNameSpecification(request.Name.ToUpperInvariant()), ct);
+
+        if (brand is not null)
+            return BrandErrors.AlreadyExists;
+
         brandRepo.Add(result.Value);
         await uow.SaveChangesAsync(ct);
 

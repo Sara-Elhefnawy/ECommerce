@@ -5,6 +5,7 @@ using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Carts.Commands.MergeGuestCart;
 using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Mediator;
+using ECommerce.Domain.Constants;
 
 namespace ECommerce.API.Endpoints.V1.Carts.MergeCarts;
 
@@ -18,7 +19,8 @@ public sealed class MergeCartsEndpoint : IEndpoint
             .WithGroupName("v1")
             .Produces<ApiResponse<GetCartResponse>>(StatusCodes.Status200OK)
             .WithSummary("Merge Carts")
-            .WithDescription("Merge guest's cart with the buyer's cart");
+            .WithDescription("Merge guest's cart with the buyer's cart")
+            .RequireAuthorization(policy => policy.RequireRole(Roles.User));
 
     public static async Task<IResult> Handle(
         MergeCartsRequest request,

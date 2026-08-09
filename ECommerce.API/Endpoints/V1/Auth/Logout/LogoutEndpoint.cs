@@ -2,6 +2,7 @@
 using ECommerce.API.Extensions.Abstraction;
 using ECommerce.APP.Features.Auth.Commands.Logout;
 using ECommerce.APP.Mediator;
+using ECommerce.Domain.Constants;
 
 namespace ECommerce.API.Endpoints.V1.Auth.Logout;
 
@@ -17,7 +18,7 @@ public sealed class LogoutEndpoint : IEndpoint
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .WithDescription("Revokes the provided refresh token.")
             .WithSummary("Logout")
-            .AllowAnonymous();
+            .RequireAuthorization(policy => policy.RequireRole(Roles.User));
 
     public static async Task<IResult> Handle(
         LogoutCommand command,

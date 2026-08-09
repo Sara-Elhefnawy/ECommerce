@@ -17,8 +17,7 @@ public sealed class ConfirmPasswordResetEndpoint : IEndpoint
             .Produces<ResultOfT<ConfirmPasswordResetResponse>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .WithDescription("Validates the password reset token and updates the user's password")
-            .WithSummary("Validates the password reset token and updates the user's password")
-            .AllowAnonymous();
+            .WithSummary("Validates the password reset token and updates the user's password");
 
     public static async Task<IResult> Handle(
         ConfirmPasswordResetCommand command,

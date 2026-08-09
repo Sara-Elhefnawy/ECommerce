@@ -31,8 +31,8 @@ public static class HealthCheckEndpointExtensions
         {
             Predicate = _ => true,
             ResponseWriter = HealthCheckResponseWriter.WriteResponse
-        });
-        //.RequireAuthorization("AdminOnly"); // 🔒 Protected!
+        })
+        .RequireAuthorization("SuperAdmin"); // 🔒 Protected!
 
         return app;
     }

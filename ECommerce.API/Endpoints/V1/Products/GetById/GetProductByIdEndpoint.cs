@@ -27,10 +27,13 @@ public class GetProductByIdEndpoint : IEndpoint
         CancellationToken ct = default
         )
     {
+        var result = await mediator.Send(new GetProductByIdQuery(id), ct);
+
+        if (result.IsFailure)
+            return result.ToApiResult(httpContext, "");
+
         using (LoggingExtensions.WithProductContext(id))
         {
-            var result = await mediator.Send(new GetProductByIdQuery(id), ct);
-
             return result.ToApiResult(httpContext, "Retrieved product ID data successfully");
         }
     }

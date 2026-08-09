@@ -4,6 +4,7 @@ using ECommerce.API.Extensions.Abstraction;
 using ECommerce.APP.Features.Users;
 using ECommerce.APP.Features.Users.Commands.AddUserAddersses;
 using ECommerce.APP.Mediator;
+using ECommerce.Domain.Constants;
 
 namespace ECommerce.API.Endpoints.V1.Users.Commands.AddUserAddersses;
 
@@ -20,7 +21,7 @@ public sealed class AddUserAddressesEndpoint : IEndpoint
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithDescription("Add the authenticated user's addresses.")
             .WithSummary("Add address for current user")
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(Roles.User));
 
     public static async Task<IResult> Handle(
         AddUserAddressesCommand command,

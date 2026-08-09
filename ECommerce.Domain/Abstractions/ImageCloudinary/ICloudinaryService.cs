@@ -9,4 +9,6 @@ public interface ICloudinaryService
     Task<string> UpdateImageAsync(Stream fileStream, string oldPublicId, string newFileName, CancellationToken ct = default);
 
     Task<bool> DeleteImageAsync(string publicId, CancellationToken ct = default);
+
+    Task<bool> PingAsync(CancellationToken ct = default);
 }

@@ -26,10 +26,13 @@ public class GetBrandByIdEndpoint : IEndpoint
         HttpContext httpContext,
         CancellationToken ct = default)
     {
+        var result = await mediator.Send(new GetBrandByIdQuery(id), ct);
+
+        if (result.IsFailure)
+            return result.ToApiResult(httpContext, "");
+
         using (LoggingExtensions.WithBrandContext(id))
         {
-            var result = await mediator.Send(new GetBrandByIdQuery(id), ct);
-
             return result.ToApiResult(httpContext, "Retrieved brand ID data successfully");
         }
     }

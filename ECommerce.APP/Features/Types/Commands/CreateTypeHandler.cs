@@ -1,6 +1,8 @@
-﻿using ECommerce.APP.Mediator;
+﻿using ECommerce.APP.Features.Types.Queries.GetByName;
+using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Entities;
+using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
 
 namespace ECommerce.APP.Features.Types.Commands;
@@ -18,6 +20,12 @@ public sealed class CreateTypeHandler(IUnitOfWork uow) :
             return result.Error!;
 
         var typeRepo = uow.Repository<ProductType>();
+
+        var type = await typeRepo.FirstOrDefaultAsync(new GetTypeByNameSpecification(request.Name.ToUpperInvariant()), ct);
+
+        if (type is not null)
+            return TypeErrors.AlreadyExists;
+
         typeRepo.Add(result.Value);
         await uow.SaveChangesAsync(ct);
 

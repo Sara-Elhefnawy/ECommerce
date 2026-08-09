@@ -4,6 +4,7 @@ using ECommerce.API.Extensions.Abstraction;
 using ECommerce.APP.Features.Users;
 using ECommerce.APP.Features.Users.Queries.GetUser;
 using ECommerce.APP.Mediator;
+using ECommerce.Domain.Constants;
 
 namespace ECommerce.API.Endpoints.V1.Users.Queries.GetUser;
 
@@ -19,7 +20,7 @@ public sealed class GetUserEndpoint : IEndpoint
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .WithDescription("Returns the authenticated user's profile.")
             .WithSummary("Get current user")
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(Roles.User));
 
     public static async Task<IResult> Handle(
         IMediator mediator,

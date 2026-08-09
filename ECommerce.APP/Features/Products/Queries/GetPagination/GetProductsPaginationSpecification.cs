@@ -1,11 +1,10 @@
-﻿using ECommerce.APP.Features.Products.Queries.GetAll;
-using ECommerce.APP.Features.Products.Queries.GetPagination.Enums;
+﻿using ECommerce.APP.Features.Products.Queries.GetPagination.Enums;
 using ECommerce.APP.Specifications;
 using ECommerce.Domain.Entities;
 
 namespace ECommerce.APP.Features.Products.Queries.GetPagination;
 
-public sealed class GetProductsPaginationSpecification : Specification<Product, GetAllProductsResponse>
+public sealed class GetProductsPaginationSpecification : Specification<Product, GetProductsPaginatedResponse>
 {
     public GetProductsPaginationSpecification(
         string? searchTerm = null,
@@ -85,7 +84,7 @@ public sealed class GetProductsPaginationSpecification : Specification<Product, 
                 .Take(size);
         }
 
-        Query.Select(p => new GetAllProductsResponse(
+        Query.Select(p => new GetProductsPaginatedResponse(
                     Id: p.Id,
                     Name: p.Name,
                     Description: p.Description,

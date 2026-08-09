@@ -58,6 +58,6 @@ public sealed class IdentitySeeder(
 
         var result = await userManager.CreateAsync(user, password);
         if (result.Succeeded)
-            await userManager.AddToRoleAsync(user, Roles.SuperAdmin);
+            await userManager.AddToRolesAsync(user, RoleHierarchy.Inherits[Roles.SuperAdmin]);
     }
 }

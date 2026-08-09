@@ -4,6 +4,7 @@ using ECommerce.API.Extensions.Abstraction;
 using ECommerce.APP.Features.Users;
 using ECommerce.APP.Features.Users.Commands.UpdateUser;
 using ECommerce.APP.Mediator;
+using ECommerce.Domain.Constants;
 
 namespace ECommerce.API.Endpoints.V1.Users.Commands.UpdateUser;
 
@@ -20,7 +21,7 @@ public sealed class UpdateUserEndpoint : IEndpoint
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .WithDescription("Updates the authenticated user's profile.")
             .WithSummary("Update current user profile")
-            .RequireAuthorization();
+            .RequireAuthorization(policy => policy.RequireRole(Roles.User));
 
     public static async Task<IResult> Handle(
         UpdateUserCommand command,

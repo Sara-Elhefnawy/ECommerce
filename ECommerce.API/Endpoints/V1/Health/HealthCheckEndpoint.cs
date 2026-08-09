@@ -1,5 +1,6 @@
 ﻿using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
+using ECommerce.Domain.Constants;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace ECommerce.API.Endpoints.V1.Health;
@@ -7,20 +8,16 @@ namespace ECommerce.API.Endpoints.V1.Health;
 public sealed class HealthCheckEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
-        => app.MapVersionedEndpoint("health", ApiVersions.V1)
+        => app.MapVersionedEndpoint("health", ApiVersions.V1, includeAudit: false)
             .MapGet("/", Handle)
             .WithTags("Health")
             .WithName("HealthCheck")
             .WithGroupName("v1")
             .Produces<HealthCheckResponse>(StatusCodes.Status200OK)
             .Produces<HealthCheckResponse>(StatusCodes.Status503ServiceUnavailable)
-
-            // infra/uptime monitors and admins hit this without a buyer/user token
-            // If you want it locked to admins only instead, swap .AllowAnonymous() for .RequireAuthorization("AdminOnly")
-            .AllowAnonymous()
-            
             .WithSummary("Health Check")
-            .WithDescription("Reports application health including database and Redis connectivity");
+            .WithDescription("Reports application health including database and Redis connectivity")
+            .RequireAuthorization(policy => policy.RequireRole(Roles.SuperAdmin));
 
     public static async Task<IResult> Handle(
         HealthCheckService healthCheckService,

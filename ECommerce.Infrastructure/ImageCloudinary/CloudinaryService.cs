@@ -144,4 +144,23 @@ public class CloudinaryService : ICloudinaryService
         // This simple version handles the common case.
         return publicId;
     }
+
+    public async Task<bool> PingAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            // Calls Cloudinary's Admin API ping endpoint.
+            // Verifies:
+            // - Cloudinary is reachable
+            // - Credentials are valid
+            // - API is responding
+            var result = await _cloudinary.PingAsync(ct);
+
+            return result.StatusCode == System.Net.HttpStatusCode.OK;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

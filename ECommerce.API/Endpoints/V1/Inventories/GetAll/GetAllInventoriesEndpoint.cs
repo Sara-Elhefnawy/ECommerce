@@ -3,6 +3,7 @@ using ECommerce.API.Extensions;
 using ECommerce.API.Extensions.Abstraction;
 using ECommerce.APP.Features.Inventories.Queries.GetAll;
 using ECommerce.APP.Mediator;
+using ECommerce.Domain.Constants;
 
 namespace ECommerce.API.Endpoints.V1.Inventories.GetAll;
 
@@ -16,7 +17,8 @@ public sealed class GetAllInventoriesEndpoint : IEndpoint
             .WithGroupName("v1")
             .Produces<ApiResponse<IReadOnlyList<GetAllInventoriesResponse>>>(StatusCodes.Status200OK)
             .WithSummary("Get inventories")
-            .WithDescription("Returns all inventories in DB");
+            .WithDescription("Returns all inventories in DB")
+            .RequireAuthorization(policy => policy.RequireRole(Roles.Manager));
 
     public static async Task<IResult> Handle(
         [AsParameters] GetAllInventoriesRequest request,

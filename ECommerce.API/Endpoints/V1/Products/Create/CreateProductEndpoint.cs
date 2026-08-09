@@ -4,6 +4,7 @@ using ECommerce.API.Extensions.Abstraction;
 using ECommerce.API.Serilog;
 using ECommerce.APP.Features.Products.Commands;
 using ECommerce.APP.Mediator;
+using ECommerce.Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce.API.Endpoints.V1.Products.Create;
@@ -23,7 +24,8 @@ public class CreateProductEndpoint : IEndpoint
             .WithSummary("Create  product")
             .WithDescription("Create product in DB, or 400 if validation fails or if BrandId/TypeId don't reference existing records")
             .Accepts<CreateProductRequest>("multipart/form-data")
-            .DisableAntiforgery();
+            .DisableAntiforgery()
+            .RequireAuthorization(policy => policy.RequireRole(Roles.Admin));
 
     public static async Task<IResult> Handle(
         [FromForm] CreateProductRequest request,  // Use [FromForm] for multipart/form-data
@@ -34,6 +36,9 @@ public class CreateProductEndpoint : IEndpoint
         var command = request.ToCommand();
 
         var result = await mediator.Send(command, ct);
+
+        if (result.IsFailure)
+            return result.ToApiResult(httpContext, "");
 
         using (LoggingExtensions.WithProductContext(result.Value.Id))
         {

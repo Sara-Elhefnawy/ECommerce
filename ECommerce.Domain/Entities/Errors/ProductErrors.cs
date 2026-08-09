@@ -30,6 +30,10 @@ public class ProductErrors
         "Product.InvalidType",
         "Valid product type is required.");
 
+    public static readonly Error AlreadyExists = Error.Validation(
+        "Product.AlreadyExists",
+        "Product already exists with that name.");
+
     // Add new image validation errors
     public static readonly Error InvalidPictureUrl = Error.Validation(
         "Product.InvalidPictureUrl",
