@@ -1,33 +1,42 @@
 ﻿using ECommerce.APP.Cachings;
 using ECommerce.APP.Cachings.Carts;
 using ECommerce.Domain.Entities;
+using ECommerce.Domain.Results;
 
 namespace ECommerce.Infrastructure.Cachings.Carts;
 
 public class CartRepository(ICache<Cart> cache) : ICartRepository
 {
-    public Task<Cart?> GetAsync(Guid buyerId, CancellationToken ct = default) 
+    public Task<ResultOfT<Cart?>> GetAsync(Guid buyerId, CancellationToken ct = default) 
         => cache.GetAsync(BuildCacheKey(buyerId), ct);
 
-    public Task<Cart> GetOrCreateAsync(Guid buyerId, CancellationToken ct = default)
-        => cache.GetOrCreateAsync(
-            BuildCacheKey(buyerId),
-            async cancellationToken =>     // if buyerId not found in cart then create it in cart?? what does it even mean?
-            {          
-                // if cart was saved in DB then he would call the DB here but it only save in cache 
-                var cartCreatedResult = Cart.CreateEmpty(buyerId);
+    public async Task<ResultOfT<Cart>> GetOrCreateAsync(Guid buyerId, CancellationToken ct = default)
+    {
+        var existing = await cache.GetAsync(BuildCacheKey(buyerId), ct);
 
-                if (cartCreatedResult.IsFailure)
-                    throw new InvalidOperationException(cartCreatedResult?.Error?.Message);
+        if (existing.IsFailure)
+            return existing.Error!;
 
-                return cartCreatedResult.Value;
-            },
-            ct);
+        if (existing.Value is not null)
+            return existing.Value;
 
-    public Task SaveAsync(Cart cart, CancellationToken ct = default)
+        var created = Cart.CreateEmpty(buyerId);
+
+        if (created.IsFailure)
+            return created.Error!;
+
+        var saveResult = await cache.SetAsync(BuildCacheKey(buyerId), created.Value, ct);
+
+        if (saveResult.IsFailure)
+            return saveResult.Error!;
+
+        return created.Value;
+    }
+
+    public Task<Result> SaveAsync(Cart cart, CancellationToken ct = default)
         => cache.SetAsync(BuildCacheKey(cart.BuyerId), cart, ct);
 
-    public Task DeleteAsync(Guid buyerId, CancellationToken ct = default)
+    public Task<Result> DeleteAsync(Guid buyerId, CancellationToken ct = default)
         => cache.RemoveAsync(BuildCacheKey(buyerId), ct);
 
     private static string BuildCacheKey(Guid buyerId) => $"cart:{buyerId}";

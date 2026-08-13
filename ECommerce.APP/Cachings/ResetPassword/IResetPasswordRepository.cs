@@ -1,17 +1,19 @@
-﻿namespace ECommerce.APP.Cachings.ResetPassword;
+﻿using ECommerce.Domain.Results;
+
+namespace ECommerce.APP.Cachings.ResetPassword;
 
 public interface IResetPasswordRepository
 {
-    public Task SaveAsync(
+    public Task<Result> SaveAsync(
         string hashedToken,
         Guid userId,
         CancellationToken ct = default);
 
-    Task<Guid?> GetUserIdAsync(
+    Task<ResultOfT<Guid?>> GetUserIdAsync(
         string hashedToken, 
         CancellationToken ct = default);
 
-    Task DeleteAsync(
+    Task<Result> DeleteAsync(
         string hashedToken,
         CancellationToken ct = default);
 }

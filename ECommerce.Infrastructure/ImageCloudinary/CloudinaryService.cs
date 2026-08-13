@@ -1,6 +1,8 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using ECommerce.Domain.Abstractions.ImageCloudinary;
+using ECommerce.Domain.Entities.Errors;
+using ECommerce.Domain.Results;
 using Microsoft.Extensions.Options;
 
 namespace ECommerce.Infrastructure.ImageCloudinary;
@@ -56,7 +58,7 @@ public class CloudinaryService : ICloudinaryService
         return await Task.FromResult(url);
     }
 
-    public async Task<string> UploadImageAsync(Stream fileStream, string fileName, CancellationToken ct = default)
+    public async Task<ResultOfT<string>> UploadImageAsync(Stream fileStream, string fileName, CancellationToken ct = default)
     {
         var uploadParams = new ImageUploadParams()
         {
@@ -69,10 +71,18 @@ public class CloudinaryService : ICloudinaryService
                 .FetchFormat("auto")
         };
 
-        var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+        ImageUploadResult uploadResult;
+        try
+        {
+            uploadResult = await _cloudinary.UploadAsync(uploadParams, ct); // ct now actually used — check your SDK version has this overload
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return CloudinaryErrors.UploadFailed;
+        }
 
         if (uploadResult.Error != null)
-            throw new InvalidOperationException($"Cloudinary upload failed: {uploadResult.Error.Message}");
+            return CloudinaryErrors.UploadFailed;
 
 
         // Return the secure URL that can be stored in the database
@@ -81,18 +91,27 @@ public class CloudinaryService : ICloudinaryService
         return uploadResult.SecureUrl.ToString();
     }
 
-    public async Task<string> UpdateImageAsync(Stream fileStream, string oldPublicId, string newFileName, CancellationToken ct = default)
+    public async Task<ResultOfT<string>> UpdateImageAsync(Stream fileStream, string oldPublicId, string newFileName, CancellationToken ct = default)
     {
-        await DeleteImageAsync(oldPublicId, ct);
+        var deleteResult = await DeleteImageAsync(oldPublicId, ct);
+
+        if (deleteResult.IsFailure)
+            return deleteResult.Error!;
 
         return await UploadImageAsync(fileStream, newFileName, ct);
     }
 
-    public async Task<bool> DeleteImageAsync(string publicId, CancellationToken ct = default)
+    public async Task<ResultOfT<bool>> DeleteImageAsync(string publicId, CancellationToken ct = default)
     {
-        var deletionParams = new DeletionParams(publicId);
-        var result = await _cloudinary.DestroyAsync(deletionParams);
-        return result.Result is "ok";
+        try
+        {
+            var result = await _cloudinary.DestroyAsync(new DeletionParams(publicId));
+            return result.Result is "ok";
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return CloudinaryErrors.DeleteFailed;
+        }
     }
 
     /// <summary>

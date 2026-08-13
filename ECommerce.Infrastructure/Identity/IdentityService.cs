@@ -5,12 +5,14 @@ using ECommerce.Domain.Constants;
 using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace ECommerce.Infrastructure.Identity;
 
 public sealed class IdentityService(
     UserManager<ApplicationUser> userManager,
-    RoleManager<ApplicationRole> roleManager) 
+    RoleManager<ApplicationRole> roleManager,
+    ILogger<IdentityService> logger) 
     : IIdentityService
 {
     public async Task<ResultOfT<AuthUserSnapshot>> CreateUserAsync(
@@ -37,7 +39,7 @@ public sealed class IdentityService(
             }
 
             var message = string.Join(" ", result.Errors.Select(e => e.Description));
-            return ResultOfT<AuthUserSnapshot>.Failure(IdentityErrors.OperationFailed(message));
+            return ResultOfT<AuthUserSnapshot>.Failure(IdentityErrors.IdentityValidationFailed(message));
         }
 
         await userManager.AddToRoleAsync(user, Roles.User);
@@ -116,7 +118,7 @@ public sealed class IdentityService(
         if (!result.Succeeded)
         {
             var message = string.Join(" ", result.Errors.Select(e => e.Description));
-            return ResultOfT<AuthUserSnapshot>.Failure(IdentityErrors.OperationFailed(message));
+            return ResultOfT<AuthUserSnapshot>.Failure(IdentityErrors.IdentityValidationFailed(message));
         }
 
         return ResultOfT<AuthUserSnapshot>.Ok(
@@ -140,7 +142,7 @@ public sealed class IdentityService(
 
         return result.Succeeded
             ? Result.Ok()
-            : Result.Failure(IdentityErrors.OperationFailed(
+            : Result.Failure(IdentityErrors.IdentityValidationFailed(
                 string.Join(" ", result.Errors.Select(e => e.Description))));
     }
 
@@ -194,15 +196,16 @@ public sealed class IdentityService(
             {
                 // Collect all Identity errors
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return Result.Failure(IdentityErrors.OperationFailed($"Password reset failed: {errors}"));
+                return Result.Failure(IdentityErrors.IdentityValidationFailed($"Password reset failed: {errors}"));
             }
 
             return Result.Ok();
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Unexpected error resetting password for user {UserId}", userId);
             return Result.Failure(
-                IdentityErrors.OperationFailed($"An unexpected error occurred: {ex.Message}"));
+                IdentityErrors.UnexpectedFailure);
         }
     }
 
@@ -215,7 +218,7 @@ public sealed class IdentityService(
 
         if (!await roleManager.RoleExistsAsync(role))
             return ResultOfT<AuthUserSnapshot>.Failure(
-                IdentityErrors.OperationFailed($"Role '{role}' does not exist."));
+                IdentityErrors.RoleDoesNotExist(role));
 
         if (!RoleHierarchy.Inherits.TryGetValue(role, out var rolesToGrant))
             rolesToGrant = [role];
@@ -226,13 +229,13 @@ public sealed class IdentityService(
 
         if (rolesToAdd.Count == 0)
             return ResultOfT<AuthUserSnapshot>.Failure(
-                IdentityErrors.OperationFailed($"User already has the role '{role}' and everything it includes."));
+                IdentityErrors.RoleAlreadyGranted(role));
 
         var addResult = await userManager.AddToRolesAsync(user, rolesToAdd);
 
         if (!addResult.Succeeded)
             return ResultOfT<AuthUserSnapshot>.Failure(
-                IdentityErrors.OperationFailed(
+                IdentityErrors.IdentityValidationFailed(
                     string.Join("; ", addResult.Errors.Select(e => e.Description))));
 
         return ResultOfT<AuthUserSnapshot>.Ok(new AuthUserSnapshot(
@@ -251,13 +254,13 @@ public sealed class IdentityService(
 
         if (!await roleManager.RoleExistsAsync(role))
             return ResultOfT<AuthUserSnapshot>.Failure(
-                IdentityErrors.OperationFailed($"Role '{role}' does not exist."));
+                IdentityErrors.RoleDoesNotExist(role));
 
         var currentRoles = await userManager.GetRolesAsync(user);
 
         if (!currentRoles.Contains(role, StringComparer.OrdinalIgnoreCase))
             return ResultOfT<AuthUserSnapshot>.Failure(
-                IdentityErrors.OperationFailed($"User does not have the role '{role}'."));
+                IdentityErrors.RoleNotAssigned(role));
 
         if (!RoleHierarchy.Dependents.TryGetValue(role, out var rolesToRemove))
             rolesToRemove = [role];
@@ -272,7 +275,7 @@ public sealed class IdentityService(
 
         if (!removeResult.Succeeded)
             return ResultOfT<AuthUserSnapshot>.Failure(
-                IdentityErrors.OperationFailed(string.Join("; ", removeResult.Errors.Select(e => e.Description))));
+                IdentityErrors.IdentityValidationFailed(string.Join("; ", removeResult.Errors.Select(e => e.Description))));
 
         return ResultOfT<AuthUserSnapshot>.Ok(new AuthUserSnapshot(
             user.Id, user.Email!, user.UserDisplayName));

@@ -35,9 +35,9 @@ public static class IdentityErrors
             "Email address is already confirmed.");
 
     public static readonly Error EmailSendFailed =
-        Error.Failure(
+        Error.Unavailable(
             "Identity.EmailSendFailed",
-            "Failed to send the verification email. Please try again later.");
+            "Our email service is currently unavailable. Please try again later.");
 
     public static readonly Error InvalidRefreshToken =
         Error.UnAuthorized(
@@ -49,6 +49,45 @@ public static class IdentityErrors
             "Identity.RefreshTokenExpired",
             "Refresh token has expired. Please sign in again.");
 
-    public static Error OperationFailed(string message) =>
-        Error.Validation("Identity.OperationFailed", message);
+    public static Error IdentityValidationFailed(string details) =>
+        Error.Validation(
+            "Identity.ValidationFailed", 
+            details);
+
+    public static Error RoleDoesNotExist(string role) =>
+        Error.NotFound(
+            "Identity.RoleDoesNotExist", 
+            $"Role '{role}' does not exist.");
+
+    public static Error RoleAlreadyGranted(string role) =>
+        Error.Conflict(
+            "Identity.RoleAlreadyGranted", 
+            $"User already has the role '{role}' and everything it includes.");
+
+    public static Error RoleNotAssigned(string role) =>
+        Error.Conflict(
+            "Identity.RoleNotAssigned", 
+            $"User does not have the role '{role}'.");
+
+    public static readonly Error UnexpectedFailure =
+        Error.Failure(
+            "Identity.UnexpectedFailure", 
+            "An unexpected error occurred. Please try again later.");
+
+    public static Error InvalidResetInput(string message) =>
+        Error.Validation(
+            "Identity.InvalidResetInput", 
+            message);
+
+    // don't split these into more specific errors later without checking whether doing
+    // so would let an attacker distinguish "expired token" from "token/email mismatch,"
+    public static readonly Error InvalidOrExpiredResetLink =
+        Error.Validation(
+            "Identity.InvalidOrExpiredResetLink", 
+            "This password reset link is invalid or has expired.");
+
+    public static readonly Error RegistrationAlreadyStarted =
+        Error.Conflict(
+            "Identity.RegistrationAlreadyStarted",
+            "An account with this email already exists but hasn't been confirmed yet. Use the resend-verification endpoint to get a new code.");
 }

@@ -22,4 +22,7 @@ public sealed record Error(string Code, string Message, ErrorTypes Type)
 
     public static Error Failure(string code, string message)
         => new(code, message, ErrorTypes.Failure);
+
+    public static Error Unavailable(string code, string message)
+    => new(code, message, ErrorTypes.Unavailable);
 }

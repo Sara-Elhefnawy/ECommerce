@@ -152,13 +152,6 @@ public static class DependencyInjection
             };
         });
 
-        services.AddTransient<ICache<ResetPasswordToken>>(provider =>
-            new Cache<ResetPasswordToken>(
-                provider.GetRequiredService<HybridCache>(),
-                provider.GetRequiredService<IOptionsMonitor<CacheEntryPolicy>>()
-            )
-        );
-
         services.AddScoped(typeof(ICache<>), typeof(Cache<>));
         services.AddScoped<ICartRepository, CartRepository>();
     }

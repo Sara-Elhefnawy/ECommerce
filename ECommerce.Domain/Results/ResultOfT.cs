@@ -28,6 +28,7 @@ public sealed class ResultOfT<T> : Result
     public new static ResultOfT<T> Unauthorized(Error error) => new(default, false, ResultTypes.Unauthorized, error);
     public new static ResultOfT<T> Forbidden(Error error) => new(default, false, ResultTypes.Forbidden, error);
     public new static ResultOfT<T> Failure(Error error) => new(default, false, ResultTypes.BadRequest, error);
+    public new static ResultOfT<T> Unavailable(Error error) => new(default, false, ResultTypes.Unavailable, error);
 
     // Implicit conversions for convenience: 
 
@@ -54,6 +55,7 @@ public sealed class ResultOfT<T> : Result
             ErrorTypes.UnAuthorized => Unauthorized(error),
             ErrorTypes.Forbidden => Forbidden(error),
             ErrorTypes.Failure => Failure(error),
+            ErrorTypes.Unavailable => Failure(error),
             _ => BadRequest(error)
         };
     }

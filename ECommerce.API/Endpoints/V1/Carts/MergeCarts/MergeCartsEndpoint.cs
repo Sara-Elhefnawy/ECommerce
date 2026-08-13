@@ -23,23 +23,29 @@ public sealed class MergeCartsEndpoint : IEndpoint
             .RequireAuthorization(policy => policy.RequireRole(Roles.User));
 
     public static async Task<IResult> Handle(
-        MergeCartsRequest request,
         IMediator mediator,
         HttpContext httpContext,
         CancellationToken ct = default)
     {
+        // Authenticated user's BuyerId comes from JWT.
         var buyerIdResult = httpContext.GetBuyerId();
 
         if (buyerIdResult.IsFailure)
             return buyerIdResult.ToApiResult(httpContext, "");
 
+        // Guest cart's BuyerId comes from X-Buyer-Id.
+        var anonymousBuyerIdResult = httpContext.GetBuyerIdHeader();
+
+        if (anonymousBuyerIdResult.IsFailure)
+            return anonymousBuyerIdResult.ToApiResult(httpContext, "");
+
         using (LoggingExtensions.WithCartContext(
             buyerIdResult.Value,
-            request.AnonymousBuyerId))
+            anonymousBuyerIdResult.Value))
         {
             var command = new MergeCartCommand(
                 buyerIdResult.Value,
-                request.AnonymousBuyerId);
+                anonymousBuyerIdResult.Value);
 
             var result = await mediator.Send(command, ct);
 

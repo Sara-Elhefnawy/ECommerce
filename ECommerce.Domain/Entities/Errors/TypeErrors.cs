@@ -30,9 +30,4 @@ public static class TypeErrors
     public static readonly Error AlreadyExists = Error.Conflict(
         "Type.AlreadyExists",
         "A type with this name already exists.");
-
-    // Failure Errors (500)
-    public static readonly Error DatabaseError = Error.Failure(
-        "Type.DatabaseError",
-        "An error occurred while accessing the database.");
 }

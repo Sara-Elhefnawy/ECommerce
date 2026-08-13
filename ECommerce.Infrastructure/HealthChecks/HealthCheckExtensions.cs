@@ -15,8 +15,6 @@ public static class HealthCheckExtensions
         var connectionString = configuration.GetConnectionString("DefaultConnection")!;
         var timeoutSeconds = configuration.GetValue<int>("HealthChecksSettings:TimeoutSeconds");
 
-        services.AddHttpClient<BrevoHealthCheck>();
-
         services.AddHealthChecks()
                     // Checks if the application is running
                     // Used by: Kubernetes liveness probe

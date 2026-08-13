@@ -1,6 +1,7 @@
-﻿using ECommerce.Domain.Entities;
+﻿using ECommerce.APP.Features.Carts.Queries.GetCart;
+using ECommerce.Domain.Entities;
 
-namespace ECommerce.APP.Features.Carts.Queries.GetCart;
+namespace ECommerce.APP.Features.Carts;
 
 public static class GetCartMapper
 {

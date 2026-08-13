@@ -3,7 +3,7 @@ using ECommerce.Domain.Results;
 
 namespace ECommerce.Domain.Entities.Errors;
 
-public class ProductErrors
+public static class ProductErrors
 {
     public static readonly Error InvalidCount = Error.Validation(
         "Product.InvalidCount",
@@ -30,7 +30,7 @@ public class ProductErrors
         "Product.InvalidType",
         "Valid product type is required.");
 
-    public static readonly Error AlreadyExists = Error.Validation(
+    public static readonly Error AlreadyExists = Error.Conflict(
         "Product.AlreadyExists",
         "Product already exists with that name.");
 
@@ -59,22 +59,4 @@ public class ProductErrors
     public static readonly Error NotFound = Error.NotFound(
         "Product.NotFound",
         "The requested product was not found.");
-
-    // Authorization Errors (401/403)
-    public static readonly Error UnauthorizedAccess = Error.UnAuthorized(
-        "Product.Unauthorized",
-        "You must be logged in to perform this action.");
-
-    public static readonly Error ForbiddenAccess = Error.Forbidden(
-        "Product.Forbidden",
-        "You don't have permission to perform this action.");
-
-    // Failure Errors (500)
-    public static readonly Error DatabaseError = Error.Failure(
-        "Product.DatabaseError",
-        "An error occurred while accessing the database.");
-
-    public static readonly Error ExternalServiceError = Error.Failure(
-        "Product.ExternalServiceError",
-        "An error occurred while calling an external service.");
 }

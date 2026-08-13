@@ -22,15 +22,13 @@ public sealed class RegisterHandler(
     public const string RegisteredMessage =
         "Registration successful. A verification code was sent to your email. Confirm your email before logging in.";
 
-    public const string UnconfirmedResendMessage =
-        "This email is registered but not confirmed. A new verification code was sent to your email.";
-
     public async Task<ResultOfT<EmailSentResponse>> Handle(
         RegisterCommand request,
         CancellationToken ct = default)
     {
         var email = request.Email.Trim();
 
+        // prevents duplicate/orphaned registrations
         var existing = await identityService.GetUserByEmailAsync(email, ct);
         if (existing.IsSuccess)
         {
@@ -38,12 +36,8 @@ public sealed class RegisterHandler(
             if (await identityService.IsEmailConfirmedAsync(email, ct))
                 return ResultOfT<EmailSentResponse>.Failure(IdentityErrors.EmailAlreadyExists);
 
-            // Exists but not confirmed → 200 + clear message + fresh code
-            return await SendVerificationAsync(
-                email,
-                verificationCodeResent: true,
-                UnconfirmedResendMessage,
-                ct);
+            return ResultOfT<EmailSentResponse>.Failure(
+                IdentityErrors.RegistrationAlreadyStarted);
         }
 
         var createResult = await identityService.CreateUserAsync(
@@ -55,27 +49,13 @@ public sealed class RegisterHandler(
         if (createResult.IsFailure)
             return ResultOfT<EmailSentResponse>.Failure(createResult.Error!);
 
-        return await SendVerificationAsync(
-            email,
-            verificationCodeResent: false,
-            RegisteredMessage,
-            ct);
-    }
-
-    private async Task<ResultOfT<EmailSentResponse>> SendVerificationAsync(
-        string email,
-        bool verificationCodeResent,
-        string message,
-        CancellationToken ct = default)
-    {
-        // confirm email code generation
         var length = settings.Value.CodeLength;
 
         if (length is < 4 or > 10)
             length = 6;
 
         var max = (int)Math.Pow(10, length);
-       
+
         var code = RandomNumberGenerator.GetInt32(0, max).ToString($"D{length}");
 
         // send code to verifiy email
@@ -91,6 +71,6 @@ public sealed class RegisterHandler(
             return ResultOfT<EmailSentResponse>.Failure(sendResult.Error!);
 
         return ResultOfT<EmailSentResponse>.Ok(
-            new EmailSentResponse(email, verificationCodeResent, message));
+            new EmailSentResponse(email, VerificationCodeResent: false, RegisteredMessage));
     }
 }

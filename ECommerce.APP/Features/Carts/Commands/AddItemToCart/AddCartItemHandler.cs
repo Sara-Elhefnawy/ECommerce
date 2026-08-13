@@ -39,7 +39,10 @@ public sealed class AddCartItemHandler(
 
         var cart = await repo.GetOrCreateAsync(request.BuyerId, ct);
 
-        var existingQuantity = cart
+        if (cart.IsFailure)
+            return ResultOfT<GetCartResponse>.Failure(cart.Error!);
+
+        var existingQuantity = cart.Value
             .Items
             .FirstOrDefault(i => i.ProductId == request.ProductId)
                 ?.Quantity ?? 0;
@@ -48,14 +51,14 @@ public sealed class AddCartItemHandler(
             return ResultOfT<GetCartResponse>.Failure(
                 InventoryErrors.NotEnoughStock);
 
-        var addResult = cart.AddItem(
+        var addResult = cart.Value.AddItem(
             product.Id, product.Name, product.PictureUrl, product.Price, request.Quantity);
 
         if (addResult.IsFailure)
             return ResultOfT<GetCartResponse>.Failure(addResult.Error!);
 
-        await repo.SaveAsync(cart, ct);
+        await repo.SaveAsync(cart.Value, ct);
 
-        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart));
+        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart.Value));
     }
 }

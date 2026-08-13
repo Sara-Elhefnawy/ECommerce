@@ -5,7 +5,6 @@ using System.Net.Sockets;
 namespace ECommerce.Infrastructure.HealthChecks;
 
 public sealed class BrevoHealthCheck(
-    HttpClient httpClient, 
     IConfiguration configuration) 
     : IHealthCheck
 {

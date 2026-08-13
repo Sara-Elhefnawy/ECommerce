@@ -10,4 +10,5 @@ public enum ResultTypes
     Forbidden = 403,
     NotFound = 404,
     Conflict = 409,
+    Unavailable = 503
 }

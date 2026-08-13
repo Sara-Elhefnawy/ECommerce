@@ -48,10 +48,13 @@ public sealed class ResetPasswordHandler(
     {
         var token = GenerateToken();
 
-        await resetPasswordRepository.SaveAsync(
+        var saveResult = await resetPasswordRepository.SaveAsync(
             HashToken(token),
             user.UserId,
             ct);
+
+        if (saveResult.IsFailure)
+            return saveResult;
 
         var resetLink =
             $"{settings.Value.FrontendResetPasswordUrl}?token={HttpUtility.UrlEncode(token)}";

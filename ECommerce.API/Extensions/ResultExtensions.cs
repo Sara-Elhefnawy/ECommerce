@@ -117,6 +117,7 @@ public static class ResultExtensions
             ErrorTypes.Conflict => (StatusCodes.Status409Conflict, "Conflict"),
             ErrorTypes.UnAuthorized => (StatusCodes.Status401Unauthorized, "Unauthorized"),
             ErrorTypes.Forbidden => (StatusCodes.Status403Forbidden, "Forbidden"),
+            ErrorTypes.Unavailable => (StatusCodes.Status503ServiceUnavailable, "Service Unavailable"),
             _ => (StatusCodes.Status500InternalServerError, "Internal Server Error")
         };
 

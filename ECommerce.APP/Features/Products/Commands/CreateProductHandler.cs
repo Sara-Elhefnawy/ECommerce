@@ -41,7 +41,11 @@ public sealed class CreateProductHandler(
         string imageUrl;
         using (var stream = request.ImageStream)
         {
-            imageUrl = await cloudinaryService.UploadImageAsync(stream, request.ImageFileName, ct);
+            var uploadResult = await cloudinaryService.UploadImageAsync(stream, request.ImageFileName, ct);
+            if (uploadResult.IsFailure)
+                return uploadResult.Error!;
+
+            imageUrl = uploadResult.Value;
         }
 
         var existing = await uow.Repository<Product>().FirstOrDefaultAsync(

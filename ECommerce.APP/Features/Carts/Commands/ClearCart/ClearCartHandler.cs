@@ -1,4 +1,5 @@
 ﻿using ECommerce.APP.Cachings.Carts;
+using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Results;
 
@@ -14,10 +15,13 @@ public sealed class ClearCartHandler(
     {
         var cart = await repo.GetOrCreateAsync(request.BuyerId, cancellationToken);
 
-        cart.Clear();
+        if (cart.IsFailure)
+            return ResultOfT<GetCartResponse>.Failure(cart.Error!);
 
-        await repo.SaveAsync(cart, cancellationToken);
+        cart.Value.Clear();
 
-        return Result.Ok();
+        await repo.SaveAsync(cart.Value, cancellationToken);
+
+        return Result.NoContent();
     }
 }

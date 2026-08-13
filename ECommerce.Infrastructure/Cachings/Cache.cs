@@ -1,35 +1,58 @@
 ﻿using ECommerce.APP.Cachings;
+using ECommerce.Domain.Entities.Errors;
+using ECommerce.Domain.Results;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace ECommerce.Infrastructure.Cachings;
 
-public sealed class Cache<T>(HybridCache cache, IOptionsMonitor<CacheEntryPolicy> options) : ICache<T> where T : class
+public sealed class Cache<T>(
+    HybridCache cache, 
+    IOptionsMonitor<CacheEntryPolicy> options,
+    ILogger<Cache<T>> logger) 
+    : ICache<T> where T : class
 {
     // T is the is Basket that is in appsettings
     private readonly CacheEntryPolicy _options = options.Get(typeof(T).Name);
 
-    public async Task<T?> GetAsync(string cacheKey, CancellationToken ct = default)
+    public async Task<ResultOfT<T?>> GetAsync(string cacheKey, CancellationToken ct = default)
     {
-        // envelop contains the data in CacheEnvelope (all data in cart + CreatedAtUtc + LastAccessedUtc)
-        var envelop = await cache.TryGetAsync<CacheEnvelope<T>>(cacheKey, ct);
-
-        return envelop?.Payload;
+        try
+        {
+            // envelop contains the data in CacheEnvelope (all data in cart + CreatedAtUtc + LastAccessedUtc)
+            var envelop = await cache.TryGetAsync<CacheEnvelope<T>>(cacheKey, ct);
+            return ResultOfT<T?>.Ok(envelop?.Payload);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Cache read failed for key {CacheKey}", cacheKey);
+            return CacheErrors.OperationFailed;
+        }
     }
 
     // if found the key then return it and update LastAccessedUtc
     //      check SlidingRefreshThresholdMinutes before updating LastAccessedUtc
     //      if 30 minutes of SlidingRefreshThresholdMinutes passed then update LastAccessedUtc
     // if not then create and update CreatedAtUtc
-    public async Task<T> GetOrCreateAsync(string cacheKey, Func<CancellationToken, Task<T>> factory, CancellationToken ct = default)
+    public async Task<ResultOfT<T>> GetOrCreateAsync(string cacheKey, Func<CancellationToken, Task<T>> factory, CancellationToken ct = default)
     {
-        var envelop = await cache.GetOrCreateAsync(
+        // Deliberately OUTSIDE the try/catch below: this can throw for a
+        // business-rule reason ("user is only allowed 30 days but he opened
+        // cart on day 31"), not because Redis is down. Letting it propagate
+        // keeps that distinct from CacheErrors.OperationFailed — don't merge
+        // these two catches later without re-checking this.
+        CacheEnvelope<T> envelop;
+
+        try
+        {
+            envelop = await cache.GetOrCreateAsync(
                 cacheKey,
-                async ct =>    // if key not found
+                async innerCt =>    // if key not found
                 {
                     // call the factory function that takes CancellationToken
                     // that return the key value from DB
-                    var value = await factory(ct);
+                    var value = await factory(innerCt);
 
                     var utcNow = DateTimeOffset.UtcNow;
 
@@ -39,31 +62,62 @@ public sealed class Cache<T>(HybridCache cache, IOptionsMonitor<CacheEntryPolicy
                 CreateEntryOptionsForNewEnvelopInCache(),  // if key not found
                 cancellationToken: ct
             );
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // NOTE: this also catches an exception thrown by `factory` itself
+            // (e.g. a DB error looking up the value on a cache miss) — HybridCache
+            // doesn't let us tell "Redis is down" and "the DB lookup failed"
+            // apart here. If that distinction matters to you later, `factory`
+            // needs to catch its own failures before they reach this catch.
+            logger.LogError(ex, "Cache get-or-create failed for key {CacheKey}", cacheKey);
+            return CacheErrors.OperationFailed;
+        }
 
-        // before updating LastAccessedUtc i must ensure SlidingRefreshThresholdMinutes has passed
-        await RefreshExpirationIfNeededAsync(cacheKey, envelop, ct);
+        var refreshResult = await RefreshExpirationIfNeededAsync(cacheKey, envelop, ct);
+        if (refreshResult.IsFailure)
+            return refreshResult.Error!;
 
         return envelop.Payload;
     }
 
-    public async Task SetAsync(string cacheKey, T value, CancellationToken ct = default)
+    public async Task<Result> SetAsync(string cacheKey, T value, CancellationToken ct = default)
     {
-        var exsisting = await cache.TryGetAsync<CacheEnvelope<T>>(cacheKey, ct);
-
-        var envelop = new CacheEnvelope<T>
+        try
         {
-            Payload = value,
-            CreatedAtUtc = exsisting?.CreatedAtUtc ?? DateTimeOffset.UtcNow,
-            LastAccessedUtc = DateTimeOffset.UtcNow
-        };
+            var exsisting = await cache.TryGetAsync<CacheEnvelope<T>>(cacheKey, ct);
 
-        await SetOrRemoveIfExpiredAsync(cacheKey, envelop, ct);
+            var envelop = new CacheEnvelope<T>
+            {
+                Payload = value,
+                CreatedAtUtc = exsisting?.CreatedAtUtc ?? DateTimeOffset.UtcNow,
+                LastAccessedUtc = DateTimeOffset.UtcNow
+            };
+
+            return await SetOrRemoveIfExpiredAsync(cacheKey, envelop, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Cache write failed for key {CacheKey}", cacheKey);
+            return CacheErrors.OperationFailed;
+        }
     }
 
-    public async Task RemoveAsync(string cacheKey, CancellationToken ct = default)
-        => await cache.RemoveAsync(cacheKey, ct);
+    public async Task<Result> RemoveAsync(string cacheKey, CancellationToken ct = default)
+    {
+        try
+        {
+            await cache.RemoveAsync(cacheKey, ct);
+            return Result.Ok();
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Cache remove failed for key {CacheKey}", cacheKey);
+            return CacheErrors.OperationFailed;
+        }
+    }
 
-    private async Task RefreshExpirationIfNeededAsync(string cacheKey, CacheEnvelope<T> envelop, CancellationToken ct)
+    private async Task<Result> RefreshExpirationIfNeededAsync(string cacheKey, CacheEnvelope<T> envelop, CancellationToken ct)
     {
         var utcNow = DateTimeOffset.UtcNow;
 
@@ -71,7 +125,8 @@ public sealed class Cache<T>(HybridCache cache, IOptionsMonitor<CacheEntryPolicy
 
         // Skip Redis write when the entry was accessed recently
         if (age < TimeSpan.FromMinutes(_options.SlidingRefreshThresholdMinutes))
-            return;
+            return Result.Ok();
+
 
         var refreshed = new CacheEnvelope<T>
         {
@@ -80,21 +135,31 @@ public sealed class Cache<T>(HybridCache cache, IOptionsMonitor<CacheEntryPolicy
             LastAccessedUtc = utcNow
         };
 
-        await SetOrRemoveIfExpiredAsync(cacheKey, refreshed, ct);
+        try
+        {
+            return await SetOrRemoveIfExpiredAsync(cacheKey, refreshed, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Cache refresh failed for key {CacheKey}", cacheKey);
+            return CacheErrors.OperationFailed;
+        }
     }
 
-    private async Task SetOrRemoveIfExpiredAsync(string cacheKey, CacheEnvelope<T> refreshed, CancellationToken ct)
+    private async Task<Result> SetOrRemoveIfExpiredAsync(string cacheKey, CacheEnvelope<T> refreshed, CancellationToken ct)
     {
         var expiration = CalculateExpiration(refreshed.CreatedAtUtc, refreshed.LastAccessedUtc, DateTimeOffset.UtcNow);
 
         if (expiration is null)
         {
             await cache.RemoveAsync(cacheKey, ct);
-            return;
+            return Result.Ok();
         }
 
         //          to set i need the key and the value and how much will it live
         await cache.SetAsync(cacheKey, refreshed, CreateEntryOption(expiration.Value), cancellationToken: ct);
+
+        return Result.Ok();
     }
 
     private HybridCacheEntryOptions CreateEntryOptionsForNewEnvelopInCache()
@@ -128,8 +193,7 @@ public sealed class Cache<T>(HybridCache cache, IOptionsMonitor<CacheEntryPolicy
     private TimeSpan? CalculateExpiration(
         DateTimeOffset createdAtUtc,
         DateTimeOffset lastAccessedAtUtc,
-        DateTimeOffset utcNow
-    )
+        DateTimeOffset utcNow)
     {
         // === MINUTE-BASED EXPIRATION (overrides day-based when set) ===
         // Used by ResetPasswordToken (real config) and can be used by any

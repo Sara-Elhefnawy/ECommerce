@@ -23,6 +23,9 @@ public sealed class UpdateCartItemQuantityHandler(
 
         var cart = await repo.GetOrCreateAsync(request.BuyerId, ct);
 
+        if (cart.IsFailure)
+            return ResultOfT<GetCartResponse>.Failure(cart.Error!);
+
         if (request.Quantity > 0)
         {
             var inventory = await inventoryRepo.FirstOrDefaultAsync(
@@ -35,13 +38,13 @@ public sealed class UpdateCartItemQuantityHandler(
                 return ResultOfT<GetCartResponse>.Failure(InventoryErrors.NotEnoughStock);
         }
 
-        var updateResult = cart.UpdateItemQuantity(request.ProductId, request.Quantity);
+        var updateResult = cart.Value.UpdateItemQuantity(request.ProductId, request.Quantity);
 
         if (updateResult.IsFailure)
             return ResultOfT<GetCartResponse>.Failure(updateResult.Error!);
 
-        await repo.SaveAsync(cart, ct);
+        await repo.SaveAsync(cart.Value, ct);
 
-        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart));
+        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart.Value));
     }
 }

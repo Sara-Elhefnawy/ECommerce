@@ -31,7 +31,7 @@ public sealed class MergeCartHandler(
 
         var anonymousCart = await repo.GetAsync(request.AnonymousBuyerId, ct);
 
-        if (anonymousCart is null)
+        if (anonymousCart.IsFailure)
         {
             logger.LogWarning(
                 "Cart merge failed. Guest cart not found. BuyerId={BuyerId}, GuestBuyerId={GuestBuyerId}",
@@ -42,7 +42,7 @@ public sealed class MergeCartHandler(
                 CartErrors.AnonymousCartNotFound);
         }
 
-        if (anonymousCart.Items.Count == 0)
+        if (anonymousCart.Value!.Items.Count == 0)
         {
             logger.LogWarning(
                 "Cart merge failed. Guest cart was empty. BuyerId={BuyerId}, GuestBuyerId={GuestBuyerId}",
@@ -55,7 +55,10 @@ public sealed class MergeCartHandler(
 
         var cart = await repo.GetOrCreateAsync(request.BuyerId, ct);
 
-        foreach (var guestItem in anonymousCart.Items)
+        if (cart.IsFailure)
+            return ResultOfT<GetCartResponse>.Failure(cart.Error!);
+
+        foreach (var guestItem in anonymousCart.Value.Items)
         {
             var inventory = await inventoryRepo.FirstOrDefaultAsync(
                 new InventoryByProductIdSpecification(guestItem.ProductId), ct);
@@ -69,7 +72,7 @@ public sealed class MergeCartHandler(
                 return ResultOfT<GetCartResponse>.Failure(InventoryErrors.NotFound);
             }
 
-            var existingQuantity = cart.Items.FirstOrDefault(i => i.ProductId == guestItem.ProductId)?.Quantity ?? 0;
+            var existingQuantity = cart.Value.Items.FirstOrDefault(i => i.ProductId == guestItem.ProductId)?.Quantity ?? 0;
 
             if (!inventory.HasEnough(existingQuantity + guestItem.Quantity))
             {
@@ -81,20 +84,20 @@ public sealed class MergeCartHandler(
             }
         }
 
-        var mergeResult = cart.MergeCartFromGuestCart(anonymousCart);
+        var mergeResult = cart.Value.MergeCartFromGuestCart(anonymousCart.Value);
 
         if (mergeResult.IsFailure)
             return ResultOfT<GetCartResponse>.Failure(mergeResult.Error!);
 
-        await repo.SaveAsync(cart, ct);
+        await repo.SaveAsync(cart.Value, ct);
         await repo.DeleteAsync(request.AnonymousBuyerId, ct);
 
         logger.LogInformation(
             "Cart merged successfully. BuyerId={BuyerId}, GuestBuyerId={GuestBuyerId}, ItemsMerged={ItemsMerged}",
             request.BuyerId,
             request.AnonymousBuyerId,
-            anonymousCart.Items.Count);
+            anonymousCart.Value.Items.Count);
 
-        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart));
+        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart.Value));
     }
 }

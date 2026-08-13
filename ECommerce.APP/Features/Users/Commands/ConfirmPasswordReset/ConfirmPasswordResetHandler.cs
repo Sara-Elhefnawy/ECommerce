@@ -20,7 +20,7 @@ public sealed class ConfirmPasswordResetHandler(
         // 1. Validate input
         if (string.IsNullOrWhiteSpace(request.PasswordResetToken) || string.IsNullOrWhiteSpace(request.NewPassword))
             return ResultOfT<ConfirmPasswordResetResponse>.Failure(
-                IdentityErrors.OperationFailed("Token and new password are required."));
+                IdentityErrors.InvalidResetInput("Token and new password are required."));
 
         var userEmail = await identityService.GetUserByEmailAsync(request.Email, ct);
 
@@ -32,22 +32,25 @@ public sealed class ConfirmPasswordResetHandler(
 
         // 3. PEEK the token — do NOT delete yet.
         // We only want to burn it once we know the password reset actually succeeded.
-        var userId = await resetPasswordRepository.GetUserIdAsync(hashedToken, ct);
+        var userIdResult = await resetPasswordRepository.GetUserIdAsync(hashedToken, ct);
 
         // 4. If token is invalid or expired, return error
-        if (!userId.HasValue)
-            return ResultOfT<ConfirmPasswordResetResponse>.Failure(
-                IdentityErrors.OperationFailed("This password reset link is invalid or has expired."));
+        if (userIdResult.IsFailure)
+            return ResultOfT<ConfirmPasswordResetResponse>.Failure(userIdResult.Error!);
 
         // Make sure the token actually belongs to this email.
         // Prevents someone from pairing a valid token for user A with user B's email.
+        var userId = userIdResult.Value;
+
+        if (!userId.HasValue)
+            return ResultOfT<ConfirmPasswordResetResponse>.Failure(IdentityErrors.InvalidOrExpiredResetLink);
+
         if (userId.Value != userEmail.Value.UserId)
-            return ResultOfT<ConfirmPasswordResetResponse>.Failure(
-                IdentityErrors.OperationFailed("This password reset link is invalid or has expired."));
+            return ResultOfT<ConfirmPasswordResetResponse>.Failure(IdentityErrors.InvalidOrExpiredResetLink);
 
         // 5. Attempt the password reset
         var resetResult = await identityService.ResetPasswordAsync(
-            userId.Value,
+            userIdResult.Value!.Value,
             request.NewPassword,
             ct);
 

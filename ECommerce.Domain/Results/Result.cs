@@ -37,7 +37,23 @@ public abstract class Result
     public static Result Conflict(Error error) => new FailureResult(error, ResultTypes.Conflict);
     public static Result Unauthorized(Error error) => new FailureResult(error, ResultTypes.Unauthorized);
     public static Result Forbidden(Error error) => new FailureResult(error, ResultTypes.Forbidden);
-    public static Result Failure(Error error) => new FailureResult(error, ResultTypes.BadRequest); // Maps to 500
+    public static Result Failure(Error error) => new FailureResult(error, ResultTypes.BadRequest);
+    public static Result Unavailable(Error error) => new FailureResult(error, ResultTypes.Unavailable);
+
+    public static implicit operator Result(Error error)
+    {
+        return error.Type switch
+        {
+            ErrorTypes.Validation => BadRequest(error),
+            ErrorTypes.NotFound => NotFound(error),
+            ErrorTypes.Conflict => Conflict(error),
+            ErrorTypes.UnAuthorized => Unauthorized(error),
+            ErrorTypes.Forbidden => Forbidden(error),
+            ErrorTypes.Failure => Failure(error),
+            ErrorTypes.Unavailable => Failure(error),
+            _ => BadRequest(error)
+        };
+    }
 }
 
 // Concrete Result Classes

@@ -12,6 +12,10 @@ public sealed class GetCartHandler(ICartRepository repo)
         CancellationToken cancellationToken)
     {
         var cart = await repo.GetOrCreateAsync(request.BuyerId, cancellationToken);
-        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart));
+
+        if (cart.IsFailure)
+            return ResultOfT<GetCartResponse>.Failure(cart.Error!);
+
+        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart.Value));
     }
 }
