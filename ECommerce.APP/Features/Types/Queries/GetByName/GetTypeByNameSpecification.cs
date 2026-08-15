@@ -8,7 +8,7 @@ public sealed class GetTypeByNameSpecification : Specification<ProductType, GetT
     public GetTypeByNameSpecification(string name)
     {
         Query
-            .Where(b => b.Name.Equals(name.ToUpperInvariant()))
+            .Where(b => b.Name.Equals(name.ToUpperInvariant().Trim()))
             .Select(t => new GetTypeByNameResponse(t.Id, t.Name));
     }
 }

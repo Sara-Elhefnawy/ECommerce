@@ -17,6 +17,6 @@ public static class GetCartMapper
                 item.SubTotalPrice
             )).ToList(),
             TotalQuantity: cart.TotalQuantity,
-            GrandTotalPrice: cart.GrandTotalPrice
+            ItemsTotal: cart.ItemsTotal
         );
 }

@@ -10,6 +10,9 @@ public class ECommerceDbContext(DbContextOptions<ECommerceDbContext> options) : 
     public DbSet<ProductType> Types { get; set; }
     public DbSet<UserAddress> UserAddresses { get; set; }
     public DbSet<Inventory> Inventories { get; set; }
+    public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

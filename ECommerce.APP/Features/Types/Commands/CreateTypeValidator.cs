@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using ECommerce.Domain.Entities;
+using FluentValidation;
 
 namespace ECommerce.APP.Features.Types.Commands;
 
@@ -8,7 +9,7 @@ public sealed class CreateTypeValidator : AbstractValidator<CreateTypeCommand>
     {
         RuleFor(x => x.Name)
             .NotEmpty()
-            .MaximumLength(100)
+            .MaximumLength(ProductType.MaxNameLength)
             .Must(name => name.Any(char.IsLetter))
             .WithMessage("Type name must contain at least one letter.");
     }

@@ -14,17 +14,17 @@ public sealed class CreateTypeHandler(IUnitOfWork uow) :
         CreateTypeCommand request,
         CancellationToken ct = default)
     {
+        var typeRepo = uow.Repository<ProductType>();
+
+        var type = await typeRepo.FirstOrDefaultAsync(new GetTypeByNameSpecification(request.Name.ToUpperInvariant().Trim()), ct);
+
+        if (type is not null)
+            return TypeErrors.AlreadyExists;
+
         var result = ProductType.Create(request.Name);
 
         if (result.IsFailure)
             return result.Error!;
-
-        var typeRepo = uow.Repository<ProductType>();
-
-        var type = await typeRepo.FirstOrDefaultAsync(new GetTypeByNameSpecification(request.Name.ToUpperInvariant()), ct);
-
-        if (type is not null)
-            return TypeErrors.AlreadyExists;
 
         typeRepo.Add(result.Value);
         await uow.SaveChangesAsync(ct);

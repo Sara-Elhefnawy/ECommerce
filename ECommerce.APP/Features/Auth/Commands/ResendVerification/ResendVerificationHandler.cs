@@ -4,6 +4,8 @@ using ECommerce.APP.Mediator;
 using ECommerce.APP.Settings;
 using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 
@@ -13,7 +15,9 @@ public sealed class ResendVerificationHandler(
     IIdentityService identityService,
     IEmailVerification emailVerification,
     IEmailSender emailSender,
-    IOptions<EmailVerificationSettings> settings)
+    IOptions<EmailVerificationSettings> settings,
+    IHostEnvironment env,
+    ILogger<ResendVerificationHandler> logger)
     : IRequestHandler<ResendVerificationCommand, ResultOfT<EmailSentResponse>>
 {
     private const string ResentMessage =
@@ -57,8 +61,12 @@ public sealed class ResendVerificationHandler(
             ct);
 
         if (sendResult.IsFailure)
-            return ResultOfT<EmailSentResponse>.Failure(
-                sendResult.Error!);
+        {
+            if (env.IsDevelopment())
+                logger.LogWarning("Email failed — verification code for {Email}: {Code}", email, code);
+
+            return ResultOfT<EmailSentResponse>.Failure(sendResult.Error!);
+        }
 
         return ResultOfT<EmailSentResponse>.Ok(
             new EmailSentResponse(

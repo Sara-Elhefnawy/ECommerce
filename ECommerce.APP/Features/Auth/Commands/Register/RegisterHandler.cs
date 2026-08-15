@@ -4,8 +4,10 @@ using ECommerce.APP.Mediator;
 using ECommerce.APP.Settings;
 using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Hosting;
 
 namespace ECommerce.APP.Features.Auth.Commands.Register;
 
@@ -16,7 +18,9 @@ public sealed class RegisterHandler(
     IIdentityService identityService,
     IEmailVerification emailVerification,
     IEmailSender emailSender,
-    IOptions<EmailVerificationSettings> settings)
+    IOptions<EmailVerificationSettings> settings,
+    IHostEnvironment env,
+    ILogger<RegisterHandler> logger)
     : IRequestHandler<RegisterCommand, ResultOfT<EmailSentResponse>>
 {
     public const string RegisteredMessage =
@@ -68,7 +72,12 @@ public sealed class RegisterHandler(
             ct);
 
         if (sendResult.IsFailure)
+        {
+            if (env.IsDevelopment())
+                logger.LogWarning("Email failed — verification code for {Email}: {Code}", email, code);
+
             return ResultOfT<EmailSentResponse>.Failure(sendResult.Error!);
+        }
 
         return ResultOfT<EmailSentResponse>.Ok(
             new EmailSentResponse(email, VerificationCodeResent: false, RegisteredMessage));

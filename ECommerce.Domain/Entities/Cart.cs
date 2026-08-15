@@ -9,7 +9,7 @@ public sealed class Cart
     public Guid BuyerId { get; private set; }
     public List<CartItem> Items { get; private set; } = [];
     public int TotalQuantity => Items.Sum(item => item.Quantity);
-    public decimal GrandTotalPrice => Items.Sum(item => item.SubTotalPrice);
+    public decimal ItemsTotal => Items.Sum(item => item.SubTotalPrice);
 
     [JsonConstructor]
     private Cart(Guid buyerId, List<CartItem>? items)

@@ -44,7 +44,7 @@ public class CreateTypeEndpoint : IEndpoint
         using (LoggingExtensions.WithTypeContext(result.Value.Id))
         {
             // Pass location for 201 Created response
-            var location = $"/api/{Version}/types/{result.Value.Id}";
+            var location = $"/api/v{Version}/types/{result.Value.Id}";
 
             return result.ToApiResult(httpContext, "Created type successfully", location);
         }

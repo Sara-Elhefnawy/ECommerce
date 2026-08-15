@@ -23,12 +23,12 @@ public sealed class CreateInventoryHandler(
             new GetInventoryByProductIdSpecification(request.ProductId), ct);
 
         if (existing is not null)
-            return ResultOfT<CreateInventoryResponse>.Failure(InventoryErrors.AlreadyExists);
+            return InventoryErrors.AlreadyExists;
 
         var createResult = Inventory.Create(request.ProductId, request.Quantity);
 
         if (createResult.IsFailure)
-            return ResultOfT<CreateInventoryResponse>.Failure(createResult.Error!);
+            return createResult.Error!;
 
         repository.Add(createResult.Value);
         await uow.SaveChangesAsync(ct);

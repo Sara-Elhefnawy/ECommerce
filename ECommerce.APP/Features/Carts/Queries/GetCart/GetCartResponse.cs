@@ -4,7 +4,7 @@ public record GetCartResponse(
     Guid BuyerId,
     IReadOnlyList<CartItemResponse> Items,
     int TotalQuantity,
-    decimal GrandTotalPrice);
+    decimal ItemsTotal);
 
 public record CartItemResponse(
     Guid ProductId,

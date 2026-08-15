@@ -2,7 +2,7 @@
 using ECommerce.Domain.Images;
 using ECommerce.Domain.Results;
 
-namespace ECommerce.APP.Features.Products.Validators;
+namespace ECommerce.APP.Features.Products.Commands.Validators;
 
 public static class ImageValidator
 {

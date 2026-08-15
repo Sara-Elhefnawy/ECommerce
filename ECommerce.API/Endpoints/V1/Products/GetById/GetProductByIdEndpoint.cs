@@ -15,7 +15,7 @@ public class GetProductByIdEndpoint : IEndpoint
             .WithTags("Products")
             .WithName("GetProductByID")
             .WithGroupName("v1")
-            .Produces<ApiResponse<IReadOnlyList<GetProductByIdResponse>>>(StatusCodes.Status200OK)
+            .Produces<ApiResponse<GetProductByIdResponse>>(StatusCodes.Status200OK)
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Retrieve product by ID")
             .WithDescription("Returns all products in DB, or 404 if list is empty");

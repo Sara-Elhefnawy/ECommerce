@@ -14,17 +14,17 @@ public sealed class CreateBrandHandler(IUnitOfWork uow) :
         CreateBrandCommand request,
         CancellationToken ct = default)
     {
+        var brandRepo = uow.Repository<ProductBrand>();
+
+        var brand = await brandRepo.FirstOrDefaultAsync(new GetBrandByNameSpecification(request.Name.ToUpperInvariant().Trim()), ct);
+
+        if (brand is not null)
+            return BrandErrors.AlreadyExists;
+
         var result = ProductBrand.Create(request.Name);
 
         if (result.IsFailure)
             return result.Error!;
-
-        var brandRepo = uow.Repository<ProductBrand>();
-
-        var brand = await brandRepo.FirstOrDefaultAsync(new GetBrandByNameSpecification(request.Name.ToUpperInvariant()), ct);
-
-        if (brand is not null)
-            return BrandErrors.AlreadyExists;
 
         brandRepo.Add(result.Value);
         await uow.SaveChangesAsync(ct);

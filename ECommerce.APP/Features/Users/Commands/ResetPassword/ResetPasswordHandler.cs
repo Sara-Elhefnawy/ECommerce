@@ -3,8 +3,9 @@ using ECommerce.APP.Email;
 using ECommerce.APP.Identity;
 using ECommerce.APP.Mediator;
 using ECommerce.APP.Settings;
-using ECommerce.APP.Token;
 using ECommerce.Domain.Results;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
@@ -16,14 +17,16 @@ public sealed class ResetPasswordHandler(
     IIdentityService identityService,
     IResetPasswordRepository resetPasswordRepository,
     IEmailSender emailSender,
-    IOptions<ResetPasswordSettings> settings)
+    IOptions<ResetPasswordSettings> settings,
+    IHostEnvironment env,
+    ILogger<ResetPasswordHandler> logger)
     : IRequestHandler<ResetPasswordCommand, ResultOfT<ResetPasswordResponse>>
 {
     private const string SuccessMessage =
         "If an account with that email exists, a password reset link has been sent.";
 
     public async Task<ResultOfT<ResetPasswordResponse>> Handle(
-        ResetPasswordCommand request, 
+        ResetPasswordCommand request,
         CancellationToken ct = default)
     {
         var email = request.Email.Trim();
@@ -32,45 +35,40 @@ public sealed class ResetPasswordHandler(
 
         if (userResult.IsSuccess)
         {
-            var sendResult = await SendResetLinkAsync(userResult.Value, ct);
+            var user = userResult.Value;
+
+            var token = Convert.ToHexString(
+                RandomNumberGenerator.GetBytes(32))
+                .ToLowerInvariant();
+
+            var saveResult = await resetPasswordRepository.SaveAsync(
+                HashToken(token),
+                user.UserId,
+                ct);
+
+            if (saveResult.IsFailure)
+                return ResultOfT<ResetPasswordResponse>.Failure(saveResult.Error!);
+
+            var resetLink =
+                $"{settings.Value.FrontendResetPasswordUrl}?token={HttpUtility.UrlEncode(token)}";
+
+            var sendResult = await emailSender.SendAsync(
+                user.Email,
+                "Reset your password",
+                $"Reset your password using the link below:\n\n{resetLink}",
+                ct);
 
             if (sendResult.IsFailure)
+            {
+                if (env.IsDevelopment())
+                    logger.LogWarning("Email failed — reset link for {Email}: {ResetLink}", user.Email, resetLink);
+
                 return ResultOfT<ResetPasswordResponse>.Failure(sendResult.Error!);
+            }
         }
 
         return ResultOfT<ResetPasswordResponse>.Ok(
             new ResetPasswordResponse(SuccessMessage));
-    }
-
-    private async Task<Result> SendResetLinkAsync(
-        AuthUserSnapshot user,
-        CancellationToken ct)
-    {
-        var token = GenerateToken();
-
-        var saveResult = await resetPasswordRepository.SaveAsync(
-            HashToken(token),
-            user.UserId,
-            ct);
-
-        if (saveResult.IsFailure)
-            return saveResult;
-
-        var resetLink =
-            $"{settings.Value.FrontendResetPasswordUrl}?token={HttpUtility.UrlEncode(token)}";
-
-        return await emailSender.SendAsync(
-            user.Email,
-            "Reset your password",
-            $"Reset your password using the link below:\n\n{resetLink}",
-            ct);
-    }
-
-    private static string GenerateToken()
-    {
-        return Convert.ToHexString(
-            RandomNumberGenerator.GetBytes(32))
-            .ToLowerInvariant();
     }
 
     private static string HashToken(string token)

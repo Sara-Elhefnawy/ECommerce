@@ -44,7 +44,7 @@ public class CreateProductEndpoint : IEndpoint
         {
             // Pass location for 201 Created response
             var location = result.IsSuccess
-                ? $"/api/{Version}/products/{result.Value.Id}"
+                ? $"/api/v{Version}/products/{result.Value.Id}"
                 : null;
 
             return result.ToApiResult(httpContext, "Created product successfully", location);

@@ -1,6 +1,6 @@
 ﻿using ECommerce.APP.Features.Brands.Queries.GetByName;
+using ECommerce.APP.Features.Products.Commands.Validators;
 using ECommerce.APP.Features.Products.Queries.GetProductByName;
-using ECommerce.APP.Features.Products.Validators;
 using ECommerce.APP.Features.Types.Queries.GetByName;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.ImageCloudinary;
@@ -21,6 +21,12 @@ public sealed class CreateProductHandler(
         CreateProductCommand request,
         CancellationToken ct = default)
     {
+        var existing = await uow.Repository<Product>().FirstOrDefaultAsync(
+            new GetProductByNameSpecification(request.Name.ToUpperInvariant().Trim()), ct);
+
+        if (existing is not null)
+            return ProductErrors.AlreadyExists;
+
         var imageValidation = ImageValidator.Validate(
             request.ImageLength,
             Path.GetExtension(request.ImageFileName),
@@ -47,12 +53,6 @@ public sealed class CreateProductHandler(
 
             imageUrl = uploadResult.Value;
         }
-
-        var existing = await uow.Repository<Product>().FirstOrDefaultAsync(
-            new GetProductByNameSpecification(request.Name.ToUpperInvariant()), ct);
-
-        if (existing is not null)
-            return ProductErrors.AlreadyExists;
 
         var result = Product.Create(
             request.Name, request.Description, imageUrl,

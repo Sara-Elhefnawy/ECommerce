@@ -41,7 +41,7 @@ public sealed class CreateInventoryEndpoint : IEndpoint
         {
             // Pass location for 201 Created response
             var location = result.IsSuccess
-                ? $"/api/{Version}/inventories/{request.ProductId}"
+                ? $"/api/v{Version}/inventories/{request.ProductId}"
                 : null;
 
             return result.ToApiResult(httpContext, "Inventory created successfully", location);

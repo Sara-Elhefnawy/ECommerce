@@ -40,6 +40,13 @@ public static class LoggingExtensions
         return context;
     }
 
+    public static IDisposable WithDeliveryMethodContext(Guid deliveryMethodId)
+    {
+        var context = LogContext.PushProperty("DeliveryMethodId", deliveryMethodId);
+
+        return context;
+    }
+
     public static IDisposable WithCartContext(Guid buyerId, Guid? guestBuyerId = null)
     {
         var buyer = LogContext.PushProperty("BuyerId", buyerId);

@@ -44,7 +44,7 @@ public class CreateBrandEndpoint : IEndpoint
         using (LoggingExtensions.WithBrandContext(result.Value.Id))
         {
             // Pass location for 201 Created response
-            var location = $"/api/{Version}/brands/{result.Value.Id}";
+            var location = $"/api/v{Version}/brands/{result.Value.Id}";
 
             return result.ToApiResult(httpContext, "Created brand successfully", location);
         }

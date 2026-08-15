@@ -47,5 +47,8 @@ public sealed class Repository<T>(ECommerceDbContext dbContext) : IRepository<T>
         => _dbSet.Update(entity);
 
     public void SoftDelete(T entity)
-        => entity.MarkDeleted();
+    {
+        entity.MarkDeleted();
+        _dbSet.Update(entity);
+    }
 }
