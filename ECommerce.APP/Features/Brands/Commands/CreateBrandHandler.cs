@@ -16,7 +16,7 @@ public sealed class CreateBrandHandler(IUnitOfWork uow) :
     {
         var brandRepo = uow.Repository<ProductBrand>();
 
-        var brand = await brandRepo.FirstOrDefaultAsync(new GetBrandByNameSpecification(request.Name.ToUpperInvariant().Trim()), ct);
+        var brand = await brandRepo.FirstOrDefaultAsync(new GetBrandByNameSpecification(request.Name), ct);
 
         if (brand is not null)
             return BrandErrors.AlreadyExists;

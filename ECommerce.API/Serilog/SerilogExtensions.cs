@@ -18,40 +18,42 @@ public static class SerilogExtensions
     /// </summary>
     public static WebApplicationBuilder AddSerilogLogging(this WebApplicationBuilder builder)
     {
-
-
         // Prints Serilog's internal errors to the console (e.g. sink connection failures).
         // Only useful during development — remove or disable in production.
         global::Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine($"[SERILOG] {msg}"));
 
-        // Create the global Serilog logger before the app starts,
-        // so startup errors (like DB connection failures) are also captured.
-        // ReadFrom.Configuration pulls MinimumLevel and Enrich settings from appsettings.json.
-        // Sinks (Console + PostgreSQL) are configured in code because PostgreSQL
-        // requires a complex columnOptions object that can't be expressed in JSON.
-        Log.Logger = new LoggerConfiguration()
+        // Build the logger config as a variable instead of one long chained
+        // expression, so the PostgreSQL sink can be added conditionally below
+        // rather than always required (which is what threw on missing LogsDb).
+        var loggerConfig = new LoggerConfiguration()
             .ReadFrom.Configuration(builder.Configuration)
             .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-            .WriteTo.PostgreSQL(
-                connectionString: builder.Configuration.GetConnectionString("LogsDb")
-                    ?? throw new InvalidOperationException("LogsDb connection string not found"),
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithThreadId()
+            .Enrich.WithCorrelationId();
+
+        var logsDbConnectionString = builder.Configuration.GetConnectionString("LogsDb");
+
+        if (!string.IsNullOrWhiteSpace(logsDbConnectionString))
+        {
+            // Only wire up Postgres logging when a connection string is actually
+            // configured. Locally/in a fresh container without LogsDb set, you
+            // still get Console logs instead of a hard crash on startup.
+            loggerConfig.WriteTo.PostgreSQL(
+                connectionString: logsDbConnectionString,
                 tableName: "logs",
-                columnOptions: ColumnOptionsHelper.GetColumnOptions(), // custom column schema
-                needAutoCreateTable: true,   // creates the table if it doesn't exist
-                batchSizeLimit: 50,          // flush after 50 log entries accumulate
-                period: TimeSpan.FromSeconds(2) // or flush every 2 seconds, whichever comes first
-            )
-            .Enrich.FromLogContext()      // picks up properties pushed via LogContext.PushProperty(...)
-            .Enrich.WithMachineName()    // adds MachineName to every log entry
-            .Enrich.WithThreadId()       // adds ThreadId to every log entry
-            .Enrich.WithCorrelationId()  // adds CorrelationId (from HTTP headers) to every log entry
-            .CreateLogger();
+                columnOptions: ColumnOptionsHelper.GetColumnOptions(),
+                needAutoCreateTable: true,
+                batchSizeLimit: 50,
+                period: TimeSpan.FromSeconds(2));
+        }
+
+        Log.Logger = loggerConfig.CreateLogger();
 
         Log.Information("Application starting. LogsDb connection configured: {IsConfigured}",
-            !string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("LogsDb")));
+            !string.IsNullOrWhiteSpace(logsDbConnectionString));
 
-        // Replace the default .NET logging pipeline with Serilog.
-        // All ILogger<T> injections throughout the app will now route through Serilog.
         builder.Host.UseSerilog();
 
         return builder;

@@ -8,6 +8,6 @@ public sealed class GetProductByNameSpecification : Specification<Product>
     public GetProductByNameSpecification(string name)
     {
         Query
-            .Where(p => p.Name.Equals(name.ToUpperInvariant().Trim()));
+            .Where(p => p.Name.ToUpper().Trim().Equals(name.ToUpper().Trim()));
     }
 }

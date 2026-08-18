@@ -1,0 +1,14 @@
+# Local build output — must be excluded, or the Linux container tries to
+# reuse Windows-generated obj/project.assets.json files, which breaks
+# ResolvePackageAssets with MSB4018 (exactly the error just hit)
+**/bin/
+**/obj/
+
+# IDE/tooling folders — irrelevant to the build, just bloat the context
+.vs/
+.git/
+.github/
+
+# Don't ship these into the image
+**/*.user
+**/.env

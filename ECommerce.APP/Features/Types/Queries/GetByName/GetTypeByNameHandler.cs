@@ -12,7 +12,7 @@ public class GetTypeByNameHandler(IReadRepository<ProductType> repository) : IRe
         GetTypeByNameQuery request, 
         CancellationToken ct = default)
     {
-        var type = await repository.FirstOrDefaultAsync(new GetTypeByNameSpecification(request.Name.ToUpperInvariant().Trim()), ct);
+        var type = await repository.FirstOrDefaultAsync(new GetTypeByNameSpecification(request.Name), ct);
 
         if (type is null)
             return TypeErrors.NotFound;

@@ -12,7 +12,7 @@ public class GetBrandByNameHandler(IReadRepository<ProductBrand> repository) : I
         GetBrandByNameQuery request, 
         CancellationToken ct = default)
     {
-        var brand = await repository.FirstOrDefaultAsync(new GetBrandByNameSpecification(request.Name.ToUpperInvariant().Trim()), ct);
+        var brand = await repository.FirstOrDefaultAsync(new GetBrandByNameSpecification(request.Name), ct);
 
         if (brand is null)
             return BrandErrors.NotFound;

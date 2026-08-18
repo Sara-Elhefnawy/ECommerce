@@ -26,13 +26,17 @@ using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System.Net;
 using System.Net.Mail;
+using Microsoft.Extensions.Hosting;
 
 namespace ECommerce.Infrastructure;
 
 public static class DependencyInjection
 {
     // could return void but IServiceCollection return type makes it useful to chain
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services, 
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         services.AddScoped<AuditInterceptor>();
         services.AddScoped<SoftDeleteInterceptor>();
@@ -42,22 +46,51 @@ public static class DependencyInjection
             var auditInterceptor = serviceProvider.GetRequiredService<AuditInterceptor>();
             var softDeleteInterceptor = serviceProvider.GetRequiredService<SoftDeleteInterceptor>();
 
-            var connectionString = configuration.GetConnectionString("DefaultConnection")
+            if (environment.IsProduction())
+            {
+                // SQLite for the free Render deployment — file resets on
+                // cold start/redeploy, which is the accepted tradeoff.
+                // No MigrationsHistoryTable call here because we don't
+                // run migrations against SQLite at all (see Program.cs:
+                // EnsureCreatedAsync instead of MigrateAsync).
+                var sqliteConnection = configuration.GetConnectionString("SqliteConnection")
+                    ?? "Data Source=ecommerce_demo.db";
+
+                options.UseSqlite(sqliteConnection);
+            }
+            else
+            {
+
+                var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-            options.UseSqlServer(connectionString, sql =>
-                sql.MigrationsHistoryTable("__ApplicationMigrationsHistroy"));
+                options.UseSqlServer(connectionString, sql =>
+                    sql.MigrationsHistoryTable("__ApplicationMigrationsHistroy"));
+            }
 
             options.AddInterceptors(softDeleteInterceptor, auditInterceptor);
         });
 
         services.AddDbContext<ECommerceIdentityDbContext>(options =>
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            if (environment.IsProduction())
+            {
+                // Different config key AND different fallback filename — must not
+                // match the domain context's, or EnsureCreatedAsync sees "file
+                // already exists" and silently skips creating this schema.
+                var sqliteConnection = configuration.GetConnectionString("SqliteIdentityConnection")
+                    ?? "Data Source=ecommerce_identity_demo.db";
 
-            options.UseSqlServer(connectionString, sql =>
-                sql.MigrationsHistoryTable("__IdentityMigrationsHistroy"));
+                options.UseSqlite(sqliteConnection);
+            }
+            else
+            {
+                var connectionString = configuration.GetConnectionString("DefaultConnection")
+                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+                options.UseSqlServer(connectionString, sql =>
+                    sql.MigrationsHistoryTable("__IdentityMigrationsHistroy"));
+            }
         });
 
         services.AddScoped<DatabaseSeeder>();

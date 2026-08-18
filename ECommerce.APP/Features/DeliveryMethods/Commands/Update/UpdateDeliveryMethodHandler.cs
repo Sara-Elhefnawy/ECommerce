@@ -22,7 +22,7 @@ public sealed class UpdateDeliveryMethodHandler(
         if (entity is null)
             return DeliveryMethodErrors.NotFound;
 
-        var duplicate = await repository.AnyAsync(new GetDeliveryMethodByNameSpecification(request.Name.ToUpperInvariant().Trim(), request.Id), ct);
+        var duplicate = await repository.AnyAsync(new GetDeliveryMethodByNameSpecification(request.Name, request.Id), ct);
 
         if (duplicate)
             return DeliveryMethodErrors.NameAlreadyExists;

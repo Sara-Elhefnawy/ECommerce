@@ -21,8 +21,7 @@ public sealed class CreateProductHandler(
         CreateProductCommand request,
         CancellationToken ct = default)
     {
-        var existing = await uow.Repository<Product>().FirstOrDefaultAsync(
-            new GetProductByNameSpecification(request.Name.ToUpperInvariant().Trim()), ct);
+        var existing = await uow.Repository<Product>().FirstOrDefaultAsync(new GetProductByNameSpecification(request.Name), ct);
 
         if (existing is not null)
             return ProductErrors.AlreadyExists;

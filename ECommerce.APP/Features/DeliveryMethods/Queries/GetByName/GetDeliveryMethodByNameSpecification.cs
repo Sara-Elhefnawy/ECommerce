@@ -8,7 +8,7 @@ public sealed class GetDeliveryMethodByNameSpecification : Specification<Deliver
     public GetDeliveryMethodByNameSpecification(string name, Guid? excludeId = null)
     {
         Query
-            .Where(x => x.Name.Equals(name.ToUpperInvariant().Trim()))
+            .Where(x => x.Name.ToUpper().Trim().Equals(name.ToUpper().Trim()))
             .Select(x => new DeliveryMethodResponse(
                 x.Id,
                 x.Name,

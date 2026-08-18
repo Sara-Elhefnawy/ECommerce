@@ -16,7 +16,7 @@ public sealed class CreateDeliveryMethodHandler(IUnitOfWork uow)
     {
         var repo = uow.Repository<DeliveryMethod>();
 
-        var existing = await repo.FirstOrDefaultAsync(new GetDeliveryMethodByNameSpecification(request.Name.ToUpperInvariant().Trim()), ct);
+        var existing = await repo.FirstOrDefaultAsync(new GetDeliveryMethodByNameSpecification(request.Name), ct);
 
         if (existing is not null)
             return DeliveryMethodErrors.NameAlreadyExists;

@@ -1,4 +1,5 @@
-﻿using ECommerce.Infrastructure.Identity;
+﻿using ECommerce.Infrastructure.HealthChecks;
+using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.Persistent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,25 +13,18 @@ public static class HealthCheckExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")!;
-        var timeoutSeconds = configuration.GetValue<int>("HealthChecksSettings:TimeoutSeconds");
+        var logsDbConnectionString = configuration.GetConnectionString("LogsDb");
+        var redisConnectionString = configuration.GetConnectionString("Redis");
 
-        services.AddHealthChecks()
-                    // Checks if the application is running
-                    // Used by: Kubernetes liveness probe
-                    // Note: NO database or external dependencies!
-                    .AddCheck("self", () => HealthCheckResult.Healthy("Application is running"),
+        var healthChecksBuilder = services.AddHealthChecks()
+            // Checks if the application is running
+            // Used by: Kubernetes liveness probe
+            // Note: NO database or external dependencies!
+            .AddCheck("self", () => HealthCheckResult.Healthy("Application is running"),
                 tags: ["live"])
-
-            .AddNpgSql(
-                connectionString: configuration.GetConnectionString("LogsDb")!,
-                name: "postgres-logging",
-                tags: ["ready", "db"])
 
             // Checks if we can connect to the database
             // Used by: Kubernetes readiness probe
-            // Note: Uses DbContext (EF Core) - we already have it registered
-            // REQUIRES: dotnet add package Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore
             .AddDbContextCheck<ECommerceDbContext>(
                 name: "ecommerce-db",
                 failureStatus: HealthStatus.Unhealthy, // DB is critical!
@@ -40,16 +34,6 @@ public static class HealthCheckExtensions
                 name: "ecommerce-identity-db",
                 failureStatus: HealthStatus.Unhealthy, // DB is critical!
                 tags: ["ready", "identity-db"])
-
-            .AddRedis(
-                redisConnectionString: configuration.GetConnectionString("Redis")!,
-                name: "redis",
-                // Unhealthy (not just Degraded) if Redis is unreachable — for a cache
-                // this isn't fatal to the app, but you want the signal to be loud
-                // while you're debugging, not buried.
-                failureStatus: HealthStatus.Unhealthy,
-                timeout: TimeSpan.FromSeconds(3),
-                tags: ["ready", "cache"])
 
             .AddCheck<BrevoHealthCheck>(
                 name: "brevo-email",
@@ -66,6 +50,28 @@ public static class HealthCheckExtensions
                 name: "cloudinary",
                 failureStatus: HealthStatus.Degraded,
                 tags: ["ready", "external"]);
+
+        // Only registered when a real connection string exists — AddNpgSql
+        // validates its argument immediately at startup (unlike the custom
+        // IHealthCheck classes above, which only run when /health/ready is
+        // actually hit), so an empty string here throws before the app boots.
+        if (!string.IsNullOrWhiteSpace(logsDbConnectionString))
+        {
+            healthChecksBuilder.AddNpgSql(
+                connectionString: logsDbConnectionString,
+                name: "postgres-logging",
+                tags: ["ready", "db"]);
+        }
+
+        if (!string.IsNullOrWhiteSpace(redisConnectionString))
+        {
+            healthChecksBuilder.AddRedis(
+                redisConnectionString: redisConnectionString,
+                name: "redis",
+                failureStatus: HealthStatus.Unhealthy,
+                timeout: TimeSpan.FromSeconds(3),
+                tags: ["ready", "cache"]);
+        }
 
         return services;
     }

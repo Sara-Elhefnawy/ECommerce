@@ -16,7 +16,7 @@ public sealed class CreateTypeHandler(IUnitOfWork uow) :
     {
         var typeRepo = uow.Repository<ProductType>();
 
-        var type = await typeRepo.FirstOrDefaultAsync(new GetTypeByNameSpecification(request.Name.ToUpperInvariant().Trim()), ct);
+        var type = await typeRepo.FirstOrDefaultAsync(new GetTypeByNameSpecification(request.Name), ct);
 
         if (type is not null)
             return TypeErrors.AlreadyExists;
