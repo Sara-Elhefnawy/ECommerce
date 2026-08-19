@@ -13,7 +13,7 @@ public sealed class GetAllInventoriesHandler(IReadRepository<Inventory> reposito
         GetAllInventoriesQuery request, CancellationToken ct = default)
     {
         if (request.Count < 0 || request.Count > 50)
-            return ResultOfT<IReadOnlyList<GetAllInventoriesResponse>>.BadRequest(InventoryErrors.InvalidCount);
+            return InventoryErrors.InvalidCount;
 
         var inventories = await repository.ListAsync(new GetAllInventoriesSpecification(request.Count), ct);
 

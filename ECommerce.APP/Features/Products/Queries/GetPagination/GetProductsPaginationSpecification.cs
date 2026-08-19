@@ -10,7 +10,7 @@ public sealed class GetProductsPaginationSpecification : Specification<Product, 
         string? searchTerm = null,
         Guid? brandId = null,
         Guid? typeId = null,
-        SortType? sortBy = null,
+        ProductSortType? sortBy = null,
         bool? isSortDescending = false,
         int? pageSize = null,
         int? pageNumber = null)
@@ -39,7 +39,7 @@ public sealed class GetProductsPaginationSpecification : Specification<Product, 
         {
             switch (sortBy)
             {
-                case SortType.Name:
+                case ProductSortType.Name:
                     {
                         if (isSortDescending is true)
                             Query.OrderByDescending(p => p.Name);
@@ -48,7 +48,7 @@ public sealed class GetProductsPaginationSpecification : Specification<Product, 
                         break;
                     }
 
-                case SortType.Price:
+                case ProductSortType.Price:
                     {
                         if (isSortDescending is true)
                             Query.OrderByDescending(p => p.Price);
@@ -57,7 +57,7 @@ public sealed class GetProductsPaginationSpecification : Specification<Product, 
                         break;
                     }
 
-                case SortType.BrandName:
+                case ProductSortType.BrandName:
                     {
                         if (isSortDescending is true)
                             Query.OrderByDescending(p => p.Brand.Name);
@@ -66,7 +66,7 @@ public sealed class GetProductsPaginationSpecification : Specification<Product, 
                         break;
                     }
 
-                case SortType.TypeName:
+                case ProductSortType.TypeName:
                     {
                         if (isSortDescending is true)
                             Query.OrderByDescending(p => p.Type.Name);

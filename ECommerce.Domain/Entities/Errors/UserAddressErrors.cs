@@ -33,4 +33,9 @@ public static class UserAddressErrors
         Error.Validation(
             "UserAddress.InvalidPostalCode",
             "Postal code is required.");
+
+    public static readonly Error AlreadyExists =
+        Error.Validation(
+            "UserAddress.AlreadyExists",
+            "This address is already saved.");
 }

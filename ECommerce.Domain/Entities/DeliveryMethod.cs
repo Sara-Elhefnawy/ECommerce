@@ -64,7 +64,7 @@ public sealed class DeliveryMethod : BaseEntity
         if (description?.Trim().Length > MaxDescriptionLength)
             return ResultOfT<DeliveryMethod>.Failure(DeliveryMethodErrors.DescriptionTooLong);
 
-        return ResultOfT<DeliveryMethod>.Ok(new DeliveryMethod(
+        return ResultOfT<DeliveryMethod>.Created(new DeliveryMethod(
             name.Trim(),
             string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
             price,

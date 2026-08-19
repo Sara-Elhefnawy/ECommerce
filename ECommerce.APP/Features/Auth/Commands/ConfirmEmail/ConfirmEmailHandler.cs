@@ -27,10 +27,10 @@ public sealed class ConfirmEmailHandler(
         // Both "no such user" AND "user exists but already confirmed" now return
         //      the same generic InvalidVerificationCode
         if (userResult.IsFailure)
-            return ResultOfT<AuthResponse>.Failure(IdentityErrors.InvalidVerificationCode);
+            return IdentityErrors.InvalidVerificationCode;
 
         if (await identityService.IsEmailConfirmedAsync(email, ct))
-            return ResultOfT<AuthResponse>.Failure(IdentityErrors.EmailAlreadyConfirmed);
+            return IdentityErrors.EmailAlreadyConfirmed;
 
         var isValid = await emailVerification.ValidateAndConsumeAsync(
             email,
@@ -38,11 +38,11 @@ public sealed class ConfirmEmailHandler(
             ct);
 
         if (!isValid)
-            return ResultOfT<AuthResponse>.Failure(IdentityErrors.InvalidVerificationCode);
+            return IdentityErrors.InvalidVerificationCode;
 
         var confirmResult = await identityService.ConfirmEmailAsync(email, ct);
         if (confirmResult.IsFailure)
-            return ResultOfT<AuthResponse>.Failure(confirmResult.Error!);
+            return confirmResult.Error!;
 
         var user = userResult.Value;
         var roles = await identityService.GetRolesAsync(user.UserId, ct);
@@ -53,13 +53,13 @@ public sealed class ConfirmEmailHandler(
             roles);
         var refreshToken = await refreshTokenService.IssueAsync(user.UserId, ct);
 
-        return ResultOfT<AuthResponse>.Ok(new AuthResponse(
+        return new AuthResponse(
             user.UserId,
             user.Email,
             user.UserDisplayName,
             accessToken.AccessToken,
             accessToken.ExpirationDate,
             refreshToken.Token,
-            refreshToken.ExpiresAtUtc));
+            refreshToken.ExpiresAtUtc);
     }
 }

@@ -9,9 +9,9 @@ public static class GetProductsPaginationMapper
     public static GetProductsPaginationQuery ToQuery(this GetProductsPaginationRequest request)
     {
         // Enum.Parse instead of TryParse. The validator already guaranteed it's valid.
-        SortType? sortBy = string.IsNullOrWhiteSpace(request.SortBy)
+        ProductSortType? sortBy = string.IsNullOrWhiteSpace(request.SortBy)
         ? null
-        : Enum.Parse<SortType>(request.SortBy, ignoreCase: true);
+        : Enum.Parse<ProductSortType>(request.SortBy, ignoreCase: true);
 
         return new(
             request.PageNumber ?? ValidatorsConstant.DefaultPageNumber,

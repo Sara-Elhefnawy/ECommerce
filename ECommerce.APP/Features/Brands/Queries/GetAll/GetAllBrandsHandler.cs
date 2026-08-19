@@ -13,7 +13,7 @@ public sealed class GetAllBrandsHandler(IReadRepository<ProductBrand> repository
         GetAllBrandsQuery request, CancellationToken ct)
     {
         if (request.Count < 0 || request.Count > 50)
-            return ResultOfT<IReadOnlyList<GetAllBrandsResponse>>.BadRequest(BrandErrors.InvalidCount);
+            return BrandErrors.InvalidCount;
 
         var brands = await repository.ListAsync(new GetAllBrandsSpecification(request.Count), ct);
 

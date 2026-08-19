@@ -38,10 +38,9 @@ public sealed class RegisterHandler(
         {
             // Confirmed account → Conflict (409)
             if (await identityService.IsEmailConfirmedAsync(email, ct))
-                return ResultOfT<EmailSentResponse>.Failure(IdentityErrors.EmailAlreadyExists);
+                return IdentityErrors.EmailAlreadyExists;
 
-            return ResultOfT<EmailSentResponse>.Failure(
-                IdentityErrors.RegistrationAlreadyStarted);
+            return IdentityErrors.RegistrationAlreadyStarted;
         }
 
         var createResult = await identityService.CreateUserAsync(
@@ -51,7 +50,7 @@ public sealed class RegisterHandler(
             ct);
 
         if (createResult.IsFailure)
-            return ResultOfT<EmailSentResponse>.Failure(createResult.Error!);
+            return createResult.Error!;
 
         var length = settings.Value.CodeLength;
 
@@ -76,10 +75,9 @@ public sealed class RegisterHandler(
             if (env.IsDevelopment())
                 logger.LogWarning("Email failed — verification code for {Email}: {Code}", email, code);
 
-            return ResultOfT<EmailSentResponse>.Failure(sendResult.Error!);
+            return sendResult.Error!;
         }
 
-        return ResultOfT<EmailSentResponse>.Ok(
-            new EmailSentResponse(email, VerificationCodeResent: false, RegisteredMessage));
+        return new EmailSentResponse(email, VerificationCodeResent: false, RegisteredMessage);
     }
 }

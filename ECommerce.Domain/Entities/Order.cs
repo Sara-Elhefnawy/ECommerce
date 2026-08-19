@@ -116,7 +116,7 @@ public sealed class Order : BaseEntity
         order.ItemsTotal = order._items.Sum(i => i.SubTotalPrice);
         order.Total = order.ItemsTotal + order.ShippingCost;
 
-        return ResultOfT<Order>.Ok(order);
+        return ResultOfT<Order>.Created(order);
     }
 
     public Result Cancel()

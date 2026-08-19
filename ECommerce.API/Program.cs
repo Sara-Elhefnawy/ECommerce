@@ -4,7 +4,6 @@ using ECommerce.API.Serilog;
 using ECommerce.APP;
 using ECommerce.Infrastructure;
 using ECommerce.Infrastructure.HealthChecks;
-using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.Persistent;
 using ECommerce.Infrastructure.Persistent.Seedings;
 using Microsoft.EntityFrameworkCore;
@@ -53,24 +52,6 @@ if (app.Environment.IsDevelopment())
     // Applies any pending EF Core migrations on startup in Development.
     await dbContext.Database.MigrateAsync();
     // Seeds initial data (brands, types, products) if the tables are empty.
-    await seeder.SeedAllAsync();
-}
-
-if (app.Environment.IsProduction())
-{
-    await using var scope = app.Services.CreateAsyncScope();
-    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ECommerceDbContext>();
-
-    var identityDbContext = scope.ServiceProvider.GetRequiredService<ECommerceIdentityDbContext>();
-
-    // Both SQLite files need their own EnsureCreated call — they're
-    // separate DbContexts, separate .db files, separate schemas.
-    // Domain tables (Products, Orders...) live in one; Identity tables
-    // (AspNetRoles, AspNetUsers...) live in the other.
-    await dbContext.Database.EnsureCreatedAsync();
-    await identityDbContext.Database.EnsureCreatedAsync();
-
     await seeder.SeedAllAsync();
 }
 

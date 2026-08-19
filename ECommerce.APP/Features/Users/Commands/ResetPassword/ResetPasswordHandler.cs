@@ -47,7 +47,7 @@ public sealed class ResetPasswordHandler(
                 ct);
 
             if (saveResult.IsFailure)
-                return ResultOfT<ResetPasswordResponse>.Failure(saveResult.Error!);
+                return saveResult.Error!;
 
             var resetLink =
                 $"{settings.Value.FrontendResetPasswordUrl}?token={HttpUtility.UrlEncode(token)}";
@@ -63,12 +63,11 @@ public sealed class ResetPasswordHandler(
                 if (env.IsDevelopment())
                     logger.LogWarning("Email failed — reset link for {Email}: {ResetLink}", user.Email, resetLink);
 
-                return ResultOfT<ResetPasswordResponse>.Failure(sendResult.Error!);
+                return sendResult.Error!;
             }
         }
 
-        return ResultOfT<ResetPasswordResponse>.Ok(
-            new ResetPasswordResponse(SuccessMessage));
+        return new ResetPasswordResponse(SuccessMessage);
     }
 
     private static string HashToken(string token)

@@ -4,6 +4,7 @@ using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Entities;
 using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
+using Microsoft.Extensions.Logging;
 
 namespace ECommerce.APP.Features.Users.Commands.AddUserAddersses;
 
@@ -18,7 +19,22 @@ public sealed class AddUserAddressesHandler(
         CancellationToken ct = default)
     {
         if (currentUser.UserId is null)
-            return ResultOfT<UserAddressResponse>.Failure(IdentityErrors.InvalidCredentials);
+            return IdentityErrors.InvalidCredentials;
+
+        var existingAddress = await addressRepository.FirstOrDefaultAsync(
+            new ExistingUserAddressSpecification(
+                currentUser.UserId.Value,
+                request.RecipientFirstName,
+                request.RecipientLastName,
+                request.PhoneNumber,
+                request.Country,
+                request.City,
+                request.Street,
+                request.PostalCode),
+            ct);
+
+        if (existingAddress is not null)
+            return UserAddressErrors.AlreadyExists;
 
         if (request.IsDefault)
         {
@@ -37,24 +53,24 @@ public sealed class AddUserAddressesHandler(
         }
 
         var createResult = UserAddress.Create(
-            currentUser.UserId.Value,
-            request.RecipientFirstName,
-            request.RecipientLastName,
-            request.PhoneNumber,
-            request.Country,
-            request.City,
-            request.Street,
-            request.PostalCode,
-            request.IsDefault);
+        currentUser.UserId.Value,
+        request.RecipientFirstName,
+        request.RecipientLastName,
+        request.PhoneNumber,
+        request.Country,
+        request.City,
+        request.Street,
+        request.PostalCode,
+        request.IsDefault);
 
         if (createResult.IsFailure)
-            return ResultOfT<UserAddressResponse>.Failure(createResult.Error!);
+            return createResult.Error!;
 
         var address = createResult.Value;
         addressRepository.Add(address);
         await unitOfWork.SaveChangesAsync(ct);
 
-        return ResultOfT<UserAddressResponse>.Ok(new UserAddressResponse(
+        return new UserAddressResponse(
             address.Id,
             address.RecipientFirstName,
             address.RecipientLastName,
@@ -63,6 +79,6 @@ public sealed class AddUserAddressesHandler(
             address.City,
             address.Street,
             address.PostalCode,
-            address.IsDefault));
+            address.IsDefault);
     }
 }

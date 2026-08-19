@@ -1,5 +1,4 @@
 ﻿using ECommerce.APP.Cachings.Carts;
-using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Results;
 
@@ -16,12 +15,12 @@ public sealed class RemoveCartItemHandler
         var cart = await repo.GetOrCreateAsync(request.BuyerId, ct);
 
         if (cart.IsFailure)
-            return ResultOfT<GetCartResponse>.Failure(cart.Error!);
+            return cart.Error!;
 
         var removeResult = cart.Value.RemoveItem(request.ProductId);
 
         if (removeResult.IsFailure)
-            return Result.Failure(removeResult.Error!);
+            return removeResult.Error!;
 
         await repo.SaveAsync(cart.Value, ct);
 

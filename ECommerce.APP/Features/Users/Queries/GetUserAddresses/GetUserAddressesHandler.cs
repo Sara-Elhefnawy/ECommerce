@@ -17,7 +17,7 @@ public sealed class GetUserAddressesHandler(
         CancellationToken ct = default)
     {
         if (currentUser.UserId is null)
-            return ResultOfT<IReadOnlyList<UserAddressResponse>>.Failure(IdentityErrors.InvalidCredentials);
+            return IdentityErrors.InvalidCredentials;
 
         var addresses = await addressRepository.ListAsync(
             new GetUserAddressesSpecification(currentUser.UserId.Value),

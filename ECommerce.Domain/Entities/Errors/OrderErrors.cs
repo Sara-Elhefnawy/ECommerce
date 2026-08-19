@@ -49,10 +49,10 @@ public static class OrderErrors
             "Order.NotFound", 
             "Order was not found.");
 
-    //public static readonly Error Unauthorized =
-    //    Error.UnAuthorized(
-    //        "Order.Unauthorized", 
-    //        "You must be signed in to manage orders.");
+    public static readonly Error Unauthorized =
+        Error.UnAuthorized(
+            "Order.Unauthorized",
+            "You must be signed in to manage orders.");
 
     //public static readonly Error Forbidden =
     //    Error.Forbidden("Order.Forbidden", "You do not have access to this order.");

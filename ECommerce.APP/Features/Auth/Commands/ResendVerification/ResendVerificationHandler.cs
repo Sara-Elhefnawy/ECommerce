@@ -32,12 +32,10 @@ public sealed class ResendVerificationHandler(
         var userResult = await identityService.GetUserByEmailAsync(email, ct);
 
         if (userResult.IsFailure)
-            return ResultOfT<EmailSentResponse>.Failure(
-                IdentityErrors.UserNotFound);
+            return IdentityErrors.UserNotFound;
 
         if (await identityService.IsEmailConfirmedAsync(email, ct))
-            return ResultOfT<EmailSentResponse>.Failure(
-                IdentityErrors.EmailAlreadyConfirmed);
+            return IdentityErrors.EmailAlreadyConfirmed;
 
         var length = settings.Value.CodeLength;
 
@@ -65,13 +63,9 @@ public sealed class ResendVerificationHandler(
             if (env.IsDevelopment())
                 logger.LogWarning("Email failed — verification code for {Email}: {Code}", email, code);
 
-            return ResultOfT<EmailSentResponse>.Failure(sendResult.Error!);
+            return sendResult.Error!;
         }
 
-        return ResultOfT<EmailSentResponse>.Ok(
-            new EmailSentResponse(
-                email,
-                VerificationCodeResent: true,
-                ResentMessage));
+        return new EmailSentResponse(email, VerificationCodeResent: true, ResentMessage);
     }
 }

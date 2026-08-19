@@ -19,13 +19,12 @@ public sealed class ConfirmPasswordResetHandler(
     {
         // 1. Validate input
         if (string.IsNullOrWhiteSpace(request.PasswordResetToken) || string.IsNullOrWhiteSpace(request.NewPassword))
-            return ResultOfT<ConfirmPasswordResetResponse>.Failure(
-                IdentityErrors.InvalidResetInput("Token and new password are required."));
+            return IdentityErrors.InvalidResetInput("Token and new password are required.");
 
         var userEmail = await identityService.GetUserByEmailAsync(request.Email, ct);
 
         if (userEmail.IsFailure)
-            return ResultOfT<ConfirmPasswordResetResponse>.Failure(userEmail.Error!);
+            return userEmail.Error!;
 
         // 2. Hash the token the user sent (must match the hash in cache)
         string hashedToken = HashToken(request.PasswordResetToken);
@@ -36,17 +35,17 @@ public sealed class ConfirmPasswordResetHandler(
 
         // 4. If token is invalid or expired, return error
         if (userIdResult.IsFailure)
-            return ResultOfT<ConfirmPasswordResetResponse>.Failure(userIdResult.Error!);
+            return userIdResult.Error!;
 
         // Make sure the token actually belongs to this email.
         // Prevents someone from pairing a valid token for user A with user B's email.
         var userId = userIdResult.Value;
 
         if (!userId.HasValue)
-            return ResultOfT<ConfirmPasswordResetResponse>.Failure(IdentityErrors.InvalidOrExpiredResetLink);
+            return IdentityErrors.InvalidOrExpiredResetLink;
 
         if (userId.Value != userEmail.Value.UserId)
-            return ResultOfT<ConfirmPasswordResetResponse>.Failure(IdentityErrors.InvalidOrExpiredResetLink);
+            return IdentityErrors.InvalidOrExpiredResetLink;
 
         // 5. Attempt the password reset
         var resetResult = await identityService.ResetPasswordAsync(
@@ -56,15 +55,14 @@ public sealed class ConfirmPasswordResetHandler(
 
         // 6. If it failed (e.g. weak password), leave the token intact so the user can retry
         if (resetResult.IsFailure)
-            return ResultOfT<ConfirmPasswordResetResponse>.Failure(resetResult.Error!);
+            return resetResult.Error!;
 
         // 7. Only now that the reset succeeded, consume (delete) the token — one-time use
         await resetPasswordRepository.DeleteAsync(hashedToken, ct);
 
-        return ResultOfT<ConfirmPasswordResetResponse>.Ok(
-            new ConfirmPasswordResetResponse(
+        return new ConfirmPasswordResetResponse(
                 UserId: userId.Value,
-                Message: "Your password has been reset successfully. You can now log in with your new password."));
+                Message: "Your password has been reset successfully. You can now log in with your new password.");
     }
 
     // Hashes a token using SHA256. Must match the hashing logic in ResetPasswordHandler.

@@ -13,15 +13,15 @@ public sealed class GetRolesHandler(IIdentityService identityService)
         var user = await identityService.GetUserByIdAsync(request.UserId, ct);
 
         if (user.IsFailure)
-            return ResultOfT<GetRolesResponse>.Failure(IdentityErrors.UserNotFound);
+            return IdentityErrors.UserNotFound;
 
         var userRoles = await identityService.GetRolesAsync(request.UserId, ct);
 
-        return ResultOfT<GetRolesResponse>.Ok(new GetRolesResponse(
+        return new GetRolesResponse(
             user.Value.UserId,
             user.Value.Email,
             user.Value.UserDisplayName,
             userRoles
-        ));
+        );
     }
 }

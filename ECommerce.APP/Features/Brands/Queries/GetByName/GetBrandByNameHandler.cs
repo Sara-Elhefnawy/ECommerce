@@ -14,9 +14,6 @@ public class GetBrandByNameHandler(IReadRepository<ProductBrand> repository) : I
     {
         var brand = await repository.FirstOrDefaultAsync(new GetBrandByNameSpecification(request.Name), ct);
 
-        if (brand is null)
-            return BrandErrors.NotFound;
-
-        return ResultOfT<GetBrandByNameResponse>.Ok(brand);
+        return brand is null ? BrandErrors.NotFound : brand;
     }
 }

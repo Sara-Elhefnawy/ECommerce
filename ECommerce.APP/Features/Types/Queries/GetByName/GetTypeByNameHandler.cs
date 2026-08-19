@@ -14,9 +14,8 @@ public class GetTypeByNameHandler(IReadRepository<ProductType> repository) : IRe
     {
         var type = await repository.FirstOrDefaultAsync(new GetTypeByNameSpecification(request.Name), ct);
 
-        if (type is null)
-            return TypeErrors.NotFound;
-
-        return ResultOfT<GetTypeByNameResponse>.Ok(type);
+        return type is null
+            ? TypeErrors.NotFound
+            : type;
     }
 }

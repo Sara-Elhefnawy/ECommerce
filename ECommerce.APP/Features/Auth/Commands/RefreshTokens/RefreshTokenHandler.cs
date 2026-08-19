@@ -18,7 +18,7 @@ public sealed class RefreshTokenHandler(
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(request.RefreshToken))
-            return ResultOfT<AuthResponse>.Failure(IdentityErrors.InvalidRefreshToken);
+            return IdentityErrors.InvalidRefreshToken;
 
         // STEP 1: Rotate the refresh token.
         //  RotateAsync internally: validates the token, checks for reuse/expiry,
@@ -28,7 +28,7 @@ public sealed class RefreshTokenHandler(
             ct);
 
         if (rotateResult.IsFailure)
-            return ResultOfT<AuthResponse>.Failure(rotateResult.Error!);
+            return rotateResult.Error!;
 
         var refresh = rotateResult.Value;
 
@@ -40,7 +40,7 @@ public sealed class RefreshTokenHandler(
             ct);
 
         if (userResult.IsFailure)
-            return ResultOfT<AuthResponse>.Failure(IdentityErrors.InvalidRefreshToken);
+            return IdentityErrors.InvalidRefreshToken;
 
         var user = userResult.Value;
 
@@ -54,13 +54,13 @@ public sealed class RefreshTokenHandler(
             user.UserDisplayName,
             roles);
 
-        return ResultOfT<AuthResponse>.Ok(new AuthResponse(
+        return new AuthResponse(
             user.UserId,
             user.Email,
             user.UserDisplayName,
             accessToken.AccessToken,
             accessToken.ExpirationDate,
             refresh.Token,
-            refresh.ExpiresAtUtc));
+            refresh.ExpiresAtUtc);
     }
 }

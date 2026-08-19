@@ -33,7 +33,6 @@ public sealed class CreateInventoryHandler(
         repository.Add(createResult.Value);
         await uow.SaveChangesAsync(ct);
 
-        return ResultOfT<CreateInventoryResponse>.Created(
-            new CreateInventoryResponse(createResult.Value.ProductId, createResult.Value.QuantityOnHand));
+        return new CreateInventoryResponse(createResult.Value.ProductId, createResult.Value.QuantityOnHand);
     }
 }

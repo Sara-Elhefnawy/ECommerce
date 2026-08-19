@@ -40,14 +40,13 @@ public sealed class UpdateDeliveryMethodHandler(
         repository.Update(entity);
         await uow.SaveChangesAsync(ct);
 
-        return ResultOfT<DeliveryMethodResponse>.Ok(
-            new DeliveryMethodResponse(
+        return new DeliveryMethodResponse(
                 entity.Id,
                 entity.Name,
                 entity.Description,
                 entity.Price,
                 entity.EstimatedDeliveryTime,
                 entity.IsAvailable,
-                entity.DisplayOrder));
+                entity.DisplayOrder);
     }
 }

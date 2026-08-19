@@ -1,6 +1,6 @@
 ﻿namespace ECommerce.APP.Features.Products.Queries.GetPagination.Enums;
 
-public enum SortType
+public enum ProductSortType
 {
     Name,
     BrandName,

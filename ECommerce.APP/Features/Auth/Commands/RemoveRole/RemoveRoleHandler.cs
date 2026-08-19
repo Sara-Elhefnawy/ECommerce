@@ -1,7 +1,6 @@
 ﻿using ECommerce.APP.Identity;
 using ECommerce.APP.Mediator;
 using ECommerce.APP.Token;
-using ECommerce.Domain.Entities.Errors;
 using ECommerce.Domain.Results;
 
 namespace ECommerce.APP.Features.Auth.Commands.RemoveRole;

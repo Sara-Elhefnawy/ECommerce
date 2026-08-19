@@ -1,6 +1,7 @@
 ﻿using ECommerce.APP.Cachings.Carts;
 using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Features.Inventories.Queries;
+using ECommerce.APP.Features.Inventories.Queries.GetByProductId;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Entities;
@@ -19,32 +20,32 @@ public sealed class UpdateCartItemQuantityHandler(
         CancellationToken ct = default)
     {
         if (request.Quantity < 0)
-            return ResultOfT<GetCartResponse>.Failure(CartErrors.InvalidQuantity);
+            return CartErrors.InvalidQuantity;
 
         var cart = await repo.GetOrCreateAsync(request.BuyerId, ct);
 
         if (cart.IsFailure)
-            return ResultOfT<GetCartResponse>.Failure(cart.Error!);
+            return cart.Error!;
 
         if (request.Quantity > 0)
         {
             var inventory = await inventoryRepo.FirstOrDefaultAsync(
-                new InventoryByProductIdSpecification(request.ProductId), ct);
+                new GetInventoryByProductIdEntitySpecification(request.ProductId), ct);
 
             if (inventory is null)
-                return ResultOfT<GetCartResponse>.Failure(InventoryErrors.NotFound);
+                return InventoryErrors.NotFound;
 
             if (!inventory.HasEnough(request.Quantity))
-                return ResultOfT<GetCartResponse>.Failure(InventoryErrors.NotEnoughStock);
+                return InventoryErrors.NotEnoughStock;
         }
 
         var updateResult = cart.Value.UpdateItemQuantity(request.ProductId, request.Quantity);
 
         if (updateResult.IsFailure)
-            return ResultOfT<GetCartResponse>.Failure(updateResult.Error!);
+            return updateResult.Error!;
 
         await repo.SaveAsync(cart.Value, ct);
 
-        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart.Value));
+        return GetCartMapper.ToResponse(cart.Value);
     }
 }

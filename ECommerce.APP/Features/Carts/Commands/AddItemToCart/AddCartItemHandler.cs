@@ -2,6 +2,7 @@
 using ECommerce.APP.Features.Carts.Commands.AddItemToCart.ProductLookup;
 using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Features.Inventories.Queries;
+using ECommerce.APP.Features.Inventories.Queries.GetByProductId;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Entities;
@@ -21,26 +22,26 @@ public sealed class AddCartItemHandler(
         CancellationToken ct = default)
     {
         if (request.Quantity <= 0)
-            return ResultOfT<GetCartResponse>.Failure(CartErrors.InvalidQuantity);
+            return CartErrors.InvalidQuantity;
 
         var product = await productRepository.FirstOrDefaultAsync(
             new ProductForCartSpecification(request.ProductId),
             ct);
 
         if (product is null)
-            return ResultOfT<GetCartResponse>.Failure(ProductErrors.NotFound);
+            return ProductErrors.NotFound;
 
         var inventory = await inventoryRepository.FirstOrDefaultAsync(
-            new InventoryByProductIdSpecification(request.ProductId),
+            new GetInventoryByProductIdEntitySpecification(request.ProductId),
             ct);
 
         if (inventory is null)
-            return ResultOfT<GetCartResponse>.Failure(InventoryErrors.NotFound);
+            return InventoryErrors.NotFound;
 
         var cart = await repo.GetOrCreateAsync(request.BuyerId, ct);
 
         if (cart.IsFailure)
-            return ResultOfT<GetCartResponse>.Failure(cart.Error!);
+            return cart.Error!;
 
         var existingQuantity = cart.Value
             .Items
@@ -48,17 +49,16 @@ public sealed class AddCartItemHandler(
                 ?.Quantity ?? 0;
 
         if (!inventory.HasEnough(existingQuantity + request.Quantity))
-            return ResultOfT<GetCartResponse>.Failure(
-                InventoryErrors.NotEnoughStock);
+            return InventoryErrors.NotEnoughStock;
 
         var addResult = cart.Value.AddItem(
             product.Id, product.Name, product.PictureUrl, product.Price, request.Quantity);
 
         if (addResult.IsFailure)
-            return ResultOfT<GetCartResponse>.Failure(addResult.Error!);
+            return addResult.Error!;
 
         await repo.SaveAsync(cart.Value, ct);
 
-        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart.Value));
+        return GetCartMapper.ToResponse(cart.Value);
     }
 }

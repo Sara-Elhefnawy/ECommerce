@@ -13,18 +13,17 @@ public sealed class GetCurrentUserHandler(
     public async Task<ResultOfT<UserProfileResponse>> Handle(GetCurrentUserQuery request, CancellationToken ct = default)
     {
         if (userService.UserId is null)
-            return ResultOfT<UserProfileResponse>.Unauthorized(IdentityErrors.InvalidCredentials);
+            return IdentityErrors.InvalidCredentials;
 
         var userResult = await identityService.GetUserByIdAsync(userService.UserId.Value, ct);
 
         if (userResult.IsFailure)
-            return ResultOfT<UserProfileResponse>.Failure(userResult.Error!);
+            return userResult.Error!;
 
-        return ResultOfT<UserProfileResponse>.Ok(new UserProfileResponse
-        (
+        return new UserProfileResponse(
             userResult.Value.UserId,
             userResult.Value.Email,
             userResult.Value.UserDisplayName
-        ));
+        );
     }
 }

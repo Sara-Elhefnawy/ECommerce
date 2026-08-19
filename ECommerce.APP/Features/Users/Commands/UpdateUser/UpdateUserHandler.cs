@@ -15,7 +15,7 @@ public sealed class UpdateUserHandler(
         CancellationToken ct = default)
     {
         if (currentUser.UserId is null)
-            return ResultOfT<UserProfileResponse>.Failure(IdentityErrors.InvalidCredentials);
+            return IdentityErrors.InvalidCredentials;
 
         var updateResult = await identityService.UpdateProfileAsync(
             currentUser.UserId.Value,
@@ -23,10 +23,9 @@ public sealed class UpdateUserHandler(
             ct);
 
         if (updateResult.IsFailure)
-            return ResultOfT<UserProfileResponse>.Failure(updateResult.Error!);
+            return updateResult.Error!;
 
         var user = updateResult.Value;
-        return ResultOfT<UserProfileResponse>.Ok(
-            new UserProfileResponse(user.UserId, user.Email, user.UserDisplayName));
+        return new UserProfileResponse(user.UserId, user.Email, user.UserDisplayName);
     }
 }

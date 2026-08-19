@@ -11,6 +11,6 @@ public sealed record GetProductsPaginationQuery(
     string? SearchTerm = null,
     Guid? BrandId = null,
     Guid? TypeId = null,
-    SortType? SortBy = null,
+    ProductSortType? SortBy = null,
     bool IsSortDescending = false
     ) : IRequest<ResultOfT<PagedResult<GetProductsPaginatedResponse>>>;

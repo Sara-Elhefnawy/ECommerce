@@ -13,7 +13,7 @@ public sealed class GetAllTypesHandler(IReadRepository<ProductType> repository) 
         GetAllTypesQuery request, CancellationToken ct)
     {
         if (request.Count < 0 || request.Count > 50)
-            return ResultOfT<IReadOnlyList<GetAllTypesResponse>>.BadRequest(TypeErrors.InvalidCount);
+            return TypeErrors.InvalidCount;
 
         var types = await repository.ListAsync(new GetAllTypesSpecification(request.Count), ct);
 

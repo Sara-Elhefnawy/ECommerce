@@ -18,7 +18,7 @@ public sealed class GetAllDeliveryMethodsEndpoint : IEndpoint
             .Produces(StatusCodes.Status200OK)
             .WithSummary("Get all delivery methods")
             .WithDescription("Gets the delivery methods with searching or availability.")
-            .RequireAuthorization(policy => policy.RequireRole(Roles.Manager));
+            .RequireAuthorization(policy => policy.RequireRole(Roles.User));
 
     public static async Task<IResult> Handle(
         [AsParameters] GetAllDeliveryMethodsRequest request,

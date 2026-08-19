@@ -60,6 +60,13 @@ public static class LoggingExtensions
         return buyer;
     }
 
+    public static IDisposable WithOrderContext(Guid orderId)
+    {
+        var context = LogContext.PushProperty("OrderId", orderId);
+
+        return context;
+    }
+
     public static IDisposable WithCorrelationId(string correlationId)
         => LogContext.PushProperty("CorrelationId", correlationId);
 

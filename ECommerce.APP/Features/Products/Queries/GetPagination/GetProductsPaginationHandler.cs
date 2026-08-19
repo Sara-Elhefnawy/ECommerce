@@ -18,6 +18,6 @@ public sealed class GetProductsPaginationHandler(IReadRepository<Product> reposi
 
         var items = await repository.ListAsync(listSpec, ct);
 
-        return ResultOfT<PagedResult<GetProductsPaginatedResponse>>.Ok(new PagedResult<GetProductsPaginatedResponse>(items, count, request.PageNumber, request.PageSize));
+        return new PagedResult<GetProductsPaginatedResponse>(items, count, request.PageNumber, request.PageSize);
     }
 }

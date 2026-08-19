@@ -26,10 +26,9 @@ public sealed class LoginHandler(
         // EmailNotConfirmed is intentional so the client can prompt for verification.
         if (validateResult.IsFailure)
         {
-            return ResultOfT<AuthResponse>.Failure(
-                validateResult.Error!.Code == IdentityErrors.EmailNotConfirmed.Code
-                    ? IdentityErrors.EmailNotConfirmed
-                    : IdentityErrors.InvalidCredentials);
+            return validateResult.Error!.Code == IdentityErrors.EmailNotConfirmed.Code
+                ? IdentityErrors.EmailNotConfirmed
+                : IdentityErrors.InvalidCredentials;
         }
 
         var user = validateResult.Value;
@@ -41,13 +40,13 @@ public sealed class LoginHandler(
             roles);
         var refreshToken = await refreshTokenService.IssueAsync(user.UserId, ct);
 
-        return ResultOfT<AuthResponse>.Ok(new AuthResponse(
+        return new AuthResponse(
             user.UserId,
             user.Email,
             user.UserDisplayName,
             accessToken.AccessToken,
             accessToken.ExpirationDate,
             refreshToken.Token,
-            refreshToken.ExpiresAtUtc));
+            refreshToken.ExpiresAtUtc);
     }
 }

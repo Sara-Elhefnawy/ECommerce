@@ -19,7 +19,7 @@ public sealed class GetDeliveryMethodsByIdEndpoint : IEndpoint
             .ProducesProblem(StatusCodes.Status404NotFound)
             .WithSummary("Get delivery method by id")
             .WithDescription("Gets the delivery methods by id if exists.")
-            .RequireAuthorization(policy => policy.RequireRole(Roles.Manager));
+            .RequireAuthorization(policy => policy.RequireRole(Roles.User));
 
     public static async Task<IResult> Handle(
         Guid id,

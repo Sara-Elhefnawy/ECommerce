@@ -9,7 +9,7 @@ public class GetProductsPaginationRequestValidator : AbstractValidator<GetProduc
     {
         RuleFor(x => x.SortBy)
             .Must(x => string.IsNullOrWhiteSpace(x) ||
-                       Enum.TryParse<SortType>(x, true, out _))
-            .WithMessage($"SortBy must be one of: {string.Join(", ", Enum.GetNames<SortType>())}");
+                       Enum.TryParse<ProductSortType>(x, true, out _))
+            .WithMessage($"SortBy must be one of: {string.Join(", ", Enum.GetNames<ProductSortType>())}");
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ECommerce.APP.Cachings.Carts;
 using ECommerce.APP.Features.Carts.Queries.GetCart;
 using ECommerce.APP.Features.Inventories.Queries;
+using ECommerce.APP.Features.Inventories.Queries.GetByProductId;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Entities;
@@ -25,8 +26,7 @@ public sealed class MergeCartHandler(
                 "Cart merge failed. Guest BuyerId was empty. BuyerId={BuyerId}",
                 request.BuyerId);
 
-            return ResultOfT<GetCartResponse>.Failure(
-                CartErrors.AnonymousBuyerRequired);
+            return CartErrors.AnonymousBuyerRequired;
         }
 
         var anonymousCart = await repo.GetAsync(request.AnonymousBuyerId, ct);
@@ -38,8 +38,7 @@ public sealed class MergeCartHandler(
                 request.BuyerId,
                 request.AnonymousBuyerId);
 
-            return ResultOfT<GetCartResponse>.Failure(
-                CartErrors.AnonymousCartNotFound);
+            return CartErrors.AnonymousCartNotFound;
         }
 
         if (anonymousCart.Value!.Items.Count == 0)
@@ -49,19 +48,18 @@ public sealed class MergeCartHandler(
                 request.BuyerId,
                 request.AnonymousBuyerId);
 
-            return ResultOfT<GetCartResponse>.Failure(
-                CartErrors.AnonymousCartNotFound);
+            return CartErrors.AnonymousCartNotFound;
         }
 
         var cart = await repo.GetOrCreateAsync(request.BuyerId, ct);
 
         if (cart.IsFailure)
-            return ResultOfT<GetCartResponse>.Failure(cart.Error!);
+            return cart.Error!;
 
         foreach (var guestItem in anonymousCart.Value.Items)
         {
             var inventory = await inventoryRepo.FirstOrDefaultAsync(
-                new InventoryByProductIdSpecification(guestItem.ProductId), ct);
+                new GetInventoryByProductIdEntitySpecification(guestItem.ProductId), ct);
 
             if (inventory is null)
             {
@@ -69,7 +67,7 @@ public sealed class MergeCartHandler(
                     "Cart merge failed. Inventory not found for product. BuyerId={BuyerId}, ProductId={ProductId}",
                     request.BuyerId,
                     guestItem.ProductId);
-                return ResultOfT<GetCartResponse>.Failure(InventoryErrors.NotFound);
+                return InventoryErrors.NotFound;
             }
 
             var existingQuantity = cart.Value.Items.FirstOrDefault(i => i.ProductId == guestItem.ProductId)?.Quantity ?? 0;
@@ -80,14 +78,14 @@ public sealed class MergeCartHandler(
                     "Cart merge failed. Insufficient stock for product. BuyerId={BuyerId}, ProductId={ProductId}",
                     request.BuyerId,
                     guestItem.ProductId);
-                return ResultOfT<GetCartResponse>.Failure(InventoryErrors.NotEnoughStock);
+                return InventoryErrors.NotEnoughStock;
             }
         }
 
         var mergeResult = cart.Value.MergeCartFromGuestCart(anonymousCart.Value);
 
         if (mergeResult.IsFailure)
-            return ResultOfT<GetCartResponse>.Failure(mergeResult.Error!);
+            return mergeResult.Error!;
 
         await repo.SaveAsync(cart.Value, ct);
         await repo.DeleteAsync(request.AnonymousBuyerId, ct);
@@ -98,6 +96,6 @@ public sealed class MergeCartHandler(
             request.AnonymousBuyerId,
             anonymousCart.Value.Items.Count);
 
-        return ResultOfT<GetCartResponse>.Ok(GetCartMapper.ToResponse(cart.Value));
+        return GetCartMapper.ToResponse(cart.Value);
     }
 }

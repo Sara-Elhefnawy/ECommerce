@@ -65,7 +65,7 @@ public sealed class ShippingAddress
         if (string.IsNullOrWhiteSpace(postalCode))
             return ResultOfT<ShippingAddress>.Failure(OrderErrors.InvalidShippingPostalCode);
 
-        return ResultOfT<ShippingAddress>.Ok(new ShippingAddress(
+        return ResultOfT<ShippingAddress>.Created(new ShippingAddress(
             recipientFirstName,
             recipientLastName,
             phoneNumber,

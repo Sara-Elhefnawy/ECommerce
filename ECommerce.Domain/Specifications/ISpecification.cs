@@ -1,5 +1,4 @@
-﻿using ECommerce.Domain.Specifications;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace ECommerce.Domain.Specifications;
 
