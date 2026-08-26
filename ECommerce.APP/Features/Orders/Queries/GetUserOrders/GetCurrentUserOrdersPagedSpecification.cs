@@ -1,6 +1,6 @@
-﻿using ECommerce.APP.Features.Orders.Enums;
+﻿using ECommerce.APP.Features.Orders.Queries.GetUserOrders.Enums;
 
-namespace ECommerce.APP.Features.Orders.Specifications;
+namespace ECommerce.APP.Features.Orders.Queries.GetUserOrders;
 
 public sealed class GetCurrentUserOrdersPagedSpecification : GetCurrentUserOrdersSpecification
 {

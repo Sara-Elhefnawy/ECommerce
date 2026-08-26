@@ -1,4 +1,5 @@
 ﻿using ECommerce.APP.Features.Inventories.Queries.GetByProductId;
+using ECommerce.APP.Features.Products.Queries.GetById;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;
 using ECommerce.Domain.Entities;
@@ -9,6 +10,7 @@ namespace ECommerce.APP.Features.Inventories.Commands.CreateInventory;
 
 public sealed class CreateInventoryHandler(
     IRepository<Inventory> repository,
+    IReadRepository<Product> productRepository,
     IUnitOfWork uow)
     : IRequestHandler<CreateInventoryCommand, ResultOfT<CreateInventoryResponse>>
 {
@@ -16,13 +18,16 @@ public sealed class CreateInventoryHandler(
         CreateInventoryCommand request,
         CancellationToken ct = default)
     {
-        // Guard against creating a second Inventory row for a product that already has one
-        // Inventory.Create doesn't know about existing rows,
-        //      only the handler can check that via the repository.
-        var existing = await repository.FirstOrDefaultAsync(
-            new GetInventoryByProductIdSpecification(request.ProductId), ct);
+        var product = await productRepository.FirstOrDefaultAsync(
+            new GetProductByIdSpecification(request.ProductId), ct);
 
-        if (existing is not null)
+        if (product is null)
+            return ProductErrors.NotFound;
+
+        var existing = await repository.AnyAsync(
+            new GetInventoryByProductIdEntitySpecification(request.ProductId), ct);
+
+        if (existing)
             return InventoryErrors.AlreadyExists;
 
         var createResult = Inventory.Create(request.ProductId, request.Quantity);
@@ -33,6 +38,6 @@ public sealed class CreateInventoryHandler(
         repository.Add(createResult.Value);
         await uow.SaveChangesAsync(ct);
 
-        return new CreateInventoryResponse(createResult.Value.ProductId, createResult.Value.QuantityOnHand);
+        return ResultOfT<CreateInventoryResponse>.Created(new CreateInventoryResponse(createResult.Value.ProductId, createResult.Value.QuantityOnHand));
     }
 }

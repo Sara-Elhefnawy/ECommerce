@@ -1,5 +1,5 @@
 ﻿using ECommerce.APP.Features.Orders.DTOs;
-using ECommerce.APP.Features.Orders.Enums;
+using ECommerce.APP.Features.Orders.Queries.GetUserOrders.Enums;
 using ECommerce.APP.Features.Products.Queries.GetPagination.Constants;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Results;

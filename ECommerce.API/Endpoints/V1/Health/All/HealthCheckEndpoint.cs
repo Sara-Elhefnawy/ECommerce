@@ -3,7 +3,7 @@ using ECommerce.API.Extensions.Abstraction;
 using ECommerce.Domain.Constants;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace ECommerce.API.Endpoints.V1.Health;
+namespace ECommerce.API.Endpoints.V1.Health.All;
 
 public sealed class HealthCheckEndpoint : IEndpoint
 {
@@ -16,17 +16,13 @@ public sealed class HealthCheckEndpoint : IEndpoint
             .Produces<HealthCheckResponse>(StatusCodes.Status200OK)
             .Produces<HealthCheckResponse>(StatusCodes.Status503ServiceUnavailable)
             .WithSummary("Health Check")
-            .WithDescription("Reports application health including database and Redis connectivity")
+            .WithDescription("Reports the health of the application and its configured dependencies.")
             .RequireAuthorization(policy => policy.RequireRole(Roles.SuperAdmin));
 
     public static async Task<IResult> Handle(
         HealthCheckService healthCheckService,
         CancellationToken ct = default)
     {
-        // This runs every check you registered (self, db, redis) and
-        // aggregates their statuses — Unhealthy from any single check
-        // that has failureStatus: HealthStatus.Unhealthy bubbles up to
-        // the overall report.Status.
         var report = await healthCheckService.CheckHealthAsync(ct);
 
         var response = new HealthCheckResponse(
@@ -39,11 +35,6 @@ public sealed class HealthCheckEndpoint : IEndpoint
                 entry.Value.Duration,
                 entry.Value.Tags.ToArray())));
 
-        // Deliberately NOT always 200 — Unhealthy returns 503 so that
-        // anything watching this endpoint via HTTP status (Azure's own
-        // health check config, an uptime pinger, a load balancer probe)
-        // actually reacts to Redis/DB being down, not just a human
-        // reading the JSON body.
         return report.Status == HealthStatus.Unhealthy
             ? Results.Json(response, statusCode: StatusCodes.Status503ServiceUnavailable)
             : Results.Ok(response);

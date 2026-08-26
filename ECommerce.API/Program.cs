@@ -4,6 +4,7 @@ using ECommerce.API.Serilog;
 using ECommerce.APP;
 using ECommerce.Infrastructure;
 using ECommerce.Infrastructure.HealthChecks;
+using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.Persistent;
 using ECommerce.Infrastructure.Persistent.Seedings;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddSerilogLogging();
 
 builder.Services.AddPresentation(builder.Configuration)
-                .AddInfrastructure(builder.Configuration, builder.Environment)
+                .AddInfrastructure(builder.Configuration)
                 .AddApp(builder.Configuration);
 
 builder.Services.AddApplicationHealthChecks(
     builder.Configuration);
+
 
 var app = builder.Build();
 
@@ -29,6 +31,19 @@ app.UseSerilogRequestLoggingConfigured();
 // Activates the GlobalExceptionMiddleware registered in AddPresentation().
 // Catches any unhandled exception and returns a structured ProblemDetails 500 response.
 app.UseExceptionHandler();
+
+// Redirects HTTP requests to HTTPS
+app.UseHttpsRedirection();
+
+// Use CORS policy for frontend application
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("DevCORS");
+}
+else
+{
+    app.UseCors("FrontendCORSPolicy");
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -43,15 +58,15 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-if (app.Environment.IsDevelopment())
+await using (var scope = app.Services.CreateAsyncScope())
 {
-    await using var scope = app.Services.CreateAsyncScope();
     var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
     var dbContext = scope.ServiceProvider.GetRequiredService<ECommerceDbContext>();
+    var identityDbContext = scope.ServiceProvider.GetRequiredService<ECommerceIdentityDbContext>();
 
-    // Applies any pending EF Core migrations on startup in Development.
     await dbContext.Database.MigrateAsync();
-    // Seeds initial data (brands, types, products) if the tables are empty.
+    await identityDbContext.Database.MigrateAsync();
+
     await seeder.SeedAllAsync();
 }
 
@@ -60,7 +75,6 @@ app.UseAuthorization();
 
 app.UseRateLimiter();
 
-// Map ALL Health Check Endpoints
 app.MapApplicationHealthChecks();
 
 app.MapEndpoints();

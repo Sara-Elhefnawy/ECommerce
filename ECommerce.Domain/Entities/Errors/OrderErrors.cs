@@ -107,4 +107,34 @@ public static class OrderErrors
         Error.Validation(
             "Order.InvalidShippingPostalCode", 
             "Shipping postal code is required.");
+
+    public static readonly Error CannotPayCancelled =
+        Error.Conflict(
+            "Order.CannotPayCancelled",
+            "Cancelled orders cannot be paid.");
+
+    public static readonly Error InvalidPaymentState =
+        Error.Conflict(
+            "Order.InvalidPaymentState",
+            "Order is not in a payable state.");
+
+    public static readonly Error PaymentIntentMismatch =
+        Error.Conflict(
+            "Order.PaymentIntentMismatch",
+            "Payment intent does not match this order.");
+
+    public static readonly Error InvalidPaymentIntent =
+        Error.Validation(
+            "Order.InvalidPaymentIntent",
+            "Payment intent id is required.");
+
+    public static readonly Error PaymentFailed =
+        Error.Failure(
+            "Order.PaymentFailed",
+            "Payment could not be started.");
+
+    public static readonly Error InvalidWebhook =
+        Error.UnAuthorized(
+            "Order.InvalidWebhook",
+            "Payment service webhook signature is invalid.");
 }

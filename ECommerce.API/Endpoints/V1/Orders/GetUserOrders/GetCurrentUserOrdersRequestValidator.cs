@@ -1,4 +1,4 @@
-﻿using ECommerce.APP.Features.Orders.Enums;
+﻿using ECommerce.APP.Features.Orders.Queries.GetUserOrders.Enums;
 using FluentValidation;
 
 namespace ECommerce.API.Endpoints.V1.Orders.GetUserOrders;

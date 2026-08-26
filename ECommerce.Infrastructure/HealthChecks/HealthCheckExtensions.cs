@@ -1,5 +1,4 @@
-﻿using ECommerce.Infrastructure.HealthChecks;
-using ECommerce.Infrastructure.Identity;
+﻿using ECommerce.Infrastructure.Identity;
 using ECommerce.Infrastructure.Persistent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +34,14 @@ public static class HealthCheckExtensions
                 failureStatus: HealthStatus.Unhealthy, // DB is critical!
                 tags: ["ready", "identity-db"])
 
+            // Cloudinary and Brevo are both external HTTP APIs with no official
+            // AspNetCore.Diagnostics.HealthChecks package, so a lightweight custom
+            // IHealthCheck hitting their status/ping endpoint is the standard approach.
+            .AddCheck<CloudinaryHealthCheck>(
+                name: "cloudinary",
+                failureStatus: HealthStatus.Degraded,
+                tags: ["ready", "external"])
+
             .AddCheck<BrevoHealthCheck>(
                 name: "brevo-email",
                 // Degraded, not Unhealthy — deliberately doesn't fail /health/ready.
@@ -43,13 +50,15 @@ public static class HealthCheckExtensions
                 failureStatus: HealthStatus.Degraded,
                 tags: ["ready", "email"])
 
-            // Cloudinary and Brevo are both external HTTP APIs with no official
-            // AspNetCore.Diagnostics.HealthChecks package, so a lightweight custom
-            // IHealthCheck hitting their status/ping endpoint is the standard approach.
-            .AddCheck<CloudinaryHealthCheck>(
-                name: "cloudinary",
+            // Stripe is an external HTTP API with no official AspNetCore.Diagnostics.HealthChecks package,
+            // so a lightweight custom IHealthCheck hitting their status/ping endpoint is the standard approach.
+            // Stripe is critical for payments, but we don't want to fail /health/ready if Stripe is down,
+            // because that would cause Kubernetes to pull the pod out of rotation and stop serving requests.
+            // Instead, we mark it as Degraded, which will show up in the health check response, but won't cause Kubernetes to fail the readiness probe.
+            .AddCheck<StripeHealthCheck>(
+                name: "stripe",
                 failureStatus: HealthStatus.Degraded,
-                tags: ["ready", "external"]);
+                tags: ["ready", "external", "payments"]);
 
         // Only registered when a real connection string exists — AddNpgSql
         // validates its argument immediately at startup (unlike the custom

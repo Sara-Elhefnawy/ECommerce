@@ -12,8 +12,8 @@ public sealed class CreateInventoryValidator : AbstractValidator<CreateInventory
             .WithErrorCode("Inventory.ProductId.Required");
 
         RuleFor(x => x.Quantity)
-            .GreaterThanOrEqualTo(0)
-            .WithMessage("Inventory quantity cannot be negative.")
+            .GreaterThan(0)
+            .WithMessage("Inventory quantity must be greater than zero.")
             .WithErrorCode("Inventory.Quantity.Invalid");
     }
 }

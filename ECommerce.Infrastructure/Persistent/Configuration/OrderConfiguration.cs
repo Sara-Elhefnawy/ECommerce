@@ -73,6 +73,10 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasField("_items")
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
+        builder.Property(x => x.PaymentIntentId)
+            .HasMaxLength(200);
+
+        builder.HasIndex(x => x.PaymentIntentId);
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.Status);
         builder.HasIndex(x => x.CreatedAt);

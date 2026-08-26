@@ -1,7 +1,7 @@
 ﻿using ECommerce.APP.Features.Inventories.Queries.GetByProductId;
 using ECommerce.APP.Features.Orders.DTOs;
 using ECommerce.APP.Features.Orders.Mapper;
-using ECommerce.APP.Features.Orders.Specifications;
+using ECommerce.APP.Features.Orders.Queries.GetById;
 using ECommerce.APP.Identity;
 using ECommerce.APP.Mediator;
 using ECommerce.Domain.Abstractions.Repositories;

@@ -1,4 +1,4 @@
-﻿namespace ECommerce.APP.Features.Orders.Enums;
+﻿namespace ECommerce.APP.Features.Orders.Queries.GetUserOrders.Enums;
 
 public enum OrderSortType
 {

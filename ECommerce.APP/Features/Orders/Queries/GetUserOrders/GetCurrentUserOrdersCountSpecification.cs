@@ -1,4 +1,4 @@
-﻿namespace ECommerce.APP.Features.Orders.Specifications;
+﻿namespace ECommerce.APP.Features.Orders.Queries.GetUserOrders;
 
 public sealed class GetCurrentUserOrdersCountSpecification : GetCurrentUserOrdersSpecification
 {

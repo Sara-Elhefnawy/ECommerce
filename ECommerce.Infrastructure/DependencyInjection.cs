@@ -3,6 +3,7 @@ using ECommerce.APP.Cachings.Carts;
 using ECommerce.APP.Cachings.ResetPassword;
 using ECommerce.APP.Email;
 using ECommerce.APP.Identity;
+using ECommerce.APP.Payments;
 using ECommerce.APP.Settings;
 using ECommerce.APP.Token;
 using ECommerce.APP.Token.RefreshTokens;
@@ -12,6 +13,7 @@ using ECommerce.Infrastructure.Cachings.Carts;
 using ECommerce.Infrastructure.Cachings.ResetPassword;
 using ECommerce.Infrastructure.Email;
 using ECommerce.Infrastructure.Identity;
+using ECommerce.Infrastructure.Payments;
 using ECommerce.Infrastructure.Persistent;
 using ECommerce.Infrastructure.Persistent.Interceptors;
 using ECommerce.Infrastructure.Persistent.Repositories;
@@ -22,11 +24,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System.Net;
 using System.Net.Mail;
-using Microsoft.Extensions.Hosting;
 
 namespace ECommerce.Infrastructure;
 
@@ -35,8 +37,7 @@ public static class DependencyInjection
     // could return void but IServiceCollection return type makes it useful to chain
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services, 
-        IConfiguration configuration,
-        IHostEnvironment environment)
+        IConfiguration configuration)
     {
         services.AddScoped<AuditInterceptor>();
         services.AddScoped<SoftDeleteInterceptor>();
@@ -46,28 +47,27 @@ public static class DependencyInjection
             var auditInterceptor = serviceProvider.GetRequiredService<AuditInterceptor>();
             var softDeleteInterceptor = serviceProvider.GetRequiredService<SoftDeleteInterceptor>();
 
-            if (environment.IsDevelopment())
-            {
-                var connectionString = configuration.GetConnectionString("DefaultConnection")
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-                options.UseSqlServer(connectionString, sql =>
-                    sql.MigrationsHistoryTable("__ApplicationMigrationsHistroy"));
-            }
+            options.UseSqlServer(connectionString, sql =>
+                sql.MigrationsHistoryTable("__ApplicationMigrationsHistroy"));
 
             options.AddInterceptors(softDeleteInterceptor, auditInterceptor);
         });
 
-        services.AddDbContext<ECommerceIdentityDbContext>(options =>
+        services.AddDbContext<ECommerceIdentityDbContext>((serviceProvider, options) =>
         {
-            if (environment.IsDevelopment())
-            {
-                var connectionString = configuration.GetConnectionString("DefaultConnection")
-                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            var auditInterceptor = serviceProvider.GetRequiredService<AuditInterceptor>();
+            var softDeleteInterceptor = serviceProvider.GetRequiredService<SoftDeleteInterceptor>();
 
-                options.UseSqlServer(connectionString, sql =>
-                    sql.MigrationsHistoryTable("__IdentityMigrationsHistroy"));
-            }
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+            options.UseSqlServer(connectionString, sql =>
+                sql.MigrationsHistoryTable("__IdentityMigrationsHistroy"));
+
+            options.AddInterceptors(softDeleteInterceptor, auditInterceptor);
         });
 
         services.AddScoped<DatabaseSeeder>();
@@ -119,6 +119,14 @@ public static class DependencyInjection
         AddCartCaching(services, configuration);
 
         services.AddScoped<IResetPasswordRepository, ResetPasswordRepository>();
+
+
+        services.Configure<StripeSettings>(
+            configuration.GetSection(StripeSettings.SectionName));
+
+        services.AddScoped<IPaymentService, StripePaymentService>();
+
+        services.AddHttpClient();
 
         return services;
     }

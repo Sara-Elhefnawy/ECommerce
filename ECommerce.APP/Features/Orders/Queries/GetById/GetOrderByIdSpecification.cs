@@ -1,7 +1,7 @@
 ﻿using ECommerce.APP.Specifications;
 using ECommerce.Domain.Entities;
 
-namespace ECommerce.APP.Features.Orders.Specifications;
+namespace ECommerce.APP.Features.Orders.Queries.GetById;
 
 public sealed class GetOrderByIdSpecification : Specification<Order>
 {

@@ -25,6 +25,9 @@ public sealed class Order : BaseEntity
     public decimal ShippingCost { get; private set; }
     public decimal Total { get; private set; }
 
+    public string? PaymentIntentId { get; private set; }
+    public DateTimeOffset? PaidAtUtc { get; private set; }
+
     public IReadOnlyCollection<OrderItem> Items => _items;
 
     private Order()
@@ -129,5 +132,52 @@ public sealed class Order : BaseEntity
         return Result.Ok();
     }
 
-    // AttachPaymentIntent / MarkAsPaid — see Stripe guide
+    public Result AttachPaymentIntent(string paymentIntentId)
+    {
+        if (Status != OrderStatus.Pending)
+            return Result.Failure(OrderErrors.InvalidPaymentState);
+
+        if (string.IsNullOrWhiteSpace(paymentIntentId))
+            return Result.Failure(OrderErrors.InvalidPaymentIntent);
+
+        PaymentIntentId = paymentIntentId.Trim();
+        return Result.Ok();
+    }
+
+    public Result MarkAsPaid(string paymentIntentId)
+    {
+        if (Status == OrderStatus.Cancelled)
+            return Result.Failure(OrderErrors.CannotPayCancelled);
+
+        // you are trying to pay again 
+        // Idempotent: already paid with same intent
+        if (Status == OrderStatus.Processing
+            && PaymentIntentId == paymentIntentId
+            && PaidAtUtc is not null)
+            return Result.Ok();
+
+        if (Status != OrderStatus.Pending)
+            return Result.Failure(OrderErrors.InvalidPaymentState);
+
+        if (!string.IsNullOrWhiteSpace(PaymentIntentId) && PaymentIntentId != paymentIntentId)
+            return Result.Failure(OrderErrors.PaymentIntentMismatch);
+
+        PaymentIntentId = paymentIntentId;
+        PaidAtUtc = DateTimeOffset.UtcNow;
+        Status = OrderStatus.Processing;
+        return Result.Ok();
+    }
+
+    public Result MarkAsPaymentFailed(string paymentIntentId)
+    {
+        // Guard: only a Pending order can move to PaymentFailed.
+        if (Status != OrderStatus.Pending)
+            return Result.Failure(OrderErrors.InvalidPaymentState);
+
+        if (!string.IsNullOrWhiteSpace(PaymentIntentId) && PaymentIntentId != paymentIntentId)
+            return Result.Failure(OrderErrors.PaymentIntentMismatch);
+
+        Status = OrderStatus.PaymentFailed;
+        return Result.Ok();
+    }
 }

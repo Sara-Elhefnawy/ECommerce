@@ -26,7 +26,7 @@ public sealed class CreateDeliveryMethodEndpoint : IEndpoint
             .RequireAuthorization(policy => policy.RequireRole(Roles.Manager));
 
     public static async Task<IResult> Handle(
-        [FromForm] CreateDeliveryMethodRequest request,
+        [FromBody] CreateDeliveryMethodRequest request,
         IValidator<CreateDeliveryMethodRequest> validator,
         IMediator mediator,
         HttpContext httpContext,

@@ -134,9 +134,9 @@ public sealed class RefreshTokenService(
     //      (RevokedAtUtc == null means "still active").
     private async Task RevokeAllActiveForUserAsync(Guid userId, CancellationToken ct = default)
     {
-        var activeTokens = dbContext.RefreshTokens
+        var activeTokens = await dbContext.RefreshTokens
             .Where(x => x.UserId == userId && x.RevokedAtUtc == null)
-            .ToList();
+            .ToListAsync(ct);
 
         foreach (var token in activeTokens)
             token.Revoke();

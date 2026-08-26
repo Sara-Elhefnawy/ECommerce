@@ -93,6 +93,10 @@ public static class DependencyInjection
             options.SerializerOptions.Converters.Add(new OptionalJsonConverterFactory());
         });
 
+        var emailVerificationSettings = configuration.GetSection(EmailVerificationSettings.SectionName).Get<EmailVerificationSettings>()
+            ?? throw new InvalidOperationException(
+                $"Configuration section '{EmailVerificationSettings.SectionName}' is missing.");
+
         // AddIdentityCore, not AddIdentity:
         // AddIdentity<TUser,TRole> lives in Microsoft.AspNetCore.Identity
         //      and pulls in cookie-auth types that force a FrameworkReference to Microsoft.AspNetCore.App —
@@ -115,16 +119,11 @@ public static class DependencyInjection
 
             // After 5 failed login attempts, the account is locked out for 15 minutes.
             // This is enforced by SignInManager.CheckPasswordSignInAsync
-            options.Lockout.MaxFailedAccessAttempts = 5;
-            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+            options.Lockout.MaxFailedAccessAttempts = emailVerificationSettings.MaxFailedAttempts;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(emailVerificationSettings.LockoutMinutesAfterMaxFailedAttempts);
 
-            // NOTE: RequireConfirmedEmail and RequireConfirmedPhoneNumber
-            //      both being true means a user literally cannot sign in
-            //      until BOTH an email confirmation link AND an SMS/phone confirmation code have been completed.
-            // If you don't have a phone-confirmation flow built
-            //      (SMS provider, OTP endpoint, etc.) yet,
-            //      every single user will be permanently locked out at sign-in with no way to unblock themselves.
-            options.SignIn.RequireConfirmedPhoneNumber = true;
+            // NOTE: RequireConfirmedEmail being true means a user literally cannot sign in
+            //      until an email confirmation link code have been completed.
             options.SignIn.RequireConfirmedEmail = true;
         })
             .AddRoles<ApplicationRole>()                     // AddIdentityCore doesn't wire up roles by default —
@@ -230,6 +229,34 @@ public static class DependencyInjection
                     }
                 });
             };
+        });
+
+        // Configure CORS to allow requests from the frontend application
+        // Adjust the origins as needed for your frontend application
+        // For example, if your frontend is running on http://localhost:4200 during development,
+        // you would include that in the WithOrigins method.
+        services.AddCors(options =>
+        {
+            options.AddPolicy("FrontendCORSPolicy", policy =>
+            {
+                policy.WithOrigins(
+                    "http://localhost:4200",
+                    "https://localhost:4200",
+                    "https://ecommerce-sara.runasp.net",
+                    "http://localhost:5500")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+            });
+        });
+
+        services.AddCors(options =>
+        {
+            options.AddPolicy("DevCORS", policy =>
+            {
+                policy.AllowAnyOrigin()
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
         });
 
         return services;

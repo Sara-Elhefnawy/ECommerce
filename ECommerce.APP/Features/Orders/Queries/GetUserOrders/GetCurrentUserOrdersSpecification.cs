@@ -2,7 +2,7 @@
 using ECommerce.Domain.Entities;
 using ECommerce.Domain.Entities.Enums;
 
-namespace ECommerce.APP.Features.Orders.Specifications;
+namespace ECommerce.APP.Features.Orders.Queries.GetUserOrders;
 
 public abstract class GetCurrentUserOrdersSpecification : Specification<Order>
 {

@@ -366,3 +366,6 @@ FodyWeavers.xsd
 .env
 .env.local
 .env.*.local
+
+# Local test stripe file
+payment-test.html
