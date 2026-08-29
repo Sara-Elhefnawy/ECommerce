@@ -59,8 +59,8 @@ public static class OrderErrors
 
     public static readonly Error CannotCancel =
         Error.Conflict(
-            "Order.CannotCancel", 
-            "Only pending orders can be cancelled.");
+            "Order.CannotCancel",
+            "Order is not in a cancelable state");
 
     public static readonly Error DeliveryMethodRequired =
         Error.Validation(

@@ -124,7 +124,12 @@ public sealed class Order : BaseEntity
 
     public Result Cancel()
     {
-        if (Status != OrderStatus.Pending)
+        // Pending: never attempted payment yet.
+        // PaymentFailed: attempted and declined, but not paid — the
+        //      customer should still be able to walk away and get their
+        //      reserved stock back, the same way they could before ever
+        //      trying to pay.
+        if (Status != OrderStatus.Pending && Status != OrderStatus.PaymentFailed)
             return Result.Failure(OrderErrors.CannotCancel);
 
         Status = OrderStatus.Cancelled;
@@ -156,7 +161,11 @@ public sealed class Order : BaseEntity
             && PaidAtUtc is not null)
             return Result.Ok();
 
-        if (Status != OrderStatus.Pending)
+        // Pending -> first successful attempt on this order.
+        // PaymentFailed -> a *previous* attempt on the same PaymentIntent
+        //      declined, but Stripe lets the same intent be retried with a new
+        //      card, and that retry just succeeded.
+        if (Status != OrderStatus.Pending && Status != OrderStatus.PaymentFailed)
             return Result.Failure(OrderErrors.InvalidPaymentState);
 
         if (!string.IsNullOrWhiteSpace(PaymentIntentId) && PaymentIntentId != paymentIntentId)
