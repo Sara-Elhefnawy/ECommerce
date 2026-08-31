@@ -45,18 +45,15 @@ else
     app.UseCors("FrontendCORSPolicy");
 }
 
-if (app.Environment.IsDevelopment())
-{
-    // Runs the middleware that makes documentation available as an HTTP endpoint
-    app.UseSwagger();
+// Runs the middleware that makes documentation available as an HTTP endpoint
+app.UseSwagger();
 
-    app.UseSwaggerUI(c =>
-    {
-        // Point Swagger UI to both API versions
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ECommerce API V1");
-        c.SwaggerEndpoint("/swagger/v2/swagger.json", "ECommerce API V2");
-    });
-}
+app.UseSwaggerUI(c =>
+{
+    // Point Swagger UI to both API versions
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ECommerce API V1");
+    c.SwaggerEndpoint("/swagger/v2/swagger.json", "ECommerce API V2");
+});
 
 await using (var scope = app.Services.CreateAsyncScope())
 {

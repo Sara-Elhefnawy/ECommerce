@@ -6,6 +6,9 @@
     <Project Path="ECommerce.Infrastructure/ECommerce.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/test/">
-    <Project Path="ECommerce.ArchTest/ECommerce.ArchTest.csproj" />
+    <Project Path="ECommerce.APITest/ECommerce.Tests.API.csproj" Id="8c63050c-0fe5-41eb-b9f3-766ae27883f7" />
+    <Project Path="ECommerce.ArchTest/ECommerce.Tests.Architecture.csproj" />
+    <Project Path="ECommerce.IntegrationTest/ECommerce.Tests.Integration.csproj" Id="73108640-f961-4e80-98c2-42a432f2086e" />
+    <Project Path="ECommerce.UnitTest/ECommerce.Tests.Unit.csproj" Id="7c56ce91-bb41-4506-a3a8-862df973dd79" />
   </Folder>
 </Solution>
